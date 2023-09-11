@@ -5,6 +5,7 @@
 
 namespace cool {
 
+
 class Scanner {
     public:
         Scanner(const std::string& source);
@@ -15,6 +16,6 @@ class Scanner {
         unsigned int line;
         const std::string& source;
 
-}
+};
 
 }
