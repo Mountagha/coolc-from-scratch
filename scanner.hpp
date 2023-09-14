@@ -22,6 +22,7 @@ class Scanner {
         std::vector<Token> scanToken() {
             char c = advance();
             switch(c) {
+                // single char token
                 case '(': addToken(LEFT_PAREN); break;
                 case ')': addToken(RIGHT_PAREN); break;
                 case ',': addToken(COMMA); break;
@@ -29,8 +30,25 @@ class Scanner {
                 case '-': addToken(MINUS); break;
                 case '+': addToken(PLUS); break;
                 case ';': addToken(SEMICOLON); break;
+                case ':': addToken(COLON); break;
+                case '*': addToken(STAR); break;
+                case '~': addToken(TILDE); break;
+                case '/': addToken(SLASH); break;
+
+                // operators
+                case '=': addToken(match('>') ? ARROW : EQUAL); break;
+                case '<': addToken(match('-') ? ASSIGN : (match('=') ? LESS_EQUAL : LESS)); break;
+                case '>': addToken(match('=') ? GREATER_EQUAL : GREATER); break; 
                  
             } 
+        }
+        bool match(char expected) {
+            if (isAtEnd()) return false;
+            if (source[current] == expected) {
+                current++;
+                return true;
+            } 
+            return false;
         }
 
         inline char advance() { return source[current++]; }

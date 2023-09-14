@@ -12,9 +12,9 @@ enum TokenType {
     SLASH, STAR, TILDE, 
 
     // One or two character token
-    EQUAL_EQUAL, ASSIGN,
+    EQUAL, ASSIGN,
     GREATER, GREATER_EQUAL,
-    LESS, LESS_EQUAL,
+    LESS, LESS_EQUAL, ARROW,
 
     // literals
     IDENTIFIER, STRING, NUMBER,
@@ -39,7 +39,8 @@ const std::unordered_map<int, std::string> enum_string_map = {
     {TokenType::SLASH, "/"},
     {TokenType::STAR, "*"},
     {TokenType::TILDE, "~"},
-    {TokenType::EQUAL_EQUAL, "=="},
+    {TokenType::EQUAL, "="},
+    {TokenType::ARROW, "=>"},
     {TokenType::ASSIGN, "<-"},
     {TokenType::GREATER, ">"},
     {TokenType::GREATER_EQUAL, ">="},
