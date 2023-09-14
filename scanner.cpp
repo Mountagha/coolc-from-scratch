@@ -1,5 +1,3 @@
-#pragma once
-
 #include "scanner.hpp"
 #include "token.hpp"
 

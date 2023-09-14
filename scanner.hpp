@@ -1,5 +1,6 @@
 #pragma once
 
+#include "token.hpp"
 #include <string>
 #include <vector>
 
@@ -19,7 +20,7 @@ class Scanner {
 
         inline bool const isAtEnd() { return current > source.length(); }
 
-        std::vector<Token> scanToken() {
+        void scanToken() {
             char c = advance();
             switch(c) {
                 // single char token
