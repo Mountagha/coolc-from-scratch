@@ -1,4 +1,5 @@
 #include "scanner.hpp"
+#include "token.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -21,7 +22,10 @@ int main(int argc, char* argv[]) {
 
     Scanner s{source};
 
-
-   
+    std::vector<Token> tokens;
+    tokens = s.scanTokens();
+    for (auto& token : tokens) {
+        std::cout << token << "\n";
+    }
 
 }
