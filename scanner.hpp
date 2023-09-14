@@ -20,16 +20,28 @@ class Scanner {
         inline bool const isAtEnd() { return current > source.length(); }
 
         std::vector<Token> scanToken() {
-            char c = advance()
+            char c = advance();
             switch(c) {
-                case '(': addToken()
+                case '(': addToken(LEFT_PAREN); break;
+                case ')': addToken(RIGHT_PAREN); break;
+                case ',': addToken(COMMA); break;
+                case '.': addToken(DOT); break;
+                case '-': addToken(MINUS); break;
+                case '+': addToken(PLUS); break;
+                case ';': addToken(SEMICOLON); break;
+                 
             } 
         }
 
-        char advance() const { return source[current++]; }
+        inline char advance() { return source[current++]; }
 
-        void addToken(TokenType tokenType, std::string lexeme, unsigned int loc) {
-            tokens.push_back(Token(tokenType, lexeme, loc));
+        void addToken(TokenType t, std::string lexeme, unsigned int loc) {
+            tokens.push_back(Token(t, lexeme, loc));
+        }
+
+        void addToken(TokenType t) {
+            std::string lexeme = source.substr(start, current-start);
+            addToken(t, lexeme, line); 
         }
 
 };
