@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include "error.hpp"
 
 namespace cool {
 
@@ -48,11 +49,23 @@ class Scanner {
                     break;
                 }
                 // whitespace
-                case '\n':
+                case '\r':
                 case '\t':
                 case ' ' :
                 case '\0':
                     // skips whitespaces && nul characters
+                    break;
+                case '\n':
+                    line++; break;
+                case '"':
+                    string();
+                    break;
+                default:
+                    if(isdigit(c))
+                        number();
+                    else
+                        identifierOrKeyword(); 
+                
 
                  
             } 
@@ -64,6 +77,11 @@ class Scanner {
                 return true;
             } 
             return false;
+        }
+
+        char peek() {
+            if (isAtEnd()) return '\0';
+            return source[current];
         }
 
         inline char advance() { return source[current++]; }
@@ -78,10 +96,39 @@ class Scanner {
         }
 
         void comments() {
-            char n = advance();
-            while (!isAtEnd() && n != '\n'){
-                n = advance();
+            while (!isAtEnd() && peek() != '\n'){
+                if (peek() == '\n') line++;
+                advance();
             }
+        }
+        
+        void string() {
+            while (!isAtEnd() && peek() != '"') {
+                advance();
+                if(peek() == '\n') line++;
+            }
+            if (isAtEnd()) {
+                error(line, "Unterminated string...");
+                return;
+            }
+            std::string lexeme = source.substr(start+1, current-start+2);
+            addToken(STRING, lexeme, line);
+        }
+
+        void number() {
+            while(isdigit(peek())) {
+                advance();
+            }
+            std::string lexeme = source.substr(start, current-start);
+            addToken(NUMBER, lexeme, line);
+        }
+
+        void identifierOrKeyword() {
+            while(isalnum(peek())) {
+                advance();
+            }
+            std::string lexeme = source.substr(start, current-start);
+            addToken(NUMBER, lexeme, line);
         }
 
 };
