@@ -2,9 +2,32 @@
 
 #include <string>
 #include <vector>
+#include <cctype>
+#include <algorithm>
 #include "error.hpp"
 
 namespace cool {
+
+const std::array<std::string, 18> keywords = {
+    "class",
+    "else",
+    "false",
+    "if",
+    "fi",
+    "in",
+    "inherits",
+    "isvoid",
+    "let",
+    "loop",
+    "pool",
+    "while",
+    "case",
+    "esac",
+    "new",
+    "of",
+    "not",
+    "true",
+};
 
 
 class Scanner {
@@ -128,7 +151,23 @@ class Scanner {
                 advance();
             }
             std::string lexeme = source.substr(start, current-start);
-            addToken(NUMBER, lexeme, line);
+            if (isKeyword(lexeme))
+                addToken(IDENTIFIER, lexeme, line);
+            else
+                addToken(IDENTIFIER, lexeme, line);
+        }
+
+        std::string strTolower(const std::string& s) {
+            std::string lowerStr;
+            std::transform(s.begin(), s.end(), lowerStr.begin(),
+                [](unsigned char c) {return std::tolower(c); });
+            return lowerStr;
+        }
+
+        bool isKeyword(const std::string& s) {
+            if(std::find(keywords.begin(), keywords.end(), s) != keywords.end())
+                return true;
+            return false;
         }
 
 };
