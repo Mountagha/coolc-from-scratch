@@ -1,6 +1,5 @@
 #pragma once
 
-#include "token.hpp"
 #include <string>
 #include <vector>
 
@@ -20,7 +19,7 @@ class Scanner {
 
         inline bool const isAtEnd() { return current > source.length(); }
 
-        void scanToken() {
+        std::vector<Token> scanToken() {
             char c = advance();
             switch(c) {
                 // single char token
@@ -28,7 +27,6 @@ class Scanner {
                 case ')': addToken(RIGHT_PAREN); break;
                 case ',': addToken(COMMA); break;
                 case '.': addToken(DOT); break;
-                case '-': addToken(MINUS); break;
                 case '+': addToken(PLUS); break;
                 case ';': addToken(SEMICOLON); break;
                 case ':': addToken(COLON); break;
@@ -40,6 +38,22 @@ class Scanner {
                 case '=': addToken(match('>') ? ARROW : EQUAL); break;
                 case '<': addToken(match('-') ? ASSIGN : (match('=') ? LESS_EQUAL : LESS)); break;
                 case '>': addToken(match('=') ? GREATER_EQUAL : GREATER); break; 
+
+                // Minus and comment
+                case '-': {
+                    if(match('-')) 
+                        comments();
+                    else
+                        addToken(MINUS); break;
+                    break;
+                }
+                // whitespace
+                case '\n':
+                case '\t':
+                case ' ' :
+                case '\0':
+                    // skips whitespaces && nul characters
+
                  
             } 
         }
@@ -61,6 +75,13 @@ class Scanner {
         void addToken(TokenType t) {
             std::string lexeme = source.substr(start, current-start);
             addToken(t, lexeme, line); 
+        }
+
+        void comments() {
+            char n = advance();
+            while (!isAtEnd() && n != '\n'){
+                n = advance();
+            }
         }
 
 };
