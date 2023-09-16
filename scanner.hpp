@@ -143,14 +143,16 @@ class Scanner {
         
         void string() {
             while (!isAtEnd() && peek() != '"') {
-                advance();
                 if(peek() == '\n') line++;
+                advance();
             }
             if (isAtEnd()) {
                 error(line, "Unterminated string...");
                 return;
             }
-            std::string lexeme = source.substr(start+1, current-start+2);
+            // consume the closing "
+            advance();
+            std::string lexeme = source.substr(start+1, current-start-2);
             addToken(STRING, lexeme, line);
         }
 
@@ -163,7 +165,7 @@ class Scanner {
         }
 
         void identifierOrKeyword() {
-            while(isalnum(peek())) {
+            while(isAlphanumeric(peek())) {
                 advance();
             }
             std::string lexeme = source.substr(start, current-start);

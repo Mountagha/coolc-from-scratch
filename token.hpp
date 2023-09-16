@@ -50,6 +50,8 @@ const std::unordered_map<int, std::string> enum_string_map = {
     {TokenType::ELSE, "ELSE"},
     {TokenType::FALSE, "FALSE"},
     {TokenType::IF, "IF"},
+    {TokenType::IDENTIFIER, "IDENTIFIER"},
+    {TokenType::STRING, "STRING"},
     {TokenType::FI, "FI"},
     {TokenType::IN, "IN"},
     {TokenType::INHERITS, "INHERITS"},
@@ -64,6 +66,7 @@ const std::unordered_map<int, std::string> enum_string_map = {
     {TokenType::OF, "OF"},
     {TokenType::NOT, "NOT"},
     {TokenType::TRUE, "TRUE"},
+    {TokenType::EOFILE, ""},
 };
 
 class Token {
