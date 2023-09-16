@@ -4,7 +4,9 @@
 #include <vector>
 #include <cctype>
 #include <algorithm>
+#include <array>
 #include "error.hpp"
+#include "token.hpp"
 
 namespace cool {
 
@@ -88,8 +90,7 @@ class Scanner {
                         number();
                     else
                         identifierOrKeyword(); 
-                
-
+                    break;
                  
             } 
         }
