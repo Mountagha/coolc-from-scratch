@@ -1,5 +1,4 @@
 #include "scanner.hpp"
-#include "token.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
