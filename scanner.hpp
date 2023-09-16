@@ -86,14 +86,29 @@ class Scanner {
                     string();
                     break;
                 default:
-                    if(isdigit(c))
+                    if(isDigit(c))
                         number();
-                    else
+                    else if (isAlphanumeric(c))
                         identifierOrKeyword(); 
                     break;
                  
             } 
         }
+
+        inline bool isDigit(char c) {
+            return '0' <= c && c <= '9';
+        }
+
+        inline bool isAlpha(char c) {
+            return (c >= 'a' && c <= 'z' ||
+                    c >= 'A' && c <= 'Z' ||
+                    c == '_');
+        }
+        
+        inline bool isAlphanumeric(char c) {
+            return isDigit(c) || isAlpha(c);
+        }
+
         bool match(char expected) {
             if (isAtEnd()) return false;
             if (source[current] == expected) {
