@@ -177,8 +177,8 @@ class Scanner {
         }
 
         std::string strTolower(const std::string& s) {
-            std::string lowerStr;
-            std::transform(s.cbegin(), s.cend(), lowerStr.begin(),
+            std::string lowerStr = s;
+            std::transform(lowerStr.cbegin(), lowerStr.cend(), lowerStr.begin(),
                 [](unsigned char c) {return std::tolower(c); });
             return lowerStr;
         }
