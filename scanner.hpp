@@ -4,31 +4,30 @@
 #include <vector>
 #include <cctype>
 #include <algorithm>
-#include <array>
 #include "error.hpp"
 #include "token.hpp"
 
 namespace cool {
 
-const std::array<std::string, 18> keywords = {
-    "class",
-    "else",
-    "false",
-    "if",
-    "fi",
-    "in",
-    "inherits",
-    "isvoid",
-    "let",
-    "loop",
-    "pool",
-    "while",
-    "case",
-    "esac",
-    "new",
-    "of",
-    "not",
-    "true",
+static const std::unordered_map<std::string, TokenType> keywordsMap = {
+    {"class", CLASS},
+    {"else", ELSE},
+    {"false", FALSE},
+    {"if", IF},
+    {"fi", FI},
+    {"in", IN},
+    {"inherits", INHERITS},
+    {"isvoid", ISVOID},
+    {"let", LET},
+    {"loop", LOOP},
+    {"pool", POOL},
+    {"while", WHILE},
+    {"case", CASE},
+    {"esac", ESAC},
+    {"new", NEW},
+    {"of", OF},
+    {"not", NOT},
+    {"true", TRUE},
 };
 
 
@@ -51,6 +50,8 @@ class Scanner {
                 // single char token
                 case '(': addToken(LEFT_PAREN); break;
                 case ')': addToken(RIGHT_PAREN); break;
+                case '}': addToken(RIGHT_BRACE); break;
+                case '{': addToken(LEFT_BRACE); break;
                 case ',': addToken(COMMA); break;
                 case '.': addToken(DOT); break;
                 case '+': addToken(PLUS); break;
@@ -170,20 +171,20 @@ class Scanner {
             }
             std::string lexeme = source.substr(start, current-start);
             if (isKeyword(lexeme))
-                addToken(IDENTIFIER, lexeme, line);
+                addToken(keywordsMap.at(strTolower(lexeme)), lexeme, line);
             else
                 addToken(IDENTIFIER, lexeme, line);
         }
 
         std::string strTolower(const std::string& s) {
             std::string lowerStr;
-            std::transform(s.begin(), s.end(), lowerStr.begin(),
+            std::transform(s.cbegin(), s.cend(), lowerStr.begin(),
                 [](unsigned char c) {return std::tolower(c); });
             return lowerStr;
         }
 
         bool isKeyword(const std::string& s) {
-            if(std::find(keywords.begin(), keywords.end(), s) != keywords.end())
+            if (keywordsMap.find(strTolower(s)) != keywordsMap.end())
                 return true;
             return false;
         }

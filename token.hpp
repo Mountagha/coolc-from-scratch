@@ -7,7 +7,8 @@ namespace cool {
 
 enum TokenType {
     // Single character tokens
-    LEFT_PAREN, RIGHT_PAREN, COMMA, 
+    LEFT_PAREN, RIGHT_PAREN, 
+    LEFT_BRACE, RIGHT_BRACE, COMMA, 
     DOT, MINUS, PLUS, SEMICOLON, COLON,
     SLASH, STAR, TILDE, 
 
@@ -30,6 +31,8 @@ enum TokenType {
 const std::unordered_map<int, std::string> enum_string_map = {
     {TokenType::LEFT_PAREN, "LEFT_PAREN"},
     {TokenType::RIGHT_PAREN, "RIGHT_PAREN"},
+    {TokenType::LEFT_BRACE, "LEFT_BRACE"},
+    {TokenType::RIGHT_BRACE, "RIGHT_BRACE"},
     {TokenType::COMMA, "COMMA"},
     {TokenType::DOT, "DOT"},
     {TokenType::MINUS, "MINUS"},
