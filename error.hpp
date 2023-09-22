@@ -3,6 +3,8 @@
 
 namespace cool {
 
-void error(int line, const std::string& msg);
+static void error(int line, const std::string& msg) {
+    std::cerr << "[line: " << line << " ]" << msg << "\n"; 
+}
 
 } // namespace cool
