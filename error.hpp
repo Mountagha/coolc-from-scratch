@@ -7,4 +7,10 @@ static void error(int line, const std::string& msg) {
     std::cerr << "[line: " << line << " ]" << msg << "\n"; 
 }
 
+static void fatal_error(int line, const std::string& msg) {
+    std::cerr << "[line: " << line << " ]" << msg << "\n"; 
+    exit(1);
+}
+
+
 } // namespace cool
