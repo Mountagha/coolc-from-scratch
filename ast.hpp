@@ -29,6 +29,14 @@ class Stmt {
         virtual void accept(StmtVisitor* v) = 0;
 };
 
+class Program: public Stmt {
+    public:
+        Program(std::unique_ptr<Class>&& classes_) {
+            classes = std::move(classes);
+        }
+        std::vector<Class> classes;
+};
+
 class Class: public Stmt {
     public:
         Class(Token name_, std::unique_ptr<Class>&& superClass_, std::vector<std::unique_ptr<Feature>>&& features_){
@@ -109,7 +117,7 @@ class Binary: public Expr {
 
 class Unary: public Expr {
     public:
-        Unary(Token op_, std::unique_ptr<Expr> expr_) {
+        Unary(Token op_, std::unique_ptr<Expr>&& expr_) {
             op = op_;
             expr = std::move(expr_);
         }
