@@ -31,7 +31,7 @@ class Stmt {
 
 class Class: public Stmt {
     public:
-        Class(Token name_, std::unique_ptr<Class> superClass_, std::vector<std::unique_ptr<Feature>>&& features_){
+        Class(Token name_, std::unique_ptr<Class>&& superClass_, std::vector<std::unique_ptr<Feature>>&& features_){
             name = name_;
             superClass = std::move(superClass_);
             features = std::move(features_);
@@ -42,7 +42,28 @@ class Class: public Stmt {
 };
 
 class Feature: public Expr {
-
+    public:
+        Feature(Token id_, std::vector<Formal>&& formals_, Token type__, std::unique_ptr<Expr> expr_){
+            id = id_;
+            formals = std::move(formals_);
+            type_ = type__;
+            expr = std::move(expr_);
+        }
+        Token id;
+        std::vector<Formal> formals;
+        Token type_;
+        std::unique_ptr<Expr> expr;
+         
 };
+
+class Formal : public Expr {
+    public:
+        Formal(Token id_, Token type__) {
+            id = id_;
+            type_ = type__;
+        }
+        Token id, type_;
+};
+
 
 } //
