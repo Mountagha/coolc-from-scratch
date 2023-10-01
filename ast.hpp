@@ -8,31 +8,44 @@ namespace cool {
 
 
 class ExprVisitor {
+    public:
+        virtual void visitFeatureExpr(Feature* expr) = 0;
+        virtual void visitFormalExpr(Formal* expr) = 0;
+        virtual void visitAssignExpr(Assign* expr) = 0;
+        virtual void visitIfExpr(If* expr) = 0;
+        virtual void visitWhileExpr(While* expr) = 0;
+        virtual void visitBinaryExpr(Binary* expr) = 0;
+        virtual void visitUnaryExpr(Unary* expr) = 0;
 
 };
 
 class StmtVisitor {
-
+    public:
+        virtual void visitProgramStmt(Program* stmt) = 0;
+        virtual void visitClassStmt(Class* smtt) = 0;
 };
 
 class Expr {
     public:
         Expr() = default;
         ~Expr() = default;
-        virtual void accept(ExprVisitor* v) = 0;
+        virtual void accept(ExprVisitor* visitor) = 0;
 };
 
 class Stmt {
     public:
         Stmt() = default;
         ~Stmt() = default;
-        virtual void accept(StmtVisitor* v) = 0;
+        virtual void accept(StmtVisitor* visitor) = 0;
 };
 
 class Program: public Stmt {
     public:
         Program(std::unique_ptr<Class>&& classes_) {
             classes = std::move(classes);
+        }
+        void accept(StmtVisitor* visitor) {
+            visitor->visitProgramStmt(this);
         }
         std::vector<Class> classes;
 };
@@ -43,6 +56,9 @@ class Class: public Stmt {
             name = name_;
             superClass = std::move(superClass_);
             features = std::move(features_);
+        }
+        void accept(StmtVisitor* visitor) {
+            visitor->visitClassStmt(this);
         }
         Token name;
         std::unique_ptr<Class> superClass;
