@@ -73,6 +73,9 @@ class Feature: public Expr {
             type_ = type__;
             expr = std::move(expr_);
         }
+        void accept(ExprVisitor* visitor) {
+            visitor->visitFeatureExpr(this);
+        }
         Token id;
         std::vector<Formal> formals;
         Token type_;
@@ -86,6 +89,9 @@ class Formal : public Expr {
             id = id_;
             type_ = type__;
         }
+        void accept(ExprVisitor* visitor) {
+            visitor->visitFormalExpr(this);
+        }
         Token id, type_;
 };
 
@@ -95,6 +101,9 @@ class Assign: public Expr {
             id = id_;
             type_ = type__;
             expr = std::move(expr);
+        }
+        void accept(ExprVisitor* visitor) {
+            visitor->visitAssignExpr(this);
         }
         Token id;
         Token type_;
@@ -108,6 +117,9 @@ class If: public Expr {
             thenBranch = std::move(then_);
             elseBranch = std::move(else_);
         }
+        void accept(ExprVisitor* visitor) {
+            visitor->visitIfExpr(this);
+        }
         std::unique_ptr<Expr> cond, thenBranch, elseBranch;
 };
 
@@ -116,6 +128,9 @@ class While: public Expr {
         While(std::unique_ptr<Expr>&& cond_, std::unique_ptr<Expr>&& expr_) {
             cond = std::move(cond_);
             expr = std::move(expr_);
+        }
+        void accept(ExprVisitor* visitor) {
+            visitor->visitWhileExpr(this);
         }
         std::unique_ptr<Expr> cond, expr;
 };
@@ -127,6 +142,9 @@ class Binary: public Expr {
             lhs = std::move(lhs_);
             rhs = std::move(rhs_);
         }
+        void accept(ExprVisitor* visitor) {
+            visitor->visitBinaryExpr(this);
+        }
         std::unique_ptr<Expr> lhs, rhs;
         Token op;
 };
@@ -136,6 +154,9 @@ class Unary: public Expr {
         Unary(Token op_, std::unique_ptr<Expr>&& expr_) {
             op = op_;
             expr = std::move(expr_);
+        }
+        void accept(ExprVisitor* visitor) {
+            visitor->visitUnaryExpr(this);
         }
         Token op;
         std::unique_ptr<Expr> expr;
