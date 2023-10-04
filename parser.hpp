@@ -16,7 +16,8 @@ class Parser {
         ~Parser();
     
     private:
-        Token current;
+        std::vector<Token> tokens;
+        unsigned int current;
         Program* program;
 
         Expr* parseProgram() {
@@ -24,6 +25,23 @@ class Parser {
 
             }
         }
+
+    bool match(const TokenType& t) const {
+        if (isAtEnd()) return false;
+        return peek().token_type == t;
+    }
+
+    bool isAtEnd() const {
+        return peek().token_type == EOFILE;
+    }
+
+    Token peek() const {
+        return tokens[current];
+    }
+
+    Token previous() const {
+        return tokens[current - 1];
+    }
 
 };
 
