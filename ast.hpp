@@ -16,6 +16,7 @@ class ExprVisitor {
         virtual void visitWhileExpr(While* expr) = 0;
         virtual void visitBinaryExpr(Binary* expr) = 0;
         virtual void visitUnaryExpr(Unary* expr) = 0;
+        virtual void visitVariableExpr(Variable* expr) = 0;
 
 };
 
@@ -160,6 +161,17 @@ class Unary: public Expr {
         }
         Token op;
         std::unique_ptr<Expr> expr;
+};
+
+class Variable: public Expr {
+    public:
+        Variable(Token name_) {
+            name = name_;
+        } 
+        void accept(ExprVisitor* visitor) {
+            visitor->visitVariableExpr(this);
+        }
+        Token name;
 };
 
 

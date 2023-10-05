@@ -19,6 +19,8 @@ class Parser {
         ~Parser();
     
     private:
+        using PExpr = std::unique_ptr<Expr>;
+        using PStmt = std::unique_ptr<Stmt>;
         struct ParseError : std::runtime_error {
             using std::runtime_error::runtime_error;
         };
@@ -26,11 +28,28 @@ class Parser {
         unsigned int current;
         Program* program;
 
-        Expr* parseProgram() {
+        PStmt parseProgram() {
+            std::vector<std::unique_ptr<Class>> classes{};
             while (match({CLASS})) {
-
-
+                classes.push_back(parseClass());
             }
+            return std::make_unique<Program>(classes);
+        }
+
+        PStmt parseClass() {
+            Token className = consume(IDENTIFIER, "Expect a class type after `class`.");
+            PExpr superclas_;
+            if(match({INHERITS})) { 
+                Token superClassName = consume(IDENTIFIER, "Expect a Class Name after `inherits`");
+                superclas_ = std::make_unique<Variable>(superClassName);
+            }
+            std::vector<std::unique_ptr<Feature>> features{};
+            consume(LEFT_BRACE, "Expect a left brace.");
+            while(match({IDENTIFIER})) {
+                features.push_back(parseFeature());
+            }
+            consume(LEFT_BRACE, "Expect a right brace.");
+            return std::make_unique<Class>(className, std::move(superclas_), std::move(features));
         }
 
         bool check(const TokenType& t) const {
@@ -38,11 +57,19 @@ class Parser {
             return peek().token_type == t;
         }
         
-        bool match(const std::vector<TokenType>& tts)  const {
+        bool match(const std::vector<TokenType>& tts) {
             for(auto& tokenType: tts){
-                if (peek().token_type == tokenType) return true;
+                if (check(tokenType)) {
+                    advance();
+                    return true;
+                }
             }
             return false;
+        }
+
+        Token advance() {
+            if (!isAtEnd()) current++;
+            return previous();
         }
 
         bool isAtEnd() const {
