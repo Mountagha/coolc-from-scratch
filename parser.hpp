@@ -27,11 +27,14 @@ class Parser {
         std::vector<Token> tokens;
         unsigned int current;
         Program* program;
+        template<class B, class D>
 
         PStmt parseProgram() {
             std::vector<std::unique_ptr<Class>> classes{};
             while (match({CLASS})) {
-                classes.push_back(parseClass());
+                auto class_ = parseClass();
+                // Probably a better way to do next line.
+                classes.push_back(std::unique_ptr<Class>(static_cast<Class*>(class_.release())));
             }
             return std::make_unique<Program>(classes);
         }
@@ -46,10 +49,16 @@ class Parser {
             std::vector<std::unique_ptr<Feature>> features{};
             consume(LEFT_BRACE, "Expect a left brace.");
             while(match({IDENTIFIER})) {
-                features.push_back(parseFeature());
+                auto feature_ = parseFeature();
+                features.push_back(std::unique_ptr<Feature>(static_cast<Feature*>(feature_.release())));
             }
             consume(LEFT_BRACE, "Expect a right brace.");
             return std::make_unique<Class>(className, std::move(superclas_), std::move(features));
+        }
+
+        PExpr parseFeature() {
+            Token id = consume(IDENTIFIER, "Expecting an identifier.");
+
         }
 
         bool check(const TokenType& t) const {
