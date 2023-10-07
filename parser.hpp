@@ -27,7 +27,6 @@ class Parser {
         std::vector<Token> tokens;
         unsigned int current;
         Program* program;
-        template<class B, class D>
 
         PStmt parseProgram() {
             std::vector<std::unique_ptr<Class>> classes{};
@@ -41,24 +40,67 @@ class Parser {
 
         PStmt parseClass() {
             Token className = consume(IDENTIFIER, "Expect a class type after `class`.");
-            PExpr superclas_;
+            PExpr superclass;
             if(match({INHERITS})) { 
                 Token superClassName = consume(IDENTIFIER, "Expect a Class Name after `inherits`");
-                superclas_ = std::make_unique<Variable>(superClassName);
+                superclass = std::make_unique<Variable>(superClassName);
             }
             std::vector<std::unique_ptr<Feature>> features{};
             consume(LEFT_BRACE, "Expect a left brace.");
             while(match({IDENTIFIER})) {
-                auto feature_ = parseFeature();
-                features.push_back(std::unique_ptr<Feature>(static_cast<Feature*>(feature_.release())));
+                auto feature = parseFeature();
+                features.push_back(std::unique_ptr<Feature>(static_cast<Feature*>(feature.release())));
             }
             consume(LEFT_BRACE, "Expect a right brace.");
-            return std::make_unique<Class>(className, std::move(superclas_), std::move(features));
+            return std::make_unique<Class>(className, std::move(superclass), features);
         }
 
         PExpr parseFeature() {
             Token id = consume(IDENTIFIER, "Expecting an identifier.");
+            std::vector<std::unique_ptr<Formal>> formals{};
+            PExpr expr;
+            if (match({LEFT_PAREN})) {
+                do {
+                    auto formal = parseFormal(); 
+                    formals.push_back(std::unique_ptr<Formal>(static_cast<Formal*>(formal.release())));
+                }while(match({COMMA}));
+            }
+            consume(COLON, "Expecting a colon.");
+            Token type_ = consume(IDENTIFIER, "Expecting a type.");
+            if (match({LEFT_BRACE})) {
+                expr = parseExpression();
+                consume(RIGHT_BRACE, "Expecting a right brace.");
+            } else if (match({ASSIGN})) {
+                expr = parseExpression();
+            }
+            return std::make_unique<Feature>(id, formals, type_, std::move(expr));
+        }
 
+        PExpr parseFormal() {
+            Token id = consume(IDENTIFIER, "Expecting an identifier.");
+            consume(COLON, "Expecting a Colon.");
+            Token type_ = consume(IDENTIFIER, "Expecting a type.");
+            return std::make_unique<Formal>(id, type_);
+        }
+
+        PExpr parseIf() {
+            consume(IF, "Expecting `if` keyword.");
+            PExpr cond = parseExpression();
+            consume(THEN, "Expecting `then` keyword.");
+            PExpr thenBranch = parseExpression();
+            consume(ELSE, "Expecting `else` keyword.");
+            PExpr elseBranch = parseExpression();
+            consume(FI, "Expecing `fi` keyword.");
+            return std::make_unique<If>(std::move(cond), std::move(thenBranch), std::move(elseBranch));
+        }
+
+        PExpr parseWhile() {
+            consume(WHILE, "Expecting `while` keyword.");
+            PExpr cond = parseExpression();
+            consume(LOOP, "Expecting `loop` keyword.");
+            PExpr expr = parseExpression();
+            consume(POOL, "Expecting `pool` keyword.");
+            return std::make_unique<While>(std::move(cond), std::move(expr));
         }
 
         bool check(const TokenType& t) const {

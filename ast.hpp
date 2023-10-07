@@ -17,6 +17,9 @@ class ExprVisitor {
         virtual void visitBinaryExpr(Binary* expr) = 0;
         virtual void visitUnaryExpr(Unary* expr) = 0;
         virtual void visitVariableExpr(Variable* expr) = 0;
+        virtual void visitCallExpr(Call* expr) = 0;
+        virtual void visitBlockExpr(Block* expr) = 0;
+        virtual void visitGroupingExpr(Grouping* expr) = 0;
 
 };
 
@@ -173,6 +176,28 @@ class Variable: public Expr {
         }
         Token name;
 };
+
+class Call: public Expr {
+    public:
+        Call(std::vector<std::unique_ptr<Expr>>&& args_) {
+           args = std::move(args_); 
+        }
+        void accept(ExprVisitor* visitor) {
+            visitor->visitCallExpr(this);
+        }
+        std::vector<std::unique_ptr<Expr>> args;
+};
+
+class Block: public Expr {
+    public:
+        Block(std::vector<std::unique_ptr<Expr>> exprs_) {
+            exprs = std::move(exprs_)
+        }
+        void accept(ExprVisitor* visitor) {
+            visitor->visitBlockExpr(this);
+        }
+        std::vector<std::unique_ptr<Expr>> exprs;
+}
 
 
 } //
