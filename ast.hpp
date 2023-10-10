@@ -190,14 +190,26 @@ class Call: public Expr {
 
 class Block: public Expr {
     public:
-        Block(std::vector<std::unique_ptr<Expr>> exprs_) {
-            exprs = std::move(exprs_)
+        Block(std::vector<std::unique_ptr<Expr>>&& exprs_) {
+            exprs = std::move(exprs_);
         }
         void accept(ExprVisitor* visitor) {
             visitor->visitBlockExpr(this);
         }
         std::vector<std::unique_ptr<Expr>> exprs;
-}
+};
+
+class Grouping: public Expr {
+    public: 
+        Grouping(std::unique_ptr<Expr>&& expr_) {
+           expr = std::move(expr_);
+        }
+        void accept(ExprVisitor* visitor) {
+            visitor->visitGroupingExpr(this);
+        }
+        std::unique_ptr<Expr> expr;
+};
+
 
 
 } //
