@@ -4,6 +4,7 @@
 #include "ast.hpp"
 #include "scanner.hpp"
 #include "error.h"
+#include "type.hpp"
 
 
 #include <iostream> // debug purposes
@@ -101,6 +102,67 @@ class Parser {
             PExpr expr = parseExpression();
             consume(POOL, "Expecting `pool` keyword.");
             return std::make_unique<While>(std::move(cond), std::move(expr));
+        }
+
+        PExpr parseExpression() {
+            return parseAssignment();
+        }
+
+        PExpr parseAssignment() {
+            PExpr expr = parseNotExpression();   
+            if (match({ASSIGN})) {
+                Token assign_ = previous();
+                PExpr value = parseAssignment(); // Not sure if I'm handling left associativity correctly here.
+                typeIdentifier typeId;
+                if (typeId.identify(expr) == Type::Variable) {
+                    Token name = static_cast<Variable*>(expr.get())->name;
+                    return std::make_unique<Assign>(name, std::move(value));
+                }
+                error(assign_, "Invalid assignment Target");
+            }
+            return expr;
+        }
+
+        PExpr parseNotExpression() {
+            PExpr expr = parseComparison();
+            if (match ({NOT})) {
+                expr = parseExpression();
+            }
+            return expr;
+        }
+
+        PExpr parseComparison() {
+            PExpr expr = parseTerm();
+            if (match ({LESS, LESS_EQUAL, EQUAL})) {
+                Token operator_ = previous();
+                PExpr rhs = parseTerm();
+                expr = std::make_unique<Binary>(operator_, expr, rhs);
+            }
+            return expr;
+        }
+
+        PExpr parseTerm() {
+            PExpr expr = parseFactor();
+            if (match({PLUS, MINUS})) {
+                Token operator_ = previous();
+                PExpr rhs = parseFactor();
+                expr = std::make_unique<Binary>(operator_, expr, rhs);
+            }
+            return expr;
+        }
+
+        PExpr parseFactor() {
+            PExpr expr = parseUnary();
+            if (match({STAR, SLASH})) {
+                Token operator_ = previous();
+                PExpr rhs = parseUnary();
+                expr = std::make_unique<Binary>(operator_, expr, rhs);
+            }
+            return expr;
+        }
+
+        PExpr parseUnary() {
+            // to be continued....
         }
 
         bool check(const TokenType& t) const {
