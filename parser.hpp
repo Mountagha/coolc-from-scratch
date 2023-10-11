@@ -162,7 +162,47 @@ class Parser {
         }
 
         PExpr parseUnary() {
-            // to be continued....
+            if (match({TILDE, ISVOID})) {
+                Token operator_ = previous();
+                PExpr right = parseUnary(); 
+                return std::make_unique<Unary>(operator_, std::move(right));
+            }
+            return parseCall();
+        }
+
+        PExpr parseCall() {
+            PExpr expr = parsePrimary();
+            while (true) {
+                if (match({LEFT_PAREN})) {
+                    expr = finishCall(expr);
+                } else if (match({AT})) {
+                    Token className = consume(IDENTIFIER, "Expect a valid class name after `@`");
+                    consume(DOT, "Expect a dot after type identifier.");
+                    Token id = consume(IDENTIFIER, "Expect an identifier after `.`.");
+                    auto class_ = std::make_unique<Variable>(className);
+                    expr = std::make_unique<Get>(id, std::move(expr), std::move(class_));
+                } else if (match ({DOT})){
+                    Token id = consume(IDENTIFIER, "Expect an identifier after `.`.");
+                    expr = std::make_unique<Get>(id, std::move(expr));
+                } else {
+                    break;
+                }
+            }
+        }
+
+        PExpr finishCall(PExpr& callee) {
+            std::vector<PExpr> arguments{};
+            if (!check({RIGHT_PAREN})) {
+                do {
+                    arguments.push_back(parseExpression());
+                }while(match({COMMA}));
+            }
+            Token paren = consume(RIGHT_PAREN, "Expect a right parenthesis at the end of a function call.");
+            return std::make_unique<Call>(std::move(callee), paren, std::move(arguments));
+        }
+
+        PExpr parsePrimary() {
+
         }
 
         bool check(const TokenType& t) const {

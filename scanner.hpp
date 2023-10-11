@@ -60,6 +60,7 @@ class Scanner {
                 case '*': addToken(STAR); break;
                 case '~': addToken(TILDE); break;
                 case '/': addToken(SLASH); break;
+                case '@': addToken(AT); break;
 
                 // operators
                 case '=': addToken(match('>') ? ARROW : EQUAL); break;

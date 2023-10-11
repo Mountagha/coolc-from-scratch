@@ -10,7 +10,7 @@ enum TokenType {
     LEFT_PAREN, RIGHT_PAREN, 
     LEFT_BRACE, RIGHT_BRACE, COMMA, 
     DOT, MINUS, PLUS, SEMICOLON, COLON,
-    SLASH, STAR, TILDE, 
+    SLASH, STAR, TILDE, AT, 
 
     // One or two character token
     EQUAL, ASSIGN,
@@ -42,6 +42,7 @@ const std::unordered_map<int, std::string> enum_string_map = {
     {TokenType::SLASH, "SLASH"},
     {TokenType::STAR, "STAR"},
     {TokenType::TILDE, "TILDE"},
+    {TokenType::AT, "@"},
     {TokenType::EQUAL, "EQUAL"},
     {TokenType::ARROW, "ARROW"},
     {TokenType::ASSIGN, "ASSIGN"},

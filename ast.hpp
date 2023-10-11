@@ -20,6 +20,7 @@ class ExprVisitor {
         virtual void visitCallExpr(Call* expr) = 0;
         virtual void visitBlockExpr(Block* expr) = 0;
         virtual void visitGroupingExpr(Grouping* expr) = 0;
+        virtual void visitGetExpr(Get* expression) = 0;
 
 };
 
@@ -179,13 +180,17 @@ class Variable: public Expr {
 
 class Call: public Expr {
     public:
-        Call(std::vector<std::unique_ptr<Expr>>&& args_) {
+        Call(std::unique_ptr<Expr>&& callee_, Token t_, std::vector<std::unique_ptr<Expr>>&& args_) {
            args = std::move(args_); 
+           callee = std::move(callee_);
+           tok = t_;
         }
         void accept(ExprVisitor* visitor) {
             visitor->visitCallExpr(this);
         }
         std::vector<std::unique_ptr<Expr>> args;
+        std::unique_ptr<Expr> callee;
+        Token tok;
 };
 
 class Block: public Expr {
@@ -210,6 +215,20 @@ class Grouping: public Expr {
         std::unique_ptr<Expr> expr;
 };
 
+class Get: public Expr {
+    public:
+        Get(Token name_, std::unique_ptr<Expr>&& expr_, std::unique_ptr<Variable>&& class__=nullptr) {
+            name = name_;
+            expr = std::move(expr_);
+            class_ = std::move(class__);
+        }
+        void accept(ExprVisitor* visitor) {
+            visitor->visitGetExpr(this);
+        }
+        std::unique_ptr<Expr> expr;
+        std::unique_ptr<Variable> class_;
+        Token name;
+};
 
 
 } //
