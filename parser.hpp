@@ -205,6 +205,14 @@ class Parser {
 
         }
 
+        PExpr parseLet() {
+
+        }
+
+        PExpr parseCase() {
+
+        }
+
         bool check(const TokenType& t) const {
             if (isAtEnd()) return false;
             return peek().token_type == t;
