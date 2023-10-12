@@ -30,6 +30,7 @@ class typeIdentifier: public StmtVisitor, public ExprVisitor {
         void visitCallExpr(Call* expr) {}
         void visitBlockExpr(Block* expr) {}
         void visitGroupingExpr(Grouping* expr) {}
+        void visitGetExpr(Get* expr) {}
 
 
         virtual void visitProgramStmt(Program* stmt) {}

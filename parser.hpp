@@ -202,7 +202,7 @@ class Parser {
         }
 
         PExpr parsePrimary() {
-
+            if (match ({}))
         }
 
         PExpr parseLet() {
