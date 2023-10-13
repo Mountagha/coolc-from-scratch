@@ -257,6 +257,7 @@ class Parser {
             if (match ({ISVOID})) return parseExpression();
             if (match ({IDENTIFIER})) return std::make_unique<Variable>(previous());
             if (match ({NUMBER})) return std::make_unique<Literal>(CoolObject(std::stoi(previous().lexeme)));
+            if (match ({STRING})) return std::make_unique<Literal>(previous().lexeme);
             if (match ({TRUE})) return std::make_unique<Literal>(CoolObject(true));
             if (match ({FALSE})) return std::make_unique<Literal>(CoolObject(false));
         }
