@@ -1,11 +1,17 @@
+#pragma once
+
 #include <iostream>
 #include <memory>
 #include <vector>
 
 #include "token.hpp"
+#include "object.hpp"
 
 namespace cool {
 
+using PExpr = std::unique_ptr<Expr>;
+using letAssign = std::tuple<Token, Token, PExpr>; // to represent id: token: expr into 1 object.
+using letAssigns = std::vector<letAssign>; // I know poor naming but hey.
 
 class ExprVisitor {
     public:
@@ -21,6 +27,9 @@ class ExprVisitor {
         virtual void visitBlockExpr(Block* expr) = 0;
         virtual void visitGroupingExpr(Grouping* expr) = 0;
         virtual void visitGetExpr(Get* expression) = 0;
+        virtual void visitLiteralExpr(Literal* expr) = 0;
+        virtual void visitLetExpr(Let* expr) = 0;
+        virtual void visitCaseExpr(Let* expr) = 0;
 
 };
 
@@ -230,5 +239,43 @@ class Get: public Expr {
         Token name;
 };
 
+class Literal: public Expr {
+    public:
+        Literal(CoolObject&& o) {
+            object = o;
+        }
+        void accept(ExprVisitor* visitor) {
+            visitor->visitLiteralExpr(this);
+        }
+        CoolObject object;
+};
+
+class Let: public Expr {
+    public: 
+        Let(letAssigns&& vecAssigns_, std::unique_ptr<Expr> body_) {
+            vecAssigns = vecAssigns_;
+            body = std::move(body);
+        }
+        
+        void accept(ExprVisitor* visitor) {
+            visitor->visitLetExpr(this);
+        }
+        letAssigns vecAssigns;
+        std::unique_ptr<Expr> body;
+};
+
+class Case: public Expr {
+    public: 
+        Case(letAssigns&& matches_, std::unique_ptr<Expr> expr_) {
+            matches = matches_;
+            expr = std::move(expr_);
+        }
+        
+        void accept(ExprVisitor* visitor) {
+            visitor->visitCaseExpr(this);
+        }
+        letAssigns matches;
+        std::unique_ptr<Expr> expr;
+};
 
 } //

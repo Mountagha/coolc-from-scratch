@@ -31,6 +31,9 @@ class typeIdentifier: public StmtVisitor, public ExprVisitor {
         void visitBlockExpr(Block* expr) {}
         void visitGroupingExpr(Grouping* expr) {}
         void visitGetExpr(Get* expr) {}
+        void visitLiteralExpr(Literal* expr) {}
+        void visitLetExpr(Let* expr) {}
+        void visitCaseExpr(Let* expr) {}
 
 
         virtual void visitProgramStmt(Program* stmt) {}

@@ -5,9 +5,11 @@
 #include "scanner.hpp"
 #include "error.h"
 #include "type.hpp"
+#include "object.hpp"
 
 
 #include <iostream> // debug purposes
+#include <tuple>
 
 
 namespace cool {
@@ -22,6 +24,9 @@ class Parser {
     private:
         using PExpr = std::unique_ptr<Expr>;
         using PStmt = std::unique_ptr<Stmt>;
+        using letAssign = std::tuple<Token, Token, PExpr>; // to represent id: token: expr into 1 object.
+        using letAssigns = std::vector<letAssign>; // I know poor naming but hey.
+
         struct ParseError : std::runtime_error {
             using std::runtime_error::runtime_error;
         };
@@ -102,6 +107,43 @@ class Parser {
             PExpr expr = parseExpression();
             consume(POOL, "Expecting `pool` keyword.");
             return std::make_unique<While>(std::move(cond), std::move(expr));
+        }
+
+        PExpr parseLet() {
+            letAssigns vecAssigns{}; 
+            do {
+                Token id = consume(IDENTIFIER, "Expect a valid identifier.");
+                Token type_ = consume(IDENTIFIER, "Expect a valid type.");
+                PExpr expr;
+                if (match({ASSIGN})) expr = parseExpression();
+                vecAssigns.push_back(std::make_tuple(id, type_, std::move(expr)));
+            }while(match({COMMA}) && !isAtEnd());
+            consume(IN, "Expect in after let assigns.");
+            PExpr body = parseExpression();
+            return std::make_unique<Let>(vecAssigns, body);
+        }
+
+        PExpr parseCase() {
+            PExpr caseExpr = parseExpression();
+            letAssigns matches{};
+            consume(OF, "Expect an of keyword after case expression.");
+            do {
+                Token id = consume(IDENTIFIER, "Expect a valid identifier");
+                Token type_ = consume(IDENTIFIER, "Expect a valid type.");
+                consume(ARROW, "Expect an arrow in case expression.");
+                PExpr expr = parseExpression();
+                matches.push_back(std::make_tuple(id, type_, std::move(expr)));
+            } while(match({SEMICOLON}) && !isAtEnd());
+            consume(ESAC, "Expect an `esac` keyword at the end of a case expression.");
+            return std::make_unique<Case>(matches, std::move(caseExpr));
+        }
+
+        PExpr parseBlock() {
+            std::vector<PExpr> exprs{};
+            do {
+                exprs.push_back(parseExpression());
+            } while(match({COMMA}) && !isAtEnd());
+            return std::make_unique<Block>(exprs);
         }
 
         PExpr parseExpression() {
@@ -202,15 +244,15 @@ class Parser {
         }
 
         PExpr parsePrimary() {
-            if (match ({}))
-        }
-
-        PExpr parseLet() {
-
-        }
-
-        PExpr parseCase() {
-
+            if (match ({NEW})) {
+                Token type_ = consume(IDENTIFIER, "Expect a valide class type after new");
+                return std::make_unique<Variable>(type_);
+            }
+            if (match ({ISVOID})) return parseExpression();
+            if (match ({IDENTIFIER})) return std::make_unique<Variable>(previous());
+            if (match ({NUMBER})) return std::make_unique<Literal>(CoolObject(std::stoi(previous().lexeme)));
+            if (match ({TRUE})) return std::make_unique<Literal>(CoolObject(true));
+            if (match ({FALSE})) return std::make_unique<Literal>(CoolObject(false));
         }
 
         bool check(const TokenType& t) const {
