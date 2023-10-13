@@ -29,7 +29,7 @@ class ExprVisitor {
         virtual void visitGetExpr(Get* expression) = 0;
         virtual void visitLiteralExpr(Literal* expr) = 0;
         virtual void visitLetExpr(Let* expr) = 0;
-        virtual void visitCaseExpr(Let* expr) = 0;
+        virtual void visitCaseExpr(Case* expr) = 0;
 
 };
 

@@ -143,11 +143,17 @@ class Parser {
             do {
                 exprs.push_back(parseExpression());
             } while(match({COMMA}) && !isAtEnd());
+            consume(RIGHT_BRACE, "Expect a `{` after a block.");
             return std::make_unique<Block>(exprs);
         }
 
         PExpr parseExpression() {
             return parseAssignment();
+
+            if (match({LEFT_BRACE})) return parseBlock(); 
+            if (match({IF})) return parseIf();
+            if (match({WHILE})) return parseWhile();
+            if (match({CASE})) return parseCase();
         }
 
         PExpr parseAssignment() {

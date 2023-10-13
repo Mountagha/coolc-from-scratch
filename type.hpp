@@ -33,7 +33,7 @@ class typeIdentifier: public StmtVisitor, public ExprVisitor {
         void visitGetExpr(Get* expr) {}
         void visitLiteralExpr(Literal* expr) {}
         void visitLetExpr(Let* expr) {}
-        void visitCaseExpr(Let* expr) {}
+        void visitCaseExpr(Case* expr) {}
 
 
         virtual void visitProgramStmt(Program* stmt) {}
