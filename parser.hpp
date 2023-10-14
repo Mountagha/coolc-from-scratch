@@ -20,6 +20,7 @@ class Parser {
     public:
         Parser(std::vector<Token>& tokens);
         ~Parser();
+        std::unique_ptr<Stmt> parse();
     
     private:
         using PExpr = std::unique_ptr<Expr>;
@@ -40,6 +41,7 @@ class Parser {
                 auto class_ = parseClass();
                 // Probably a better way to do next line.
                 classes.push_back(std::unique_ptr<Class>(static_cast<Class*>(class_.release())));
+                consume(SEMICOLON, "Expect a `;` at the end of class declaration.");
             }
             return std::make_unique<Program>(classes);
         }
@@ -260,6 +262,8 @@ class Parser {
             if (match ({STRING})) return std::make_unique<Literal>(previous().lexeme);
             if (match ({TRUE})) return std::make_unique<Literal>(CoolObject(true));
             if (match ({FALSE})) return std::make_unique<Literal>(CoolObject(false));
+
+            throw error(peek(), "Expect an expression.");
         }
 
         bool check(const TokenType& t) const {
@@ -290,6 +294,11 @@ class Parser {
             return tokens[current];
         }
 
+        Token peek(int lookahead) {
+            if (isAtEnd()) return tokens[current]; // We can't look ahead past the EOF.
+            return tokens[current+lookahead];
+        }
+
         Token previous() const {
             return tokens[current - 1];
         }
@@ -308,6 +317,25 @@ class Parser {
             report(t, msg);
 
             return ParseError{msg};
+        }
+
+        // To get the parser unstuck.
+        void synchronize() {
+            advance(); 
+            while(!isAtEnd()) {
+                switch (peek().token_type){
+                    case IDENTIFIER:
+                        if(peek(1).token_type == COLON || peek(1).token_type == LEFT_PAREN)
+                            return; // going to the next feature.
+                    case LET:
+                    case CLASS:
+                    case CASE:
+                    case SEMICOLON:
+                        return;
+
+                }
+                advance();
+            }
         }
 
 
