@@ -75,18 +75,18 @@ class Stmt {
 
 class Program: public Stmt {
     public:
-        Program(std::unique_ptr<Class>&& classes_) {
+        Program(std::vector<std::unique_ptr<Class>>&& classes_) {
             classes = std::move(classes);
         }
         void accept(StmtVisitor* visitor) {
             visitor->visitProgramStmt(this);
         }
-        std::vector<Class> classes;
+        std::vector<std::unique_ptr<Class>> classes;
 };
 
 class Class: public Stmt {
     public:
-        Class(Token name_, std::unique_ptr<Class>&& superClass_, std::vector<std::unique_ptr<Feature>>&& features_){
+        Class(Token name_, std::unique_ptr<Variable>&& superClass_, std::vector<std::unique_ptr<Feature>>&& features_){
             name = name_;
             superClass = std::move(superClass_);
             features = std::move(features_);
@@ -95,13 +95,13 @@ class Class: public Stmt {
             visitor->visitClassStmt(this);
         }
         Token name;
-        std::unique_ptr<Class> superClass;
+        std::unique_ptr<Variable> superClass;
         std::vector<std::unique_ptr<Feature>> features; 
 };
 
 class Feature: public Expr {
     public:
-        Feature(Token id_, std::vector<Formal>&& formals_, Token type__, std::unique_ptr<Expr>&& expr_){
+        Feature(Token id_, std::vector<std::unique_ptr<Formal>>&& formals_, Token type__, std::unique_ptr<Expr>&& expr_){
             id = id_;
             formals = std::move(formals_);
             type_ = type__;
@@ -111,7 +111,7 @@ class Feature: public Expr {
             visitor->visitFeatureExpr(this);
         }
         Token id;
-        std::vector<Formal> formals;
+        std::vector<std::unique_ptr<Formal>> formals;
         Token type_;
         std::unique_ptr<Expr> expr;
          
@@ -131,16 +131,14 @@ class Formal : public Expr {
 
 class Assign: public Expr {
     public:
-        Assign(Token id_, Token type__, std::unique_ptr<Expr>&& expr_) {
+        Assign(Token id_, std::unique_ptr<Expr>&& expr_) {
             id = id_;
-            type_ = type__;
             expr = std::move(expr);
         }
         void accept(ExprVisitor* visitor) {
             visitor->visitAssignExpr(this);
         }
         Token id;
-        Token type_;
         std::unique_ptr<Expr> expr;
 };
 
@@ -273,7 +271,7 @@ class Literal: public Expr {
 class Let: public Expr {
     public: 
         Let(letAssigns&& vecAssigns_, std::unique_ptr<Expr> body_) {
-            vecAssigns = vecAssigns_;
+            vecAssigns = std::move(vecAssigns_);
             body = std::move(body);
         }
         
@@ -287,7 +285,7 @@ class Let: public Expr {
 class Case: public Expr {
     public: 
         Case(letAssigns&& matches_, std::unique_ptr<Expr> expr_) {
-            matches = matches_;
+            matches = std::move(matches_);
             expr = std::move(expr_);
         }
         

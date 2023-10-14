@@ -11,6 +11,7 @@ std::unique_ptr<Stmt> Parser::parse() {
         return parseProgram();
     } catch (ParseError error) {
         synchronize();
+        return PStmt{}; // to please to C++ compiler.
     }
 }
 

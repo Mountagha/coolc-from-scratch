@@ -44,12 +44,12 @@ class Parser {
                 classes.push_back(std::unique_ptr<Class>(static_cast<Class*>(class_.release())));
                 consume(SEMICOLON, "Expect a `;` at the end of class declaration.");
             }
-            return std::make_unique<Program>(classes);
+            return std::make_unique<Program>(std::move(classes));
         }
 
         PStmt parseClass() {
             Token className = consume(IDENTIFIER, "Expect a class type after `class`.");
-            PExpr superclass;
+            std::unique_ptr<Variable> superclass;
             if(match({INHERITS})) { 
                 Token superClassName = consume(IDENTIFIER, "Expect a Class Name after `inherits`");
                 superclass = std::make_unique<Variable>(superClassName);
@@ -61,7 +61,7 @@ class Parser {
                 features.push_back(std::unique_ptr<Feature>(static_cast<Feature*>(feature.release())));
             }
             consume(LEFT_BRACE, "Expect a right brace.");
-            return std::make_unique<Class>(className, std::move(superclass), features);
+            return std::make_unique<Class>(className, std::move(superclass), std::move(features));
         }
 
         PExpr parseFeature() {
@@ -82,7 +82,7 @@ class Parser {
             } else if (match({ASSIGN})) {
                 expr = parseExpression();
             }
-            return std::make_unique<Feature>(id, formals, type_, std::move(expr));
+            return std::make_unique<Feature>(id, std::move(formals), type_, std::move(expr));
         }
 
         PExpr parseFormal() {
@@ -123,7 +123,7 @@ class Parser {
             }while(match({COMMA}) && !isAtEnd());
             consume(IN, "Expect in after let assigns.");
             PExpr body = parseExpression();
-            return std::make_unique<Let>(vecAssigns, body);
+            return std::make_unique<Let>(std::move(vecAssigns), std::move(body));
         }
 
         PExpr parseCase() {
@@ -138,7 +138,7 @@ class Parser {
                 matches.push_back(std::make_tuple(id, type_, std::move(expr)));
             } while(match({SEMICOLON}) && !isAtEnd());
             consume(ESAC, "Expect an `esac` keyword at the end of a case expression.");
-            return std::make_unique<Case>(matches, std::move(caseExpr));
+            return std::make_unique<Case>(std::move(matches), std::move(caseExpr));
         }
 
         PExpr parseBlock() {
@@ -147,7 +147,7 @@ class Parser {
                 exprs.push_back(parseExpression());
             } while(match({COMMA}) && !isAtEnd());
             consume(RIGHT_BRACE, "Expect a `{` after a block.");
-            return std::make_unique<Block>(exprs);
+            return std::make_unique<Block>(std::move(exprs));
         }
 
         PExpr parseExpression() {
@@ -187,7 +187,7 @@ class Parser {
             if (match ({LESS, LESS_EQUAL, EQUAL})) {
                 Token operator_ = previous();
                 PExpr rhs = parseTerm();
-                expr = std::make_unique<Binary>(operator_, expr, rhs);
+                expr = std::make_unique<Binary>(operator_, std::move(expr), std::move(rhs));
             }
             return expr;
         }
@@ -197,7 +197,7 @@ class Parser {
             if (match({PLUS, MINUS})) {
                 Token operator_ = previous();
                 PExpr rhs = parseFactor();
-                expr = std::make_unique<Binary>(operator_, expr, rhs);
+                expr = std::make_unique<Binary>(operator_, std::move(expr), std::move(rhs));
             }
             return expr;
         }
@@ -207,7 +207,7 @@ class Parser {
             if (match({STAR, SLASH})) {
                 Token operator_ = previous();
                 PExpr rhs = parseUnary();
-                expr = std::make_unique<Binary>(operator_, expr, rhs);
+                expr = std::make_unique<Binary>(operator_, std::move(expr), std::move(rhs));
             }
             return expr;
         }
@@ -261,7 +261,7 @@ class Parser {
             if (match ({ISVOID})) return parseExpression();
             if (match ({IDENTIFIER})) return std::make_unique<Variable>(previous());
             if (match ({NUMBER})) return std::make_unique<Literal>(CoolObject(std::stoi(previous().lexeme)));
-            if (match ({STRING})) return std::make_unique<Literal>(previous().lexeme);
+            if (match ({STRING})) return std::make_unique<Literal>(CoolObject(previous().lexeme));
             if (match ({TRUE})) return std::make_unique<Literal>(CoolObject(true));
             if (match ({FALSE})) return std::make_unique<Literal>(CoolObject(false));
 
