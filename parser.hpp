@@ -38,16 +38,16 @@ class Parser {
 
         PStmt parseProgram() {
             std::vector<std::unique_ptr<Class>> classes{};
-            while (match({CLASS})) {
+            do {
                 auto class_ = parseClass();
                 // Probably a better way to do next line.
                 classes.push_back(std::unique_ptr<Class>(static_cast<Class*>(class_.release())));
-                consume(SEMICOLON, "Expect a `;` at the end of class declaration.");
-            }
+            } while(match({SEMICOLON}) && !isAtEnd());
             return std::make_unique<Program>(std::move(classes));
         }
 
         PStmt parseClass() {
+            consume(CLASS, "Expect the keyword `class` at the beginning of class definition.");
             Token className = consume(IDENTIFIER, "Expect a class type after `class`.");
             std::unique_ptr<Variable> superclass;
             if(match({INHERITS})) { 
@@ -56,11 +56,11 @@ class Parser {
             }
             std::vector<std::unique_ptr<Feature>> features{};
             consume(LEFT_BRACE, "Expect a left brace.");
-            while(match({IDENTIFIER})) {
+            do {
                 auto feature = parseFeature();
                 features.push_back(std::unique_ptr<Feature>(static_cast<Feature*>(feature.release())));
-            }
-            consume(LEFT_BRACE, "Expect a right brace.");
+            } while(match({SEMICOLON}) && !isAtEnd());
+            consume(RIGHT_BRACE, "Expect a right brace after class definition.");
             return std::make_unique<Class>(className, std::move(superclass), std::move(features));
         }
 
@@ -72,7 +72,7 @@ class Parser {
                 do {
                     auto formal = parseFormal(); 
                     formals.push_back(std::unique_ptr<Formal>(static_cast<Formal*>(formal.release())));
-                }while(match({COMMA}));
+                }while(match({COMMA}) && !isAtEnd());
             }
             consume(COLON, "Expecting a colon.");
             Token type_ = consume(IDENTIFIER, "Expecting a type.");
@@ -151,12 +151,14 @@ class Parser {
         }
 
         PExpr parseExpression() {
-            return parseAssignment();
+            PExpr expr = parseAssignment();
 
             if (match({LEFT_BRACE})) return parseBlock(); 
             if (match({IF})) return parseIf();
             if (match({WHILE})) return parseWhile();
             if (match({CASE})) return parseCase();
+
+            return expr;
         }
 
         PExpr parseAssignment() {
@@ -247,7 +249,7 @@ class Parser {
             if (!check({RIGHT_PAREN})) {
                 do {
                     arguments.push_back(parseExpression());
-                }while(match({COMMA}));
+                }while(match({COMMA}) && !isAtEnd());
             }
             Token paren = consume(RIGHT_PAREN, "Expect a right parenthesis at the end of a function call.");
             return std::make_unique<Call>(std::move(callee), paren, std::move(arguments));

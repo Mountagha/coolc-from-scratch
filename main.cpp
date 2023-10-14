@@ -29,5 +29,8 @@ int main(int argc, char* argv[]) {
     for (auto& token : tokens) {
         std::cout << token << "\n";
     }
+    Parser p{tokens};
+    std::cout << "Parsing...\n";
+    auto program = p.parse();
 
 }
