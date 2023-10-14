@@ -9,6 +9,26 @@
 
 namespace cool {
 
+class Expr;
+class Stmt;
+class Program;
+class Class;
+class Feature;
+class Formal;
+class Assign;
+class If;
+class While;
+class Let;
+class Binary;
+class Unary;
+class Get;
+class Block;
+class Call;
+class Variable;
+class Grouping;
+class Literal;
+class Case;
+
 using PExpr = std::unique_ptr<Expr>;
 using letAssign = std::tuple<Token, Token, PExpr>; // to represent id: token: expr into 1 object.
 using letAssigns = std::vector<letAssign>; // I know poor naming but hey.

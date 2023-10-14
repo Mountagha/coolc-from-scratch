@@ -1,7 +1,10 @@
-#include "scanner.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
+#include "scanner.hpp"
+#include "parser.hpp"
+
 
 using namespace cool;
 

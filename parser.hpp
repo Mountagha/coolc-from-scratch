@@ -10,6 +10,7 @@
 
 #include <iostream> // debug purposes
 #include <tuple>
+#include <memory>
 
 
 namespace cool {
@@ -238,6 +239,7 @@ class Parser {
                     break;
                 }
             }
+            return expr;
         }
 
         PExpr finishCall(PExpr& callee) {
@@ -307,10 +309,6 @@ class Parser {
 
             Token t = peek(); // cause of the passage by reference
             throw error(t, msg);
-        }
-        Token advance() {
-            if(!isAtEnd()) current++;
-            return previous();
         }
 
         ParseError error(const Token& t, const std::string& msg) {

@@ -6,14 +6,13 @@ Parser::Parser(std::vector<Token>& tokens_): tokens{tokens_}, current{0} {}
 
 Parser::~Parser() = default;
 
-// Program = class
 std::unique_ptr<Stmt> Parser::parse() {
     try {
         return parseProgram();
     } catch (ParseError error) {
         synchronize();
     }
- }
+}
 
 
 };
