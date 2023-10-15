@@ -38,11 +38,12 @@ class Parser {
 
         PStmt parseProgram() {
             std::vector<std::unique_ptr<Class>> classes{};
-            do {
+            while(!isAtEnd()){
                 auto class_ = parseClass();
                 // Probably a better way to do next line.
                 classes.push_back(std::unique_ptr<Class>(static_cast<Class*>(class_.release())));
-            } while(match({SEMICOLON}) && !isAtEnd());
+                consume(SEMICOLON, "Expect `;` at the end of a class definition.");
+            }
             return std::make_unique<Program>(std::move(classes));
         }
 
@@ -56,10 +57,11 @@ class Parser {
             }
             std::vector<std::unique_ptr<Feature>> features{};
             consume(LEFT_BRACE, "Expect a left brace at the beginning of a class definition.");
-            do {
+            while (isCurToken(IDENTIFIER)){
                 PExpr feature = parseFeature();
                 features.push_back(std::unique_ptr<Feature>(static_cast<Feature*>(feature.release())));
-            } while(match({SEMICOLON}) && !isAtEnd());
+                consume(SEMICOLON, "Expect a `;` at the end of a feature definition.");
+            }
             consume(RIGHT_BRACE, "Expect a right brace after class definition.");
             return std::make_unique<Class>(className, std::move(superclass), std::move(features));
         }
@@ -303,9 +305,14 @@ class Parser {
             return tokens[current+lookahead];
         }
 
+        bool isCurToken(TokenType tt) const {
+            return peek().token_type == tt;
+        }
+
         Token previous() const {
             return tokens[current - 1];
         }
+
         inline Token consume(TokenType tt, const std::string& msg) {
             if (check(tt)) return advance();
 

@@ -1,7 +1,7 @@
 class Main {
     i : IO <- new IO;
     main() :IO { i.out_string("Hello World!\n") };
-}
+};
 
 -- class Main {
 --     main() :IO { (new IO).out_string("Hello World!\n") };
