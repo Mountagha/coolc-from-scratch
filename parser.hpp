@@ -55,9 +55,9 @@ class Parser {
                 superclass = std::make_unique<Variable>(superClassName);
             }
             std::vector<std::unique_ptr<Feature>> features{};
-            consume(LEFT_BRACE, "Expect a left brace.");
+            consume(LEFT_BRACE, "Expect a left brace at the beginning of a class definition.");
             do {
-                auto feature = parseFeature();
+                PExpr feature = parseFeature();
                 features.push_back(std::unique_ptr<Feature>(static_cast<Feature*>(feature.release())));
             } while(match({SEMICOLON}) && !isAtEnd());
             consume(RIGHT_BRACE, "Expect a right brace after class definition.");
@@ -68,7 +68,7 @@ class Parser {
             Token id = consume(IDENTIFIER, "Expecting an identifier.");
             std::vector<std::unique_ptr<Formal>> formals{};
             PExpr expr;
-            if (match({LEFT_PAREN})) {
+            if (match({LEFT_PAREN}) && !match({RIGHT_PAREN})) {
                 do {
                     auto formal = parseFormal(); 
                     formals.push_back(std::unique_ptr<Formal>(static_cast<Formal*>(formal.release())));
