@@ -159,6 +159,7 @@ class Scanner {
                 if (match('(') && match('*')) nesting.push(1);
                 else if(match('*') && match(')')) nesting.pop();
                 if (nesting.empty()) isBalanced = true;
+                if (match('\n')) line++;
                 advance();
             }
             if (!isBalanced)
