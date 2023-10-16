@@ -147,18 +147,19 @@ class Parser {
             std::vector<PExpr> exprs{};
             do {
                 exprs.push_back(parseExpression());
-            } while(match({COMMA}) && !isAtEnd());
-            consume(RIGHT_BRACE, "Expect a `{` after a block.");
+            } while(match({SEMICOLON}) && !isAtEnd());
+            consume(RIGHT_BRACE, "Expect a `}` after a block definition.");
             return std::make_unique<Block>(std::move(exprs));
         }
 
         PExpr parseExpression() {
-            PExpr expr = parseAssignment();
 
             if (match({LEFT_BRACE})) return parseBlock(); 
             if (match({IF})) return parseIf();
             if (match({WHILE})) return parseWhile();
             if (match({CASE})) return parseCase();
+
+            PExpr expr = parseAssignment();
 
             return expr;
         }
@@ -268,6 +269,13 @@ class Parser {
             if (match ({STRING})) return std::make_unique<Literal>(CoolObject(previous().lexeme));
             if (match ({TRUE})) return std::make_unique<Literal>(CoolObject(true));
             if (match ({FALSE})) return std::make_unique<Literal>(CoolObject(false));
+            
+            // Grouping (expr)
+            if (match({LEFT_PAREN})) {
+                PExpr expr = parseExpression();
+                consume(RIGHT_PAREN, "Expect ')' at the end of a grouping expression.");
+                return std::make_unique<Grouping>(std::move(expr));
+            }
 
             throw error(peek(), "Expect an expression.");
         }
