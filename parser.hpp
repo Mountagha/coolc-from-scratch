@@ -300,8 +300,10 @@ class Parser {
             return tokens[current];
         }
 
-        Token peek(int lookahead) {
+        Token peek(unsigned int lookahead=0) {
             if (isAtEnd()) return tokens[current]; // We can't look ahead past the EOF.
+            if (current+lookahead > tokens.size()-1) 
+                return Token{EOFILE, "", tokens[tokens.size()-1].loc};
             return tokens[current+lookahead];
         }
 

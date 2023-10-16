@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <stack>
 #include <cctype>
 #include <algorithm>
 #include "error.hpp"
@@ -48,7 +49,6 @@ class Scanner {
             char c = advance();
             switch(c) {
                 // single char token
-                case '(': addToken(LEFT_PAREN); break;
                 case ')': addToken(RIGHT_PAREN); break;
                 case '}': addToken(RIGHT_BRACE); break;
                 case '{': addToken(LEFT_BRACE); break;
@@ -67,10 +67,18 @@ class Scanner {
                 case '<': addToken(match('-') ? ASSIGN : (match('=') ? LESS_EQUAL : LESS)); break;
                 case '>': addToken(match('=') ? GREATER_EQUAL : GREATER); break; 
 
-                // Minus and comment
+                // left parenthese or long comment.
+                case '(': { 
+                    if (match('*'))
+                        long_comment();
+                    else
+                        addToken(LEFT_PAREN); break;
+                }
+
+                // Minus or short comment
                 case '-': {
                     if(match('-')) 
-                        comments();
+                        short_comment();
                     else
                         addToken(MINUS); break;
                     break;
@@ -136,11 +144,25 @@ class Scanner {
             addToken(t, lexeme, line); 
         }
 
-        void comments() {
+        void short_comment() {
             while (!isAtEnd() && peek() != '\n'){
                 if (peek() == '\n') line++;
                 advance();
             }
+        }
+
+        void long_comment() {
+            bool isBalanced = false;
+            std::stack<int> nesting{};
+            nesting.push(1);
+            while (!isBalanced && !isAtEnd()){
+                if (match('(') && match('*')) nesting.push(1);
+                else if(match('*') && match(')')) nesting.pop();
+                if (nesting.empty()) isBalanced = true;
+                advance();
+            }
+            if (!isBalanced)
+                error(line, "Unterminated long comments.");
         }
         
         void string() {

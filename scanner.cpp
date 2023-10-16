@@ -3,7 +3,7 @@
 
 namespace cool {
 Scanner::Scanner(const std::string& source):
-    source{source}, start{0}, current{0}, line{0} 
+    source{source}, start{0}, current{0}, line{1} 
 {}
 
 std::vector<Token> Scanner::scanTokens() {
