@@ -72,7 +72,8 @@ class Scanner {
                     if (match('*'))
                         long_comment();
                     else
-                        addToken(LEFT_PAREN); break;
+                        addToken(LEFT_PAREN); 
+                    break;
                 }
 
                 // Minus or short comment
@@ -156,10 +157,13 @@ class Scanner {
             std::stack<int> nesting{};
             nesting.push(1);
             while (!isBalanced && !isAtEnd()){
-                if (match('(') && match('*')) nesting.push(1);
-                else if(match('*') && match(')')) nesting.pop();
-                if (nesting.empty()) isBalanced = true;
-                if (match('\n')) line++;
+                if (match('(') && match('*')) 
+                    nesting.push(1);
+                else if(match('*') && match(')')) 
+                    nesting.pop();
+                if (nesting.empty()) 
+                    isBalanced = true;
+                if (peek() == '\n') line++;
                 advance();
             }
             if (!isBalanced)
