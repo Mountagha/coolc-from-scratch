@@ -15,6 +15,7 @@ static const std::unordered_map<std::string, TokenType> keywordsMap = {
     {"else", ELSE},
     {"false", FALSE},
     {"if", IF},
+    {"then", THEN},
     {"fi", FI},
     {"in", IN},
     {"inherits", INHERITS},

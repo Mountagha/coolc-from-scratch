@@ -75,6 +75,7 @@ class Parser {
                     auto formal = parseFormal(); 
                     formals.push_back(std::unique_ptr<Formal>(static_cast<Formal*>(formal.release())));
                 }while(match({COMMA}) && !isAtEnd());
+                consume(RIGHT_PAREN, "Expecting a `)` after params listing.");
             }
             consume(COLON, "Expecting a colon.");
             Token type_ = consume(IDENTIFIER, "Expecting a type.");
@@ -95,7 +96,6 @@ class Parser {
         }
 
         PExpr parseIf() {
-            consume(IF, "Expecting `if` keyword.");
             PExpr cond = parseExpression();
             consume(THEN, "Expecting `then` keyword.");
             PExpr thenBranch = parseExpression();
@@ -106,7 +106,6 @@ class Parser {
         }
 
         PExpr parseWhile() {
-            consume(WHILE, "Expecting `while` keyword.");
             PExpr cond = parseExpression();
             consume(LOOP, "Expecting `loop` keyword.");
             PExpr expr = parseExpression();
