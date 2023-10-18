@@ -145,10 +145,10 @@ class Parser {
 
         PExpr parseBlock() {
             std::vector<PExpr> exprs{};
-            do {
+            while (!match({RIGHT_BRACE}) && !isAtEnd()){
                 exprs.push_back(parseExpression());
-            } while(match({SEMICOLON}) && !isAtEnd());
-            consume(RIGHT_BRACE, "Expect a `}` after a block definition.");
+                consume(SEMICOLON, "Expect a `;` after an expression.");
+            }
             return std::make_unique<Block>(std::move(exprs));
         }
 
