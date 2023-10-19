@@ -185,11 +185,14 @@ class Parser {
         }
 
         PExpr parseNotExpression() {
-            PExpr expr = parseComparison();
+            // this should be stuffed into the parseUnary func
+            // but due to precedence I had to keep it appart.
             if (match ({NOT})) {
-                expr = parseExpression();
+                Token operator_not = previous();
+                PExpr expr = parseExpression();
+                return std::make_unique<Unary>(operator_not, std::move(expr));
             }
-            return expr;
+            return parseComparison();
         }
 
         PExpr parseComparison() {

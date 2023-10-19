@@ -135,6 +135,10 @@ class Scanner {
             return source[current];
         }
 
+        char previous() {
+            return current>0 ? source[current] : source[0];
+        }
+
         inline char advance() { return source[current++]; }
 
         void addToken(TokenType t, std::string lexeme, unsigned int loc) {
@@ -172,7 +176,7 @@ class Scanner {
         }
         
         void string() {
-            while (!isAtEnd() && peek() != '"') {
+            while (!isAtEnd() && (peek() != '"' && previous() != '\\')) {
                 if(peek() == '\n') line++;
                 advance();
             }
