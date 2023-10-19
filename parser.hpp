@@ -117,6 +117,7 @@ class Parser {
             letAssigns vecAssigns{}; 
             do {
                 Token id = consume(IDENTIFIER, "Expect a valid identifier.");
+                consume(COLON, "Expect `:` after identifier in `Let expression`.");
                 Token type_ = consume(IDENTIFIER, "Expect a valid type.");
                 PExpr expr;
                 if (match({ASSIGN})) expr = parseExpression();
@@ -153,14 +154,19 @@ class Parser {
 
         PExpr parseExpression() {
 
-            if (match({LEFT_BRACE})) return parseBlock(); 
-            if (match({IF})) return parseIf();
-            if (match({WHILE})) return parseWhile();
-            if (match({CASE})) return parseCase();
+            // if (match({LEFT_BRACE})) return parseBlock(); 
+            // if (match({IF})) return parseIf();
+            // if (match({WHILE})) return parseWhile();
+            // if (match({CASE})) return parseCase();
+            // if (match ({LET})) return parseLet();
 
-            PExpr expr = parseAssignment();
+            // if (match({LEFT_PAREN})) {
+            //     PExpr expr = parseExpression();
+            //     consume(RIGHT_PAREN, "Expect ')' at the end of a grouping expression.");
+            //     return std::make_unique<Grouping>(std::move(expr));
+            // }
 
-            return expr;
+            return parseAssignment();
         }
 
         PExpr parseAssignment() {
@@ -188,7 +194,7 @@ class Parser {
 
         PExpr parseComparison() {
             PExpr expr = parseTerm();
-            if (match ({LESS, LESS_EQUAL, EQUAL})) {
+            while (match ({LESS, LESS_EQUAL, EQUAL})) {
                 Token operator_ = previous();
                 PExpr rhs = parseTerm();
                 expr = std::make_unique<Binary>(operator_, std::move(expr), std::move(rhs));
@@ -198,7 +204,7 @@ class Parser {
 
         PExpr parseTerm() {
             PExpr expr = parseFactor();
-            if (match({PLUS, MINUS})) {
+            while (match({PLUS, MINUS})) {
                 Token operator_ = previous();
                 PExpr rhs = parseFactor();
                 expr = std::make_unique<Binary>(operator_, std::move(expr), std::move(rhs));
@@ -208,7 +214,7 @@ class Parser {
 
         PExpr parseFactor() {
             PExpr expr = parseUnary();
-            if (match({STAR, SLASH})) {
+            while (match({STAR, SLASH})) {
                 Token operator_ = previous();
                 PExpr rhs = parseUnary();
                 expr = std::make_unique<Binary>(operator_, std::move(expr), std::move(rhs));
@@ -268,7 +274,13 @@ class Parser {
             if (match ({STRING})) return std::make_unique<Literal>(CoolObject(previous().lexeme));
             if (match ({TRUE})) return std::make_unique<Literal>(CoolObject(true));
             if (match ({FALSE})) return std::make_unique<Literal>(CoolObject(false));
-            
+
+            if (match({LEFT_BRACE})) return parseBlock(); 
+            if (match({IF})) return parseIf();
+            if (match({WHILE})) return parseWhile();
+            if (match({CASE})) return parseCase();
+            if (match({LET})) return parseLet();
+
             // Grouping (expr)
             if (match({LEFT_PAREN})) {
                 PExpr expr = parseExpression();
