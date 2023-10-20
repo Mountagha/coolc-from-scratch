@@ -136,7 +136,7 @@ class Scanner {
         }
 
         char previous() {
-            return current>0 ? source[current] : source[0];
+            return current>0 ? source[current-1] : source[0];
         }
 
         inline char advance() { return source[current++]; }
@@ -176,7 +176,9 @@ class Scanner {
         }
         
         void string() {
-            while (!isAtEnd() && (peek() != '"' && previous() != '\\')) {
+            while (!isAtEnd() && peek() != '"') {
+                if (peek() == '\\') // handling escaped including \"
+                    advance();
                 if(peek() == '\n') line++;
                 advance();
             }
