@@ -108,7 +108,7 @@ class Scanner {
         }
 
         inline bool isDigit(char c) {
-            return '0' <= c && c <= '9';
+            return std::isdigit(static_cast<unsigned char>(c));
         }
 
         inline bool isAlpha(char c) {
@@ -193,7 +193,7 @@ class Scanner {
         }
 
         void number() {
-            while(isdigit(peek())) {
+            while(isDigit(peek())) {
                 advance();
             }
             std::string lexeme = source.substr(start, current-start);

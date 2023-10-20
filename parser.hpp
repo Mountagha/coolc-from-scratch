@@ -132,13 +132,15 @@ class Parser {
             PExpr caseExpr = parseExpression();
             letAssigns matches{};
             consume(OF, "Expect an of keyword after case expression.");
-            do {
+            while(isCurToken(IDENTIFIER)) {
                 Token id = consume(IDENTIFIER, "Expect a valid identifier");
+                consume(COLON, "Expect `:` after identifier in `Case expression`.");
                 Token type_ = consume(IDENTIFIER, "Expect a valid type.");
                 consume(ARROW, "Expect an arrow in case expression.");
                 PExpr expr = parseExpression();
                 matches.push_back(std::make_tuple(id, type_, std::move(expr)));
-            } while(match({SEMICOLON}) && !isAtEnd());
+                consume(SEMICOLON, "Expect a `;` after expression within Case.");
+            }
             consume(ESAC, "Expect an `esac` keyword at the end of a case expression.");
             return std::make_unique<Case>(std::move(matches), std::move(caseExpr));
         }

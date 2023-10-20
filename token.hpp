@@ -56,6 +56,7 @@ const std::unordered_map<int, std::string> enum_string_map = {
     {TokenType::IF, "IF"},
     {TokenType::IDENTIFIER, "IDENTIFIER"},
     {TokenType::STRING, "STRING"},
+    {TokenType::NUMBER, "NUMBER"},
     {TokenType::FI, "FI"},
     {TokenType::IN, "IN"},
     {TokenType::INHERITS, "INHERITS"},

@@ -11,7 +11,7 @@ std::ostream& operator<<(std::ostream& os, const Token& token) {
             enum_string_map.at(token.token_type) + " " 
             + token.lexeme + "\n";
     else
-        os << "unknown " + token.lexeme + "\n";
+        os << "[line " + std::to_string(token.loc) +  " ] UNKNOWN " + token.lexeme + "\n";
     return os;
 }
 };
