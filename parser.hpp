@@ -21,6 +21,7 @@ class Parser {
     public:
         Parser(std::vector<Token>& tokens);
         ~Parser();
+        bool hasError();
         std::unique_ptr<Stmt> parse();
     
     private:
@@ -34,6 +35,7 @@ class Parser {
         };
         std::vector<Token> tokens;
         unsigned int current;
+        bool hasError;
         Program* program;
 
         PStmt parseProgram() {
