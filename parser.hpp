@@ -35,7 +35,7 @@ class Parser {
         };
         std::vector<Token> tokens;
         unsigned int current;
-        bool hasError;
+        bool parseError;
         Program* program;
 
         PStmt parseProgram() {

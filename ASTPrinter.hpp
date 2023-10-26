@@ -4,6 +4,6 @@
 #include "ast.hpp"
 #include <iostream>
 
-class ASTPrinter {
+class ASTPrinter : public ExprVisitor, public StmtVisitor  {
     
 };
