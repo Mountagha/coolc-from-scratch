@@ -80,8 +80,16 @@ void ASTPrinter::visitBlockExpr(Block* expr) {
     }
     ast_string += " }\n";
 }
-void ASTPrinter::visitGroupingExpr(Grouping* expr) {}
-void ASTPrinter::visitGetExpr(Get* expr) {}
+void ASTPrinter::visitGroupingExpr(Grouping* expr) {
+    ast_string += " (\n";
+    expr->expr->accept(this);
+    ast_string += " )\n";
+}
+
+void ASTPrinter::visitGetExpr(Get* expr) {
+    expr->expr->accept(this);
+    //if ()
+}
 void ASTPrinter::visitLiteralExpr(Literal* expr) {}
 void ASTPrinter::visitLetExpr(Let* expr) {}
 void ASTPrinter::visitCaseExpr(Case* expr) {}
