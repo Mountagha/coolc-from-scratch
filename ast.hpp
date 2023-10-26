@@ -55,7 +55,7 @@ class ExprVisitor {
 class StmtVisitor {
     public:
         virtual void visitProgramStmt(Program* stmt) = 0;
-        virtual void visitClassStmt(Class* smtt) = 0;
+        virtual void visitClassStmt(Class* stmt) = 0;
 };
 
 class Expr {

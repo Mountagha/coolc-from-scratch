@@ -4,7 +4,7 @@
 
 #include "scanner.hpp"
 #include "parser.hpp"
-
+#include "ASTPrinter.hpp"
 
 using namespace cool;
 
@@ -33,4 +33,6 @@ int main(int argc, char* argv[]) {
     std::cout << "Parsing...\n";
     auto program = p.parse();
 
+    if(!p.hasError()) 
+        ASTPrinter{}.print(program);
 }
