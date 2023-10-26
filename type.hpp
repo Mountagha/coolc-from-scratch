@@ -38,8 +38,8 @@ class typeIdentifier: public StmtVisitor, public ExprVisitor {
         void visitCaseExpr(Case* expr) {}
 
 
-        virtual void visitProgramStmt(Program* stmt) {}
-        virtual void visitClassStmt(Class* smtt) {}
+        void visitProgramStmt(Program* stmt) {}
+        void visitClassStmt(Class* smtt) {}
 
     private:
         Type type;
