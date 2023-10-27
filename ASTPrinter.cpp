@@ -88,11 +88,46 @@ void ASTPrinter::visitGroupingExpr(Grouping* expr) {
 
 void ASTPrinter::visitGetExpr(Get* expr) {
     expr->expr->accept(this);
-    //if ()
+    if (expr->class_ != nullptr) {
+        ast_string += "@";
+        expr->class_->accept(this);
+    }
+    ast_string += "." + expr->name.lexeme;
+    
 }
-void ASTPrinter::visitLiteralExpr(Literal* expr) {}
-void ASTPrinter::visitLetExpr(Let* expr) {}
-void ASTPrinter::visitCaseExpr(Case* expr) {}
+
+void ASTPrinter::visitLiteralExpr(Literal* expr) {
+    ast_string += expr->object.to_string();
+}
+
+void ASTPrinter::visitLetExpr(Let* expr) {
+    ast_string += "let ";
+    for (auto& assign: expr->vecAssigns) {
+        auto id = std::get<0>(assign);
+        auto type_ = std::get<1>(assign);
+        auto expr1 = std::move(std::get<2>(assign));
+        ast_string += id.lexeme + " : " + type_.lexeme;
+        if (expr1 != nullptr) {
+            ast_string += " <- ";
+            expr1->accept(this);
+        }
+    }
+    ast_string += "in \n";
+    expr->body->accept(this);
+}
+
+void ASTPrinter::visitCaseExpr(Case* expr) {
+    ast_string += "case ";
+    expr->expr->accept(this);
+    ast_string += "of ";
+    for (auto& match : expr->matches){
+        auto id = std::get<0>(match);
+        auto type_ = std::get<1>(match);
+        auto expr1 = std::move(std::get<2>(match));
+        ast_string += id.lexeme + " : " + type_.lexeme + " => ";
+        expr1->accept(this);
+    }
+}
 
 
 void ASTPrinter::visitProgramStmt(Program* stmt) {

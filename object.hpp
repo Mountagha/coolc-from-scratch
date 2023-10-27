@@ -17,6 +17,7 @@ class CoolObject{
         explicit CoolObject(bool b): coolType{CoolType::Bool}, boolean{b} {}
         explicit CoolObject(int n): coolType{CoolType::Number}, number{n} {}
         explicit CoolObject(std::string s): coolType{CoolType::String}, string{s} {}
+        std::string to_string();
 
     private:
         CoolType coolType;
