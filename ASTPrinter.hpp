@@ -39,8 +39,15 @@ class ASTPrinter : public ExprVisitor, public StmtVisitor  {
         void visitProgramStmt(Program* stmt);
         void visitClassStmt(Class* smtt);
 
-    public:
+    private:
         std::string ast_string;
+        std::string indent(unsigned int n) { 
+            std::string s; 
+            s += "\n";
+            for (int i=0; i<n; i++)
+                s += "\t";
+            return s;
+        }
         
 };
 

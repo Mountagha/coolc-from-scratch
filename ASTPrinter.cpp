@@ -3,26 +3,32 @@
 namespace cool {
 
 void ASTPrinter::visitFeatureExpr(Feature* expr) {
-    ast_string += expr->id.lexeme;
+    ast_string += "(Feature " + expr->id.lexeme + " (";
+    ast_string += indent(3);
+    ast_string += "Type : " + expr->type_.lexeme + ",";
     if (expr->formals.size() > 0) {
-        ast_string += " (\n";
+        ast_string += indent(3);
+        ast_string += " (" + indent(4) + "Formals (" + indent(4);
         for (auto& f: expr->formals) 
             f->accept(this);
-        ast_string += " )\n";
-        ast_string += " : " + expr->type_.lexeme + "{ ";
+        ast_string += indent(3);
+        ast_string += indent(3) + " Expr : {" + indent(4);
         expr->expr->accept(this);
-        ast_string += " }";
+        ast_string += indent(3);
     } else {
-        ast_string += " : " + expr->type_.lexeme;
         if (expr->expr != nullptr) {
-            ast_string += " <- ";
+            ast_string += indent(3);
+            ast_string += "Assign ( ";
+            ast_string += indent(4);
             expr->expr->accept(this);
+            ast_string += indent(3) + ")";
         }
     }
 } 
 
 void ASTPrinter::visitFormalExpr(Formal* expr)  {
-    ast_string += expr->id.lexeme + " : " + expr->type_.lexeme;
+    ast_string += indent(4) + "Formal (" + indent(5) + \
+        "ID: " + expr->id.lexeme + indent(5) + "Type: " + expr->type_.lexeme;
 }
 
 void ASTPrinter::visitAssignExpr(Assign* expr) {
@@ -132,21 +138,21 @@ void ASTPrinter::visitCaseExpr(Case* expr) {
 
 
 void ASTPrinter::visitProgramStmt(Program* stmt) {
-    ast_string += "Program [\n";
+    ast_string += "Program (\n\t";
     for (auto& c : stmt->classes) {
         c->accept(this);
     }
-    ast_string += " ]";
+    ast_string += " \n)";
 }
 void ASTPrinter::visitClassStmt(Class* stmt) {
-    ast_string += "Class " + stmt->name.lexeme + " "; 
+    ast_string += "(Class " + stmt->name.lexeme + " "; 
     if (stmt->superClass != nullptr)
-        ast_string += "inherits " + stmt->superClass->name.lexeme;
-    ast_string += " {\n";
+        ast_string += ": SUPERCLASS " + stmt->superClass->name.lexeme;
+    ast_string += " (\n\t\t";
     for (auto& f : stmt->features) {
         f->accept(this);
     }
-    ast_string += " }";
+    ast_string += " \n\t)";
 }
 
 
