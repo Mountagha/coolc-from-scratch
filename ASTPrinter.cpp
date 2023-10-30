@@ -47,6 +47,7 @@ void ASTPrinter::visitWhileExpr(While* expr) {
     expr->expr->accept(this);
     ast_string += " pool\n";
 }
+
 void ASTPrinter::visitBinaryExpr(Binary* expr) {
     expr->lhs->accept(this);
     ast_string += expr->op.lexeme;

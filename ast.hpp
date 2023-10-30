@@ -271,7 +271,7 @@ class Let: public Expr {
     public: 
         Let(letAssigns&& vecAssigns_, std::unique_ptr<Expr> body_) {
             vecAssigns = std::move(vecAssigns_);
-            body = std::move(body_);
+            body = std::move(body);
         }
         
         void accept(ExprVisitor* visitor) {

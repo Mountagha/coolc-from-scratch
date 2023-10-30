@@ -356,6 +356,7 @@ class Parser {
 
         // To get the parser unstuck.
         void synchronize() {
+            std::cout << "Problem somewhere ";
             advance(); 
             while(!isAtEnd()) {
                 switch (peek().token_type){
