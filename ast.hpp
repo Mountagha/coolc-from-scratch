@@ -75,7 +75,7 @@ class Stmt {
 class Program: public Stmt {
     public:
         Program(std::vector<std::unique_ptr<Class>>&& classes_) {
-            classes = std::move(classes);
+            classes = std::move(classes_);
         }
         void accept(StmtVisitor* visitor) {
             visitor->visitProgramStmt(this);
@@ -132,7 +132,7 @@ class Assign: public Expr {
     public:
         Assign(Token id_, std::unique_ptr<Expr>&& expr_) {
             id = id_;
-            expr = std::move(expr);
+            expr = std::move(expr_);
         }
         void accept(ExprVisitor* visitor) {
             visitor->visitAssignExpr(this);
@@ -271,7 +271,7 @@ class Let: public Expr {
     public: 
         Let(letAssigns&& vecAssigns_, std::unique_ptr<Expr> body_) {
             vecAssigns = std::move(vecAssigns_);
-            body = std::move(body);
+            body = std::move(body_);
         }
         
         void accept(ExprVisitor* visitor) {
