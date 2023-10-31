@@ -40,6 +40,36 @@ class ASTPrinter : public ExprVisitor, public StmtVisitor  {
         void visitClassStmt(Class* smtt);
 
     private:
+        class PrettyString {
+            private:
+                std::string s;
+                unsigned int l;
+            public:
+                PrettyString(): s{""}, l{0} {}
+                ~ PrettyString() = default;
+
+                PrettyString& operator+=(std::string other) {
+                    for (auto i=0; i<l; i++) s += "\t";
+                    s += other;
+                    return *this;
+                }
+
+                PrettyString& operator+=(const char* other) {
+                    for (auto i=0; i<l; i++) s += "\t";
+                    s += other;
+                    return *this;
+                }
+
+
+                PrettyString& operator+(std::string other) {
+                    *this += other;
+                    return *this;
+                }
+                void indent() { l++; }
+                void unindent() { l--; }
+
+        };
+        PrettyString s;
         std::string ast_string;
         std::string indent(unsigned int n) { 
             std::string s; 
