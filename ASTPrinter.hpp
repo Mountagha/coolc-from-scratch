@@ -3,6 +3,8 @@
 
 #include "ast.hpp"
 #include <iostream>
+#include <ostream>
+
 namespace cool {
 
 class ASTPrinter : public ExprVisitor, public StmtVisitor  {
@@ -11,12 +13,12 @@ class ASTPrinter : public ExprVisitor, public StmtVisitor  {
 
         void print(std::unique_ptr<Expr>& expr) {
             expr->accept(this);
-            std::cout << ast_string << '\n';
+            std::cout << ast_string;
         }
 
         void print(std::unique_ptr<Stmt>& stmt) {
             stmt->accept(this);
-            std::cout << ast_string << '\n';
+            std::cout << ast_string;
         }
 
         void visitFeatureExpr(Feature* expr);
@@ -49,36 +51,34 @@ class ASTPrinter : public ExprVisitor, public StmtVisitor  {
                 ~ PrettyString() = default;
 
                 PrettyString& operator+=(std::string other) {
-                    for (auto i=0; i<l; i++) s += "\t";
+                    if (s.back() == '\n')
+                        for (auto i=0; i<l; i++) s += "\t";
                     s += other;
                     return *this;
                 }
 
                 PrettyString& operator+=(const char* other) {
-                    for (auto i=0; i<l; i++) s += "\t";
+                    if (s.back() == '\n')
+                        for (auto i=0; i<l; i++) s += "\t";
                     s += other;
                     return *this;
                 }
-
 
                 PrettyString& operator+(std::string other) {
                     *this += other;
                     return *this;
                 }
+
+                friend std::ostream& operator<<(std::ostream& os, const PrettyString& o) {
+                    os << o.s << "\n";
+                    return os;
+                }
+                PrettyString& nl() { s += "\n"; return *this; }
                 void indent() { l++; }
                 void unindent() { l--; }
 
         };
-        PrettyString s;
-        std::string ast_string;
-        std::string indent(unsigned int n) { 
-            std::string s; 
-            s += "\n";
-            for (int i=0; i<n; i++)
-                s += "\t";
-            return s;
-        }
-        
+        PrettyString ast_string;
 };
 
 } // namespace cool

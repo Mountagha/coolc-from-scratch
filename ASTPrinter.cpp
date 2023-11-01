@@ -4,65 +4,115 @@ namespace cool {
 
 void ASTPrinter::visitFeatureExpr(Feature* expr) {
     ast_string += "(Feature " + expr->id.lexeme + " (";
-    ast_string += indent(3);
+    ast_string.nl().indent();
     ast_string += "Type : " + expr->type_.lexeme + ",";
     if (expr->formals.size() > 0) {
-        ast_string += indent(3);
-        ast_string += " (" + indent(4) + "Formals (" + indent(4);
+        ast_string.nl().indent();
+        ast_string += "(Formals (";
         for (auto& f: expr->formals) 
             f->accept(this);
-        ast_string += indent(3);
-        ast_string += indent(3) + " Expr : {" + indent(4);
+        ast_string.nl().unindent();
+        ast_string += " Expr : {";
+        ast_string.nl().indent();
         expr->expr->accept(this);
-        ast_string += indent(3);
+        ast_string.unindent();
     } else {
         if (expr->expr != nullptr) {
-            ast_string += indent(3);
+            ast_string.nl();
             ast_string += "Assign ( ";
-            ast_string += indent(4);
+            ast_string.nl().indent();
             expr->expr->accept(this);
-            ast_string += indent(3) + ")";
+            ast_string.nl().unindent();
+            ast_string += ")";
         }
     }
 } 
 
 void ASTPrinter::visitFormalExpr(Formal* expr)  {
-    ast_string += indent(4) + "Formal (" + indent(5) + \
-        "ID: " + expr->id.lexeme + indent(5) + "Type: " + expr->type_.lexeme;
+    ast_string.nl().indent(); 
+    ast_string += "Formal (";
+    ast_string.nl().indent();
+    ast_string += "ID: " + expr->id.lexeme;
+    ast_string.nl() += "Type: " + expr->type_.lexeme;
+    ast_string.nl().unindent();
+    ast_string += ")";
 }
 
 void ASTPrinter::visitAssignExpr(Assign* expr) {
+    ast_string.nl().indent();
     ast_string += expr->id.lexeme + " <- ";
     expr->expr->accept(this);
+    ast_string.unindent();
 }
 
 void ASTPrinter::visitIfExpr(If* expr) {
-    ast_string += "if ";
+    ast_string += "If (";
+    ast_string.nl().indent();
+    ast_string += "Cond (";
+    ast_string.nl().indent();
     expr->cond->accept(this);
-    ast_string += "then ";
+    ast_string.nl().unindent();
+    ast_string += ")\n";
+    ast_string += "ThenBranch (";
+    ast_string.nl().indent();
     expr->thenBranch->accept(this);
-    ast_string += "else ";
+    ast_string.nl().unindent();
+    ast_string += ")\n";
+    ast_string += "ElseBranch ( ";
+    ast_string.nl().indent();
     expr->elseBranch->accept(this);
-    ast_string += " fi\n";
+    ast_string.nl().unindent();
+    ast_string += ")";
+    ast_string.nl().unindent();
+    ast_string += ")\n";
 }
 
 void ASTPrinter::visitWhileExpr(While* expr) {
-    ast_string += " while ";
+    ast_string += " WhileLoop (";
+    ast_string.nl().indent();
+    ast_string += "Cond (";
+    ast_string.nl().indent();
     expr->cond->accept(this);
-    ast_string += " loop ";
+    ast_string.nl().unindent();
+    ast_string += ")\n";
+    ast_string += "Body (";
+    ast_string.nl().indent();
     expr->expr->accept(this);
-    ast_string += " pool\n";
+    ast_string.nl().unindent();
+    ast_string += ")";
+    ast_string.nl().unindent();
+    ast_string += ")";
 }
 
 void ASTPrinter::visitBinaryExpr(Binary* expr) {
+    ast_string += "BinaryOp (";
+    ast_string.nl().indent();
+    ast_string += expr->op.lexeme + "\n";
+    ast_string += "LHS (";
+    ast_string.nl().indent();
     expr->lhs->accept(this);
-    ast_string += expr->op.lexeme;
+    ast_string.nl().unindent();
+    ast_string += ")\n";
+    ast_string += "RHS (";
+    ast_string.nl().indent();
     expr->rhs->accept(this);
+    ast_string.nl().unindent();
+    ast_string += ")";
+    ast_string.nl().unindent();
+    ast_string += ")\n";
 }
 
 void ASTPrinter::visitUnaryExpr(Unary* expr) {
-    ast_string += expr->op.lexeme;
+    ast_string += "UnaryOp (";
+    ast_string.nl().indent();
+    ast_string += expr->op.lexeme + "\n";
+    ast_string += "Expr (";
+    ast_string.nl().indent();
     expr->expr->accept(this);
+    ast_string.nl().unindent();
+    ast_string += ")";
+    ast_string.nl().unindent();
+    ast_string += ")\n";
 }
 
 void ASTPrinter::visitVariableExpr(Variable* expr) {
@@ -138,21 +188,24 @@ void ASTPrinter::visitCaseExpr(Case* expr) {
 
 
 void ASTPrinter::visitProgramStmt(Program* stmt) {
-    ast_string += "Program (\n\t";
+    ast_string += "Program (";
+    ast_string.nl().indent();
     for (auto& c : stmt->classes) {
         c->accept(this);
     }
-    ast_string += " \n)";
+    ast_string.unindent();
+    ast_string.nl() += ")";
 }
+
 void ASTPrinter::visitClassStmt(Class* stmt) {
     ast_string += "(Class " + stmt->name.lexeme + " "; 
     if (stmt->superClass != nullptr)
         ast_string += ": SUPERCLASS " + stmt->superClass->name.lexeme;
-    ast_string += " (\n\t\t";
+    ast_string.nl().indent();
     for (auto& f : stmt->features) {
         f->accept(this);
     }
-    ast_string += " \n\t)";
+    ast_string.nl().unindent();
 }
 
 
