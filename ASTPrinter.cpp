@@ -120,30 +120,43 @@ void ASTPrinter::visitVariableExpr(Variable* expr) {
 }
 
 void ASTPrinter::visitCallExpr(Call* expr) {
+    ast_string += "Call (";
+    ast_string.nl().indent();
+    ast_string += "Callee (";
+    ast_string.nl().indent();
     expr->callee->accept(this);
-    ast_string += "(";
+    ast_string.nl().unindent();
+    ast_string += ")\n";
+    ast_string += "Args (";
+    ast_string.nl().indent();
     for (auto& arg: expr->args) {
         arg->accept(this);
-        ast_string += ", ";
     }
+    ast_string.nl().unindent();
     ast_string += ")";
+    ast_string.nl().unindent();
+    ast_string += ")\n";
 }
 
 void ASTPrinter::visitBlockExpr(Block* expr) {
-    ast_string += " {\n";
+    ast_string += " Block (";
+    ast_string.nl().indent();
     for (auto& e: expr->exprs) {
         e->accept(this);
-        ast_string += ";";
     }
-    ast_string += " }\n";
+    ast_string.nl().unindent();
+    ast_string += ")\n";
 }
 void ASTPrinter::visitGroupingExpr(Grouping* expr) {
-    ast_string += " (\n";
+    ast_string += "Grouping (";
+    ast_string.nl().indent();
     expr->expr->accept(this);
-    ast_string += " )\n";
+    ast_string.nl().unindent();
+    ast_string += ")\n";
 }
 
 void ASTPrinter::visitGetExpr(Get* expr) {
+    ast_string += "Get (";
     expr->expr->accept(this);
     if (expr->class_ != nullptr) {
         ast_string += "@";
