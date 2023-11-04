@@ -157,12 +157,14 @@ void ASTPrinter::visitGroupingExpr(Grouping* expr) {
 
 void ASTPrinter::visitGetExpr(Get* expr) {
     ast_string += "Get (";
+    ast_string.nl().indent();
     expr->expr->accept(this);
     if (expr->class_ != nullptr) {
         ast_string += "@";
         expr->class_->accept(this);
     }
-    ast_string += "." + expr->name.lexeme;
+    ast_string.nl().unindent();
+    ast_string += ")\n";
     
 }
 
@@ -171,7 +173,8 @@ void ASTPrinter::visitLiteralExpr(Literal* expr) {
 }
 
 void ASTPrinter::visitLetExpr(Let* expr) {
-    ast_string += "let ";
+    ast_string += "let (";
+    ast_string.nl().indent();
     for (auto& assign: expr->vecAssigns) {
         auto id = std::get<0>(assign);
         auto type_ = std::get<1>(assign);
@@ -181,22 +184,35 @@ void ASTPrinter::visitLetExpr(Let* expr) {
             ast_string += " <- ";
             expr1->accept(this);
         }
+        ast_string.nl();
     }
-    ast_string += "in \n";
+    ast_string += "body (";
+    ast_string.nl().indent();
     expr->body->accept(this);
+    ast_string.nl().unindent();
+    ast_string += ")\n";
+    ast_string.unindent();
+    ast_string += ")\n";
 }
 
 void ASTPrinter::visitCaseExpr(Case* expr) {
-    ast_string += "case ";
+    ast_string += "case (";
+    ast_string.nl().indent();
     expr->expr->accept(this);
-    ast_string += "of ";
+    ast_string += "body: ";
+    ast_string.nl().indent();
     for (auto& match : expr->matches){
         auto id = std::get<0>(match);
         auto type_ = std::get<1>(match);
         auto expr1 = std::move(std::get<2>(match));
         ast_string += id.lexeme + " : " + type_.lexeme + " => ";
         expr1->accept(this);
+        ast_string.nl();
     }
+    ast_string.nl().unindent();
+    ast_string += "\n)";
+    ast_string.nl().unindent();
+    ast_string += "\n)";
 }
 
 
