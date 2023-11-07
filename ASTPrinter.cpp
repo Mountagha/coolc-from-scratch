@@ -227,7 +227,7 @@ void ASTPrinter::visitProgramStmt(Program* stmt) {
 }
 
 void ASTPrinter::visitClassStmt(Class* stmt) {
-    ast_string += "(Class " + stmt->name.lexeme + " "; 
+    ast_string += "Class " + stmt->name.lexeme + " "; 
     if (stmt->superClass != nullptr)
         ast_string += ": SUPERCLASS " + stmt->superClass->name.lexeme;
     ast_string.nl().indent();
@@ -235,6 +235,7 @@ void ASTPrinter::visitClassStmt(Class* stmt) {
         f->accept(this);
     }
     ast_string.nl().unindent();
+    ast_string += ")\n";
 }
 
 
