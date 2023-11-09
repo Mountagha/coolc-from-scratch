@@ -147,6 +147,7 @@ void ASTPrinter::visitBlockExpr(Block* expr) {
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
+
 void ASTPrinter::visitGroupingExpr(Grouping* expr) {
     ast_string += "Grouping (";
     ast_string.nl().indent();
