@@ -89,14 +89,10 @@ void ASTPrinter::visitBinaryExpr(Binary* expr) {
     ast_string.nl().indent();
     ast_string += expr->op.lexeme + "\n";
     ast_string += "LHS (";
-    ast_string.nl().indent();
     expr->lhs->accept(this);
-    ast_string.nl().unindent();
     ast_string += ")\n";
     ast_string += "RHS (";
-    ast_string.nl().indent();
     expr->rhs->accept(this);
-    ast_string.nl().unindent();
     ast_string += ")";
     ast_string.nl().unindent();
     ast_string += ")\n";
@@ -107,9 +103,7 @@ void ASTPrinter::visitUnaryExpr(Unary* expr) {
     ast_string.nl().indent();
     ast_string += expr->op.lexeme + "\n";
     ast_string += "Expr (";
-    ast_string.nl().indent();
     expr->expr->accept(this);
-    ast_string.nl().unindent();
     ast_string += ")";
     ast_string.nl().unindent();
     ast_string += ")\n";
@@ -123,16 +117,12 @@ void ASTPrinter::visitCallExpr(Call* expr) {
     ast_string += "Call (";
     ast_string.nl().indent();
     ast_string += "Callee (";
-    ast_string.nl().indent();
     expr->callee->accept(this);
-    ast_string.nl().unindent();
     ast_string += ")\n";
-    ast_string += "Args (";
-    ast_string.nl().indent();
+    ast_string += "Args ( ";
     for (auto& arg: expr->args) {
         arg->accept(this);
     }
-    ast_string.nl().unindent();
     ast_string += ")";
     ast_string.nl().unindent();
     ast_string += ")\n";
