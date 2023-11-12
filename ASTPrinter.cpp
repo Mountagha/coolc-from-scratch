@@ -213,8 +213,8 @@ void ASTPrinter::visitProgramStmt(Program* stmt) {
     for (auto& c : stmt->classes) {
         c->accept(this);
     }
-    ast_string.unindent();
-    ast_string.nl() += ")";
+    ast_string.nl().unindent();
+    ast_string += ")\n";
 }
 
 void ASTPrinter::visitClassStmt(Class* stmt) {
