@@ -5,17 +5,18 @@ namespace cool {
 void ASTPrinter::visitFeatureExpr(Feature* expr) {
     ast_string += "(Feature " + expr->id.lexeme + " (";
     ast_string.nl().indent();
-    ast_string += "Type : " + expr->type_.lexeme + ",";
+    ast_string += "Type : " + expr->type_.lexeme + ",\n";
     if (expr->formals.size() > 0) {
-        ast_string.nl().indent();
         ast_string += "(Formals (";
+        ast_string.nl().indent();
         for (auto& f: expr->formals) 
             f->accept(this);
         ast_string.nl().unindent();
         ast_string += " Expr : {";
         ast_string.nl().indent();
         expr->expr->accept(this);
-        ast_string.unindent();
+        ast_string.nl().unindent();
+        ast_string += ")\n";
     } else {
         if (expr->expr != nullptr) {
             ast_string.nl();
@@ -23,9 +24,10 @@ void ASTPrinter::visitFeatureExpr(Feature* expr) {
             ast_string.nl().indent();
             expr->expr->accept(this);
             ast_string.nl().unindent();
-            ast_string += ")";
+            ast_string += ")\n";
         }
     }
+    ast_string.nl().unindent();
 } 
 
 void ASTPrinter::visitFormalExpr(Formal* expr)  {
@@ -35,7 +37,8 @@ void ASTPrinter::visitFormalExpr(Formal* expr)  {
     ast_string += "ID: " + expr->id.lexeme;
     ast_string.nl() += "Type: " + expr->type_.lexeme;
     ast_string.nl().unindent();
-    ast_string += ")";
+    ast_string.unindent();
+    ast_string += ")\n";
 }
 
 void ASTPrinter::visitAssignExpr(Assign* expr) {
@@ -227,7 +230,6 @@ void ASTPrinter::visitClassStmt(Class* stmt) {
     }
     ast_string.nl().unindent();
     ast_string += ")\n";
-    ast_string.nl().unindent();
 }
 
 
