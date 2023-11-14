@@ -227,6 +227,7 @@ void ASTPrinter::visitClassStmt(Class* stmt) {
     }
     ast_string.nl().unindent();
     ast_string += ")\n";
+    ast_string.nl().unindent();
 }
 
 
