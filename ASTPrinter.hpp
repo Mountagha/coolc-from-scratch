@@ -75,7 +75,10 @@ class ASTPrinter : public ExprVisitor, public StmtVisitor  {
                 }
                 PrettyString& nl() { s += "\n"; return *this; }
                 void indent() { l++; }
-                void unindent() { l--; }
+                // I should probably put on a checking here since
+                // l is an unsigned a decrement to negative lead to 
+                // very large number. 
+                void unindent() { l--; } 
 
         };
         PrettyString ast_string;
