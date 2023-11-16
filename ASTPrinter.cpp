@@ -3,10 +3,10 @@
 namespace cool {
 
 void ASTPrinter::visitFeatureExpr(Feature* expr) {
-    ast_string += "(Feature " + expr->id.lexeme + " (";
+    ast_string += "Feature " + expr->id.lexeme + " (";
     ast_string.nl().indent();
-    ast_string += "Type : " + expr->type_.lexeme + ",";
-    ast_string += "(Formals (";
+    ast_string += "Type : " + expr->type_.lexeme + ",\n";
+    ast_string += "Formals (";
     ast_string.nl().indent();
     for (auto& f: expr->formals)
         f->accept(this);
@@ -125,7 +125,7 @@ void ASTPrinter::visitCallExpr(Call* expr) {
     for (auto& arg: expr->args) {
         arg->accept(this);
     }
-    ast_string += ")";
+    ast_string += " )";
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
