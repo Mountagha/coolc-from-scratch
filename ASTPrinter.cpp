@@ -19,14 +19,6 @@ void ASTPrinter::visitFeatureExpr(Feature* expr) {
         ast_string.nl().unindent();
     }
     ast_string += "}\n";
-    // } else {
-    //     if (expr->expr != nullptr) {
-    //         ast_string.nl();
-    //         ast_string += "Assign ( ";
-    //         expr->expr->accept(this);
-    //         ast_string += " )\n";
-    //     }
-    // }
     ast_string.nl().unindent();
     ast_string += ")\n";
 } 
