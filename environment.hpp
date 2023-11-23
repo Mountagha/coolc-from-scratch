@@ -3,7 +3,8 @@
 #include <unordered_map>
 #include <vector>
 #include <iostream>
-#include <list>
+#include <memory>
+
 
 namespace cool {
 
@@ -12,28 +13,30 @@ class Scope : public std::unordered_map<K, V> {
 
 };
 
+
 template<class K, class V>
-class SymbolTable {
+class SymbolTable : public std::enable_shared_from_this<SymbolTable<K, V>> {
     private:
-        using ScopeList = std::list
-        std::vector<Scope<K, V>> symtab{};
-        size_t curr_scope;
+        Scope<K, V> scope;
+        using PSymTable = std::shared_ptr<SymbolTable<K, V>>;
     public:
-        SymbolTable() {symtab.push_back({}); curr_scope(0);}
+        SymbolTable() {enclosing = nullptr; scope{}; }
 
-        void enterScope() {symtab.push_back({}), curr_scope++; };
+        SymbolTable(PSymbole enc) { enclosing = enc; scope{}; }
 
-        void exitScope() {
-            if (curr_scope == 0) 
-                fatal_error("Cannot exit from the highest Scope.");
-            curr_scope--;
+        void insert(K key, V value) {
+            scope.insert(key, value);
         }
 
-        void addEntry()
+        void assign(K key, V value);
+        V get(K key);
+        void enterScope();
+        void exitScope();
         void fatal_error(const std::string& msg) {
             std::cerr << msg  << "\n";
             exit(1);
         }
+        PSymTable enclosing;
 
 };
 
