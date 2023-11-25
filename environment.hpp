@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <memory>
+#include <list>
 
 
 namespace cool {
@@ -17,10 +18,11 @@ class Scope : public std::unordered_map<K, V> {
 template<class K, class V>
 class SymbolTable : public std::enable_shared_from_this<SymbolTable<K, V>> {
     private:
-        Scope<K, V> scope;
-        using PSymTable = std::shared_ptr<SymbolTable<K, V>>;
+        using ListScope = std::list<Scope<K, V>>;
+        std::shared_ptr<ListScope> listScope;
+        std::unique_ptr<Scope<K, V>> cur_scope;
     public:
-        SymbolTable() {enclosing = nullptr; scope{}; }
+        SymbolTable() { cur_scope{}; enclosing {nullptr}; }
 
         SymbolTable(PSymbole enc) { enclosing = enc; scope{}; }
 
@@ -28,10 +30,15 @@ class SymbolTable : public std::enable_shared_from_this<SymbolTable<K, V>> {
             scope.insert(key, value);
         }
 
-        void assign(K key, V value);
-        V get(K key);
-        void enterScope();
-        void exitScope();
+        V get(K key) {
+            auto value = scope.find(key);
+            if (value != scope.end()) {
+                return value;
+            }
+
+            if (enclosing) return enclosing->get(key);
+        }
+
         void fatal_error(const std::string& msg) {
             std::cerr << msg  << "\n";
             exit(1);
@@ -39,5 +46,14 @@ class SymbolTable : public std::enable_shared_from_this<SymbolTable<K, V>> {
         PSymTable enclosing;
 
 };
+
+template<class K, class V>
+class ScopedEnvironment {
+    private:
+        Using PSymTable = std::shared_ptr<SymbolTable<K, V>>;
+        PSymtable backup_env;
+        PSymtable
+
+}
 
 } // namespace cool
