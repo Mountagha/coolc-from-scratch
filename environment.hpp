@@ -24,13 +24,14 @@ class SymbolTable : public std::enable_shared_from_this<SymbolTable<K, V>> {
     public:
         SymbolTable() { cur_scope{}; enclosing {nullptr}; }
 
-        SymbolTable(PSymbole enc) { enclosing = enc; scope{}; }
+        //SymbolTable(PSymbole enc) { enclosing = enc; scope{}; }
 
         void insert(K key, V value) {
-            scope.insert(key, value);
+            cur_scope.insert(key, value);
         }
 
         V get(K key) {
+            for (auto iter = listScope.rbegin(); iter != listScope.rend(); ++it)
             auto value = scope.find(key);
             if (value != scope.end()) {
                 return value;
@@ -43,7 +44,6 @@ class SymbolTable : public std::enable_shared_from_this<SymbolTable<K, V>> {
             std::cerr << msg  << "\n";
             exit(1);
         }
-        PSymTable enclosing;
 
 };
 
