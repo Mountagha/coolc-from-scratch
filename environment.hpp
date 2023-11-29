@@ -16,28 +16,40 @@ class Scope : public std::unordered_map<K, V> {
 
 
 template<class K, class V>
-class SymbolTable : public std::enable_shared_from_this<SymbolTable<K, V>> {
+class SymbolTable {
     private:
-        using ListScope = std::list<Scope<K, V>>;
-        std::shared_ptr<ListScope> listScope;
-        std::unique_ptr<Scope<K, V>> cur_scope;
+        using Scope = std::unordered_map<K, V>; 
+        using ListScope = std::list<Scope>;
+        using ListIter = typename ListScope::iterator;
+        ListScope listScope;
+        ListIter listIter;
     public:
-        SymbolTable() { cur_scope{}; enclosing {nullptr}; }
-
-        //SymbolTable(PSymbole enc) { enclosing = enc; scope{}; }
+        SymbolTable() {}
 
         void insert(K key, V value) {
-            cur_scope.insert(key, value);
+            listIter->insert({key, value});
         }
 
         V get(K key) {
-            for (auto iter = listScope.rbegin(); iter != listScope.rend(); ++it)
-            auto value = scope.find(key);
-            if (value != scope.end()) {
-                return value;
+            for (auto iter = listScope.rbegin(); iter != listScope.rend(); ++iter) {
+                auto value = iter->find(key);
+                if (value != iter->end())
+                    return value->second;
             }
+            return V(); 
+        }
 
-            if (enclosing) return enclosing->get(key);
+        void enterScope() {
+            listScope.push_back({});
+            listIter = listScope.end();
+            --listIter;
+        }
+
+        void exitScope() {
+            if (listScope.empty()) {
+                fatal_error("Exitscope: Can't remove scope from an empty symbol table.");
+            }
+            --listIter;
         }
 
         void fatal_error(const std::string& msg) {
@@ -46,14 +58,5 @@ class SymbolTable : public std::enable_shared_from_this<SymbolTable<K, V>> {
         }
 
 };
-
-template<class K, class V>
-class ScopedEnvironment {
-    private:
-        Using PSymTable = std::shared_ptr<SymbolTable<K, V>>;
-        PSymtable backup_env;
-        PSymtable
-
-}
 
 } // namespace cool
