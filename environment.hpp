@@ -10,15 +10,9 @@
 namespace cool {
 
 template<class K, class V>
-class Scope : public std::unordered_map<K, V> {
-
-};
-
-
-template<class K, class V>
 class SymbolTable {
     private:
-        using Scope = std::unordered_map<K, V>; 
+        using Scope = std::unordered_map<K, std::unique_ptr<V>>; 
         using ListScope = std::list<Scope>;
         using ListIter = typename ListScope::iterator;
         ListScope listScope;
@@ -26,17 +20,20 @@ class SymbolTable {
     public:
         SymbolTable() {}
 
-        void insert(K key, V value) {
-            listIter->insert({key, value});
+        void insert(K key, std::unique_ptr<V> value) {
+            if(listScope.empty()) {
+                fatal_error("Insert: Can't add a symbol without a scope.");
+            }
+            listIter->insert({key, std::move(value)});
         }
 
-        V get(K key) {
+        std::unique_ptr<V> get(K key) {
             for (auto iter = listScope.rbegin(); iter != listScope.rend(); ++iter) {
                 auto value = iter->find(key);
                 if (value != iter->end())
-                    return value->second;
+                    return std::move(value->second);
             }
-            return V(); 
+            return nullptr; 
         }
 
         void enterScope() {
