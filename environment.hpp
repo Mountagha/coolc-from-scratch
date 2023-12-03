@@ -6,19 +6,30 @@
 #include <memory>
 #include <list>
 
+#include "list.hpp"
+
 
 namespace cool {
 
 template<class K, class V>
+class Scope {
+    private:
+        std::unordered_map<K, std::unique_ptr<V>> scope;
+        std::unique_ptr<Scope> enclosing;
+    public:
+        Scope(): scope({}), enclosing(nullptr) {}
+        Scope(std::unique_ptr<Scope>&& encl): scope({}), enclosing{encl} {}
+        void insert(K Key, std::unique_ptr<V> value) { scope.insert({key, std::move(value)})};
+
+};
+
+template<class K, class V>
 class SymbolTable {
     private:
-        using Scope = std::unordered_map<K, std::unique_ptr<V>>; 
-        using ListScope = std::list<Scope>;
-        using ListIter = typename ListScope::iterator;
-        ListScope listScope;
-        ListIter listIter;
+        using Scope_t = Scope<K, V>;
+        Scope_t listScope;
     public:
-        SymbolTable() {}
+        SymbolTable(): listScope() {}
 
         void insert(K key, std::unique_ptr<V> value) {
             if(listScope.empty()) {
@@ -37,16 +48,14 @@ class SymbolTable {
         }
 
         void enterScope() {
-            listScope.push_back({});
-            listIter = listScope.end();
-            --listIter;
+            listScope = ListScope(nullptr, std::move(listScope));
         }
 
         void exitScope() {
             if (listScope.empty()) {
                 fatal_error("Exitscope: Can't remove scope from an empty symbol table.");
             }
-            --listIter;
+            listScope = ListScope->tail();
         }
 
         void fatal_error(const std::string& msg) {
