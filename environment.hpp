@@ -55,7 +55,13 @@ class SymbolTable {
             auto v = listScope->get(key);
             if (v != nullptr)
                 return v;
-            return listScope->enclosing->get(key);
+            Scope_t current = listScope->enclosing;
+            while (current != nullptr ) { 
+                current->get(key); 
+                if(v != nullptr) return v;
+                current = current->enclosing;
+            }
+            return nullptr;
         }
 
         void enterScope() {
