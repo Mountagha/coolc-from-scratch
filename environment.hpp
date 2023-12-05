@@ -12,7 +12,7 @@
 namespace cool {
 
 template<class K, class V>
-class Scope {
+class Scope : public std::enable_shared_from_this<Scope<K, V>> {
     private:
         std::unordered_map<K, V*> scope;
     public:
