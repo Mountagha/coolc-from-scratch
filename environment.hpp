@@ -23,7 +23,10 @@ class Scope : public std::enable_shared_from_this<Scope<K, V>> {
         //         other.scope.insert({key, std::make_unique<V>(*elt)});
         //     }
         // }
-        Scope(std::shared_ptr<Scope>& encl): scope({}), enclosing{encl} {}
+        std::shared_ptr<Scope> getScope() { return this->shared_from_this(); }
+        Scope(std::shared_ptr<Scope>& encl): scope({}){
+            enclosing = encl;
+        }
 
         void insert(K key, V* value) { scope.insert({key, value}); }
 
@@ -55,11 +58,11 @@ class SymbolTable {
             auto v = listScope->get(key);
             if (v != nullptr)
                 return v;
-            Scope_t current = listScope->enclosing;
+            Scope_t current = listScope->getScope()->enclosing;
             while (current != nullptr ) { 
                 current->get(key); 
                 if(v != nullptr) return v;
-                current = current->enclosing;
+                current = current->getScope()->enclosing;
             }
             return nullptr;
         }
