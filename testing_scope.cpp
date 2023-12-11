@@ -10,10 +10,10 @@ int main() {
     auto c = std::make_unique<int>(5);
     symTab.enterScope();
     symTab.insert(1, a.get());
-    //symTab.enterScope();
     symTab.enterScope();
-    //symTab.enterScope();
-    //symTab.insert(1, a.get());
+    symTab.enterScope();
+    symTab.enterScope();
+    symTab.insert(1, a.get());
     auto ret = symTab.get(1);
     if (ret)
     std::cout << *ret; 
