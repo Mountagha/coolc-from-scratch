@@ -29,8 +29,13 @@ private:
 public:
   List(T *h,List<T>* t = NULL): head(h), tail(t) { }
 
-  T *hd() const       { return head; }  
-  List<T>* tl() const { return tail; }
+  T *head() const       { return head; }  
+  List<T>* taill() const { return tail; }
+  bool empty() const { return head == nullptr; }
+  
+  T* add(T* elt) {
+
+  }
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -49,8 +54,8 @@ public:
 template <class T>
 void list_map(void f(T*), List<T> *l)
 {
-  for (l; l != NULL; l = l->tl())
-    f(l->hd());
+  for (l; l != NULL; l = l->tail())
+    f(l->head());
 }
 
 //
@@ -61,8 +66,8 @@ template <class S, class T>
 void list_print(S &str, List<T> *l)
 {
    str << "[\n";
-   for(; l != NULL; l = l->tl())
-	str << *(l->hd()) << " ";
+   for(; l != NULL; l = l->tail())
+	str << *(l->head()) << " ";
    str << "]\n";
 }
 
@@ -73,7 +78,7 @@ template <class T>
 int list_length(List<T> *l)
 {
   int i = 0;
-  for (; l != NULL; l = l->tl())
+  for (; l != NULL; l = l->tail())
     i++;
   return i;
 }

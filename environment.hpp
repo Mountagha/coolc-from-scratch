@@ -6,76 +6,56 @@
 #include <memory>
 #include <list>
 
-//#include "list.hpp"
+#include "list.hpp"
 
 
 namespace cool {
 
 template<class K, class V>
-class Scope : public std::enable_shared_from_this<Scope<K, V>> {
+class Scope {
     private:
-        std::unordered_map<K, V*> scope;
+        std::unordered_map<K, std::unique_ptr<V>> scope;
+        std::unique_ptr<Scope> enclosing;
     public:
-        std::shared_ptr<Scope> enclosing;
         Scope(): scope({}), enclosing(nullptr) {}
-        // Scope(const Scope& other) {
-        //     for (auto& elt: scope) {
-        //         other.scope.insert({key, std::make_unique<V>(*elt)});
-        //     }
-        // }
-        std::shared_ptr<Scope> getScope() { return this->shared_from_this(); }
-        Scope(std::shared_ptr<Scope>& encl): scope({}){
-            enclosing = encl;
-        }
-
-        void insert(K key, V* value) { scope.insert({key, value}); }
-
-        V* get(K key) {
-            auto value = scope.find(key);
-            if (value != scope.end())
-                return value->second;
-            return nullptr; 
-        }
-
+        Scope(std::unique_ptr<Scope>&& encl): scope({}), enclosing{encl} {}
+        void insert(K Key, std::unique_ptr<V> value) { scope.insert({key, std::move(value)})};
+        
 };
 
 template<class K, class V>
 class SymbolTable {
     private:
-        using Scope_t = std::shared_ptr<Scope<K, V>>;
+        using Scope_t = Scope<K, V>;
         Scope_t listScope;
     public:
-        SymbolTable(): listScope(nullptr) {}
+        SymbolTable(): listScope() {}
 
-        void insert(K key, V* value) {
-            if(listScope == nullptr) {
+        void insert(K key, std::unique_ptr<V> value) {
+            if(listScope.empty()) {
                 fatal_error("Insert: Can't add a symbol without a scope.");
             }
-            listScope->insert(key, value);
+            listIter->insert({key, std::move(value)});
         }
 
-        V* get(K key) {
-            auto v = listScope->get(key);
-            if (v != nullptr)
-                return v;
-            Scope_t current = listScope->getScope()->enclosing;
-            while (current != nullptr ) { 
-                current->get(key); 
-                if(v != nullptr) return v;
-                current = current->getScope()->enclosing;
+        std::unique_ptr<V> get(K key) {
+            for (auto iter = listScope.rbegin(); iter != listScope.rend(); ++iter) {
+                auto value = iter->find(key);
+                if (value != iter->end())
+                    return std::move(value->second);
             }
-            return nullptr;
+            return nullptr; 
         }
 
         void enterScope() {
-            listScope = std::make_shared<Scope<K, V>>(listScope);
+            listScope = ListScope(nullptr, std::move(listScope));
         }
 
         void exitScope() {
-            if (listScope == nullptr) {
+            if (listScope.empty()) {
                 fatal_error("Exitscope: Can't remove scope from an empty symbol table.");
             }
-            listScope = listScope->enclosing;
+            listScope = ListScope->tail();
         }
 
         void fatal_error(const std::string& msg) {
