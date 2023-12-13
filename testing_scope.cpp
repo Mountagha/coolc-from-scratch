@@ -13,16 +13,19 @@ int main() {
     symTab.enterScope();
     symTab.enterScope();
     symTab.enterScope();
-    symTab.insert(1, a.get());
+    symTab.insert(2, b.get());
     auto ret = symTab.get(1);
-    if (ret)
-    std::cout << *ret; 
-    // symTab.enterScope();
-    // symTab.insert(2, b.get());
-    // ret = symTab.get(1);
-    // std::cout << *ret; 
-    // ret = symTab.get(2);
-    // std::cout << *ret; 
-    // symTab.exitScope();
-    // symTab.exitScope();
+    if (ret) 
+    std::cout << *ret; // should print 3
+    ret = symTab.get(2);
+    if (ret)  
+    std::cout << *ret; // should print 4
+    symTab.exitScope();
+    ret = symTab.get(2);
+    if (ret)  
+    std::cout << *ret; // should print nothing
+    symTab.exitScope();
+    symTab.exitScope();
+    symTab.exitScope();
+    symTab.exitScope(); // error here
 }

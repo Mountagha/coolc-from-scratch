@@ -15,15 +15,15 @@ template<class K, class V>
 class Scope : public std::enable_shared_from_this<Scope<K, V>> {
     private:
         std::unordered_map<K, V*> scope;
-    public:
         std::shared_ptr<Scope> enclosing;
+    public:
         Scope(): scope({}), enclosing(nullptr) {}
         // Scope(const Scope& other) {
         //     for (auto& elt: scope) {
         //         other.scope.insert({key, std::make_unique<V>(*elt)});
         //     }
         // }
-        std::shared_ptr<Scope> getScope() { return this->shared_from_this(); }
+        std::shared_ptr<Scope> getEnclosing() { return this->shared_from_this()->enclosing; }
         Scope(std::shared_ptr<Scope>& encl): scope({}){
             enclosing = encl;
         }
@@ -58,11 +58,11 @@ class SymbolTable {
             auto v = listScope->get(key);
             if (v != nullptr)
                 return v;
-            Scope_t current = listScope->getScope()->enclosing;
+            Scope_t current = listScope->getEnclosing();
             while (current != nullptr ) { 
-                current->get(key); 
+                v = current->get(key); 
                 if(v != nullptr) return v;
-                current = current->getScope()->enclosing;
+                current = current->getEnclosing();
             }
             return nullptr;
         }
@@ -75,7 +75,7 @@ class SymbolTable {
             if (listScope == nullptr) {
                 fatal_error("Exitscope: Can't remove scope from an empty symbol table.");
             }
-            listScope = listScope->enclosing;
+            listScope = listScope->getEnclosing();
         }
 
         void fatal_error(const std::string& msg) {
