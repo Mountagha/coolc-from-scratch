@@ -1,6 +1,7 @@
 #include "environment.hpp"
 #include <iostream>
 
+#define PRINT(p) std::cout << ((p) ? std::to_string((*p)) : "null");
 using namespace cool;
 
 int main() {
@@ -14,16 +15,18 @@ int main() {
     symTab.enterScope();
     symTab.enterScope();
     symTab.insert(2, std::move(b));
+    symTab.insert(3, std::move(c));
     auto ret = symTab.get(1);
-    if (ret) 
-    std::cout << *ret; // should print 3
+    PRINT(ret);
+    ret = symTab.get(1);
+    PRINT(ret) // should print 3
     ret = symTab.get(2);
-    if (ret)  
-    std::cout << *ret; // should print 4
+    PRINT(ret) // should print 4
+    ret = symTab.probe(3);
+    PRINT(ret);
     symTab.exitScope();
     ret = symTab.get(2);
-    if (ret)  
-    std::cout << *ret; // should print nothing
+    PRINT(ret) // should print null
     symTab.exitScope();
     symTab.exitScope();
     symTab.exitScope();
