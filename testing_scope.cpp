@@ -9,11 +9,11 @@ int main() {
     auto b = std::make_unique<int>(4);
     auto c = std::make_unique<int>(5);
     symTab.enterScope();
-    symTab.insert(1, a.get());
+    symTab.insert(1, std::move(a));
     symTab.enterScope();
     symTab.enterScope();
     symTab.enterScope();
-    symTab.insert(2, b.get());
+    symTab.insert(2, std::move(b));
     auto ret = symTab.get(1);
     if (ret) 
     std::cout << *ret; // should print 3

@@ -6,34 +6,26 @@
 #include <memory>
 #include <list>
 
-//#include "list.hpp"
-
 
 namespace cool {
 
 template<class K, class V>
 class Scope : public std::enable_shared_from_this<Scope<K, V>> {
     private:
-        std::unordered_map<K, V*> scope;
+        std::unordered_map<K, std::unique_ptr<V>> scope{};
         std::shared_ptr<Scope> enclosing;
     public:
-        Scope(): scope({}), enclosing(nullptr) {}
-        // Scope(const Scope& other) {
-        //     for (auto& elt: scope) {
-        //         other.scope.insert({key, std::make_unique<V>(*elt)});
-        //     }
-        // }
+        Scope(): enclosing(nullptr) {}
+        Scope(std::shared_ptr<Scope>& encl): enclosing(encl) {}
+
         std::shared_ptr<Scope> getEnclosing() { return this->shared_from_this()->enclosing; }
-        Scope(std::shared_ptr<Scope>& encl): scope({}){
-            enclosing = encl;
-        }
 
-        void insert(K key, V* value) { scope.insert({key, value}); }
+        void insert(K key, std::unique_ptr<V>&& value) { scope.insert({key, std::move(value)}); }
 
-        V* get(K key) {
+        std::unique_ptr<V> get(K key) {
             auto value = scope.find(key);
             if (value != scope.end())
-                return value->second;
+                return std::move(value->second);
             return nullptr; 
         }
 
@@ -47,21 +39,21 @@ class SymbolTable {
     public:
         SymbolTable(): listScope(nullptr) {}
 
-        void insert(K key, V* value) {
+        void insert(K key, std::unique_ptr<V> value) {
             if(listScope == nullptr) {
                 fatal_error("Insert: Can't add a symbol without a scope.");
             }
-            listScope->insert(key, value);
+            listScope->insert(key, std::move(value));
         }
 
-        V* get(K key) {
+        std::unique_ptr<V> get(K key) {
             auto v = listScope->get(key);
             if (v != nullptr)
-                return v;
+                return std::move(v);
             Scope_t current = listScope->getEnclosing();
             while (current != nullptr ) { 
-                v = current->get(key); 
-                if(v != nullptr) return v;
+                v = std::move(current->get(key)); 
+                if(v != nullptr) return std::move(v);
                 current = current->getEnclosing();
             }
             return nullptr;
