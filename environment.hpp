@@ -12,7 +12,7 @@ namespace cool {
 template<class K, class V>
 class Scope : public std::enable_shared_from_this<Scope<K, V>> {
     private:
-        std::unordered_map<K, std::unique_ptr<V>> scope{};
+        std::unordered_map<K, V*> scope{};
         std::shared_ptr<Scope> enclosing;
     public:
         Scope(): enclosing(nullptr) {}
@@ -20,12 +20,12 @@ class Scope : public std::enable_shared_from_this<Scope<K, V>> {
 
         std::shared_ptr<Scope> getEnclosing() { return this->shared_from_this()->enclosing; }
 
-        void insert(K key, std::unique_ptr<V>&& value) { scope.insert({key, std::move(value)}); }
+        void insert(K key, V* value) { scope.insert({key, value}); }
 
         V* get(K key) {
             auto value = scope.find(key);
             if (value != scope.end())
-                return value->second.get();
+                return value->second;
             return nullptr; 
         }
 
@@ -39,11 +39,11 @@ class SymbolTable {
     public:
         SymbolTable(): listScope(nullptr) {}
 
-        void insert(K key, std::unique_ptr<V> value) {
+        void insert(K key, V* value) {
             if(listScope == nullptr) {
                 fatal_error("Insert: Can't add a symbol without a scope.");
             }
-            listScope->insert(key, std::move(value));
+            listScope->insert(key, value);
         }
 
         V* get(K key) {

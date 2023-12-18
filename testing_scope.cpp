@@ -10,12 +10,12 @@ int main() {
     auto b = std::make_unique<int>(4);
     auto c = std::make_unique<int>(5);
     symTab.enterScope();
-    symTab.insert(1, std::move(a));
+    symTab.insert(1, a.get());
     symTab.enterScope();
     symTab.enterScope();
     symTab.enterScope();
-    symTab.insert(2, std::move(b));
-    symTab.insert(3, std::move(c));
+    symTab.insert(2, b.get());
+    symTab.insert(3, c.get());
     auto ret = symTab.get(1);
     PRINT(ret);
     ret = symTab.get(1);

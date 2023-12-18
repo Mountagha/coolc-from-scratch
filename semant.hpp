@@ -99,30 +99,55 @@ class Semant : public StmtVisitor, public ExprVisitor {
         void visitProgramStmt(Program* stmt) {
 
             Token class_name, parent_name;
-            bool class_main_exist = false;
             for (auto& class_: stmt->classes) {
-                class_name = class_->name;
-                parent_name = class_->superClass->name;
-
-                if (class_name == Main) {
-                    class_main_exist = true;
-                } 
-
-                if (class_name == SELF_TYPE) {
-                    semant_error(class_name, "Cannot define a class named SELF_TYPE.");
-                    continue;
-                }
-
-                if (classTable.get(class_name)) {
-                    semant_error(class_name, class_name.lexeme + " already defined.");
-                }
-
-                // We can't inherit from the basic class in Cool
-
-
+                class_->accept(this);
             }
 
         }
+
+        void visitClassStmt(Class* stmt) {
+
+            Token class_name, parent_name;
+            class_name = stmt->name;
+            parent_name = stmt->superClass->name;
+            if (class_name == Main) {
+                class_main_exist = true;
+            }
+            if (class_name == SELF_TYPE) {
+                semant_error(class_name, "Cannot define a class named SELF_TYPE.");
+            }
+
+            if (classTable.get(class_name)) {
+                semant_error(class_name, class_name.lexeme + " already defined.");
+            }
+
+            // We can't inherit from the basic class in Cool
+            if (parent_name == Main || parent_name == Int ||
+                parent_name == Str  || parent_name == SELF_TYPE) {
+                    semant_error(class_name, "Class " + class_name.lexeme + "cannot inherits from " + parent_name.lexeme + "\n");
+
+            }
+
+            classTable.insert(class_name, stmt);
+
+        }
+
+         virtual void visitFeatureExpr(Feature* expr) {}
+        virtual void visitFormalExpr(Formal* expr) {}
+        virtual void visitAssignExpr(Assign* expr) {}
+        virtual void visitIfExpr(If* expr) {}
+        virtual void visitWhileExpr(While* expr) {}
+        virtual void visitBinaryExpr(Binary* expr) {}
+        virtual void visitUnaryExpr(Unary* expr) {}
+        virtual void visitVariableExpr(Variable* expr) {}
+        virtual void visitCallExpr(Call* expr) {}
+        virtual void visitBlockExpr(Block* expr) {}
+        virtual void visitGroupingExpr(Grouping* expr) {}
+        virtual void visitGetExpr(Get* expression) {}
+        virtual void visitLiteralExpr(Literal* expr) {}
+        virtual void visitLetExpr(Let* expr) {}
+        virtual void visitCaseExpr(Case* expr) {}
+
 
         std::ostream& semant_error() {
             semant_errors++;
@@ -139,6 +164,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
         SymbolTable<Token, Class> classTable;
         unsigned int semant_errors;
         std::ostream& error_stream;
+        bool class_main_exist{false};
 
 };
 
