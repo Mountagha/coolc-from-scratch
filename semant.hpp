@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <ostream>
 
 #include "token.hpp"
 #include "ast.hpp"
@@ -95,11 +96,49 @@ class Semant : public StmtVisitor, public ExprVisitor {
             expr->accept(this);
         }
 
-        void visitPRogramStmt(Program* stmt) {
+        void visitProgramStmt(Program* stmt) {
+
+            Token class_name, parent_name;
+            bool class_main_exist = false;
+            for (auto& class_: stmt->classes) {
+                class_name = class_->name;
+                parent_name = class_->superClass->name;
+
+                if (class_name == Main) {
+                    class_main_exist = true;
+                } 
+
+                if (class_name == SELF_TYPE) {
+                    semant_error(class_name, "Cannot define a class named SELF_TYPE.");
+                    continue;
+                }
+
+                if (classTable.get(class_name)) {
+                    semant_error(class_name, class_name.lexeme + " already defined.");
+                }
+
+                // We can't inherit from the basic class in Cool
+
+
+            }
 
         }
+
+        std::ostream& semant_error() {
+            semant_errors++;
+            return error_stream;
+        }
+
+        std::ostream& semant_error(Token& c, const std::string& msg) {
+            error_stream << "Error at : " << c.loc << msg << "\n";
+            return semant_error();
+        }
+
+
     private:
         SymbolTable<Token, Class> classTable;
+        unsigned int semant_errors;
+        std::ostream& error_stream;
 
 };
 

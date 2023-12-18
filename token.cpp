@@ -14,4 +14,9 @@ std::ostream& operator<<(std::ostream& os, const Token& token) {
         os << "[line " + std::to_string(token.loc) +  " ] UNKNOWN " + token.lexeme + "\n";
     return os;
 }
+
+bool operator==(const Token& a, const Token& b) {
+    if (a.token_type != b.token_type) return false;
+    return a.lexeme == b.lexeme;
+}
 };
