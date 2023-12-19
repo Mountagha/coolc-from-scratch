@@ -5,18 +5,18 @@
 
 namespace cool {
 enum CoolType {
-    Void=0,
-    Bool,
-    Number,
-    String,
+    Void_t=0,
+    Bool_t,
+    Number_t,
+    String_t,
 };
 
 class CoolObject{
     public:
-        CoolObject() : coolType(CoolType::Void) {}
-        explicit CoolObject(bool b): coolType{CoolType::Bool}, boolean{b} {}
-        explicit CoolObject(int n): coolType{CoolType::Number}, number{n} {}
-        explicit CoolObject(std::string s): coolType{CoolType::String}, string{s} {}
+        CoolObject() : coolType(CoolType::Void_t) {}
+        explicit CoolObject(bool b): coolType{CoolType::Bool_t}, boolean{b} {}
+        explicit CoolObject(int n): coolType{CoolType::Number_t}, number{n} {}
+        explicit CoolObject(std::string s): coolType{CoolType::String_t}, string{s} {}
         std::string to_string();
 
     private:

@@ -22,9 +22,9 @@ namespace cool {
     and references (respectively) to constants.
 */
 
-using IdTable = std::unordered_map<Token, std::string>;
-using StringTable = std::unordered_map<Token, std::string>;
-using IntTable = std::unordered_map<Token, int>;
+using IdTable = std::unordered_map<std::string, Token>;
+using StringTable = std::unordered_map<std::string, Token>;
+using IntTable = std::unordered_map<std::string, Token>;
 
 
 } // namespace cool

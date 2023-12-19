@@ -77,7 +77,7 @@ const std::unordered_map<int, std::string> enum_string_map = {
 class Token {
     public:
         Token() = default;
-        Token(TokenType token_type, std::string lexeme, unsigned int loc);
+        Token(TokenType token_type, std::string lexeme, unsigned int loc=0);
         friend std::ostream& operator<<(std::ostream& os, const Token& token);
         friend bool operator==(const Token& a, const Token& b);
     

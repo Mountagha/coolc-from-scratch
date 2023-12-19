@@ -19,74 +19,74 @@ namespace cool {
     as fixed names used by the runtime system.
 */
 
-extern IdTable idtable;
+IdTable idtable;
 
 static Token 
-    arg,
-    arg2,
-    Bool,
-    concat,
-    cool_abort,
-    copy,
-    Int,
-    in_int,
-    in_string,
-    IO,
-    length,
-    Main,
-    main_meth,
-    No_class, 
-    No_type,
-    Object,
-    out_int,
-    out_string,
-    prim_slot,
-    self,
-    SELF_TYPE,
-    Str,
-    str_field,
-    substr,
-    type_name,
-    val;
+    arg{TokenType::IDENTIFIER, "arg"},
+    arg2{TokenType::IDENTIFIER, "arg2"},
+    Bool{TokenType::IDENTIFIER, "Bool"},
+    concat{TokenType::IDENTIFIER, "concat"},
+    cool_abort{TokenType::IDENTIFIER, "cool_abort"},
+    copy{TokenType::IDENTIFIER, "copy"},
+    Int{TokenType::IDENTIFIER, "Int"},
+    in_int{TokenType::IDENTIFIER, "in_int"},
+    in_string{TokenType::IDENTIFIER, "in_string"},
+    IO{TokenType::IDENTIFIER, "IO"},
+    length{TokenType::IDENTIFIER, "length"},
+    Main{TokenType::IDENTIFIER, "Main"},
+    main_meth{TokenType::IDENTIFIER, "main_meth"},
+    No_class{TokenType::IDENTIFIER, "No_class"}, 
+    No_type{TokenType::IDENTIFIER, "No_type"},
+    Object{TokenType::IDENTIFIER, "Object"},
+    out_int{TokenType::IDENTIFIER, "out_int"},
+    out_string{TokenType::IDENTIFIER, "out_string"},
+    prim_slot{TokenType::IDENTIFIER, "prim_slot"},
+    self{TokenType::IDENTIFIER, "self"},
+    SELF_TYPE{TokenType::IDENTIFIER, "SELF_TYPE"},
+    Str{TokenType::IDENTIFIER, "Str"},
+    str_field{TokenType::IDENTIFIER, "str_field"},
+    substr{TokenType::IDENTIFIER, "substr"},
+    type_name{TokenType::IDENTIFIER, "type_name"},
+    val{TokenType::IDENTIFIER, "val"};
 
 static void initialize_constants() {
-    idtable.insert({arg, "arg"});
-    idtable.insert({arg2, "arg2"});
-    idtable.insert({Bool, "Bool"});
-    idtable.insert({concat, "concat"});
-    idtable.insert({cool_abort, "abort"});
-    idtable.insert({copy, "copy"});
-    idtable.insert({Int, "Int"});
-    idtable.insert({in_int, "in_int"});
-    idtable.insert({in_string, "in_string"});
-    idtable.insert({IO, "IO"});
-    idtable.insert({length, "length"});
-    idtable.insert({Main, "Main"});
-    idtable.insert({main_meth, "main"});
+    idtable.insert({"arg", arg});
+    idtable.insert({"arg2", arg2});
+    idtable.insert({"Bool", Bool});
+    idtable.insert({"concat", concat});
+    idtable.insert({"abort", cool_abort});
+    idtable.insert({"copy", copy});
+    idtable.insert({"Int", Int});
+    idtable.insert({"in_int", in_int});
+    idtable.insert({"in_string", in_string});
+    idtable.insert({"IO", IO});
+    idtable.insert({"length", length});
+    idtable.insert({"Main", Main});
+    idtable.insert({"main", main_meth});
 
     //  _no_class is a symbol that can't be the name of
     // any user_defined class.
 
-    idtable.insert({No_class, "_no_class"});
-    idtable.insert({No_type, "_no_type"});
-    idtable.insert({Object, "Object"});
-    idtable.insert({out_int, "out_int"});
-    idtable.insert({out_string, "out_string"});
-    idtable.insert({prim_slot, "_prim_slot"});
-    idtable.insert({self, "self"});
-    idtable.insert({SELF_TYPE, "SELF_TYPE"});
-    idtable.insert({Str, "String"});
-    idtable.insert({str_field, "_str_field"});
-    idtable.insert({substr, "substr"});
-    idtable.insert({type_name, "type_name"});
-    idtable.insert({val, "_val"});
+    idtable.insert({"_no_class", No_class});
+    idtable.insert({"_no_type", No_type});
+    idtable.insert({"Object", Object});
+    idtable.insert({"out_int", out_int});
+    idtable.insert({"out_string", out_string});
+    idtable.insert({"_prim_slot", prim_slot});
+    idtable.insert({"self", self});
+    idtable.insert({"SELF_TYPE", SELF_TYPE});
+    idtable.insert({"String", Str});
+    idtable.insert({"_str_field", str_field});
+    idtable.insert({"substr", substr});
+    idtable.insert({"type_name", type_name});
+    idtable.insert({"_val", val});
 
 }
 
 class Semant : public StmtVisitor, public ExprVisitor {
     public:
 
-        Semant() = default;
+        Semant(std::ostream& out=std::cerr): error_stream{out} {} 
 
         void semant(std::unique_ptr<Expr>& expr) {
             expr->accept(this);
@@ -97,12 +97,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
         }
 
         void visitProgramStmt(Program* stmt) {
-
-            Token class_name, parent_name;
-            for (auto& class_: stmt->classes) {
-                class_->accept(this);
-            }
-
+            initialize_constants();
         }
 
         void visitClassStmt(Class* stmt) {
@@ -117,7 +112,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 semant_error(class_name, "Cannot define a class named SELF_TYPE.");
             }
 
-            if (classTable.get(class_name)) {
+            if (classTable.get(class_name.lexeme)) {
                 semant_error(class_name, class_name.lexeme + " already defined.");
             }
 
@@ -128,11 +123,11 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             }
 
-            classTable.insert(class_name, stmt);
+            classTable.insert(class_name.lexeme, stmt);
 
         }
 
-         virtual void visitFeatureExpr(Feature* expr) {}
+        virtual void visitFeatureExpr(Feature* expr) {}
         virtual void visitFormalExpr(Formal* expr) {}
         virtual void visitAssignExpr(Assign* expr) {}
         virtual void visitIfExpr(If* expr) {}
@@ -161,7 +156,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
 
     private:
-        SymbolTable<Token, Class> classTable;
+        SymbolTable<std::string, Class> classTable;
         unsigned int semant_errors;
         std::ostream& error_stream;
         bool class_main_exist{false};
