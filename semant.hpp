@@ -97,13 +97,24 @@ class Semant : public StmtVisitor, public ExprVisitor {
         }
 
         void visitProgramStmt(Program* stmt) {
+
             initialize_constants();
+
+            classTable.enterScope();
+
+            for (auto& class_ : stmt->classes) {
+                class_->accept(this);
+            }
+
+            check_parents(stmt);
+            
         }
 
         void visitClassStmt(Class* stmt) {
 
             Token class_name, parent_name;
             class_name = stmt->name;
+            std::cout << class_name;
             parent_name = stmt->superClass->name;
             if (class_name == Main) {
                 class_main_exist = true;
@@ -160,6 +171,24 @@ class Semant : public StmtVisitor, public ExprVisitor {
         unsigned int semant_errors;
         std::ostream& error_stream;
         bool class_main_exist{false};
+
+        bool check_parents(Program* stmt) {
+            // make sure all class have parent class.
+            bool ret{true};
+            Token className, parentClassName;
+            for (auto& class_ : stmt->classes) {
+                className = class_->name;
+                parentClassName = class_->superClass->name;
+                if (!classTable.get(parentClassName.lexeme) && (parentClassName == No_class)) {
+                    semant_error(class_->name, "Parent class " + parentClassName.lexeme + " of class " + className.lexeme + " is not defined.");
+                    ret = false;
+                }
+            }
+            return ret;
+        }
+         void check_inheritance(Program* stmt) {
+
+         }
 
 };
 

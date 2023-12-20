@@ -47,6 +47,8 @@ class SymbolTable {
         }
 
         V* get(K key) {
+            if (listScope == nullptr)
+                fatal_error("No scope available");
             auto v = listScope->get(key);
             if (v != nullptr)
                 return v;
