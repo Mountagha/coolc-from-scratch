@@ -173,7 +173,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
         bool class_main_exist{false};
 
         bool check_parents(Program* stmt) {
-            // make sure all class have parent class.
+            // make sure all classes have parent class.
             bool ret{true};
             Token className, parentClassName;
             for (auto& class_ : stmt->classes) {
@@ -186,9 +186,9 @@ class Semant : public StmtVisitor, public ExprVisitor {
             }
             return ret;
         }
-         void check_inheritance(Program* stmt) {
+        void check_inheritance(Program* stmt) {
 
-         }
+        }
 
 };
 
