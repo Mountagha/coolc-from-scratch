@@ -19,4 +19,8 @@ bool operator==(const Token& a, const Token& b) {
     if (a.token_type != b.token_type) return false;
     return a.lexeme == b.lexeme;
 }
+
+bool operator!=(const Token& a, const Token& b) {
+    return !(a == b);
+}
 };

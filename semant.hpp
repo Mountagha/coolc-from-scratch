@@ -83,6 +83,8 @@ static void initialize_constants() {
 
 }
 
+Class curr_class; // Not fan of global. But will figure out later.
+
 class Semant : public StmtVisitor, public ExprVisitor {
     public:
 
@@ -190,6 +192,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
         }
 
+        
 };
 
 } // namespace cool
