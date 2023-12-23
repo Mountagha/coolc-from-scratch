@@ -81,6 +81,7 @@ class Token {
         friend std::ostream& operator<<(std::ostream& os, const Token& token);
         friend bool operator==(const Token& a, const Token& b);
         friend bool operator!=(const Token& a, const Token& b);
+        friend bool operator<(const Token& a, const Token& b);
     
         TokenType token_type;
         std::string lexeme;

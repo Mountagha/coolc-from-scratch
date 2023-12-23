@@ -35,7 +35,7 @@ IdTable idtable;
 
 // later find a way to get rid of those globals.
 
-static Class curr_class;
+static Class* curr_class;
 
 static Token 
     arg{TokenType::IDENTIFIER, "arg"},
@@ -118,8 +118,6 @@ void InheritanceGraph::addEdge(const Token& a, const Token& b) {
 }
 
 bool InheritanceGraph::isDGA() {
-    // object is the root of the inheritance graph.
-    Token Object{TokenType::IDENTIFIER, "Object"};
     for(auto it = graph.begin(); it != graph.end(); it++) {
         Token current = it->first;
         Token next = it->second;
@@ -142,7 +140,7 @@ bool InheritanceGraph::conform(const Token& a, const Token& b) {
     if (a == b) 
         return true;
     if (current == SELF_TYPE)
-        current = curr_class.name;
+        current = curr_class->name;
     while (current != Object) {
         if(current == b)
             return true;
@@ -157,9 +155,9 @@ Token InheritanceGraph::lca(Token a, Token b) {
     if (a == b)
         return a;
     if (a == SELF_TYPE)
-        a = curr_class.name;
+        a = curr_class->name;
     if (b == SELF_TYPE)
-        b = curr_class.name;
+        b = curr_class->name;
     
     int high_a = 0, high_b = 0;
     Token temp_a = a, temp_b = b;

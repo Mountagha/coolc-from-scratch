@@ -23,4 +23,10 @@ bool operator==(const Token& a, const Token& b) {
 bool operator!=(const Token& a, const Token& b) {
     return !(a == b);
 }
+
+bool operator<(const Token& a, const Token& b) {
+    if (a.token_type == b.token_type) 
+        return a.lexeme < b.lexeme;
+    return a.token_type < b.token_type;
+}
 };

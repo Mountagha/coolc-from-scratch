@@ -38,42 +38,16 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             initialize_constants();
 
-            classTable.enterScope();
-
-            for (auto& class_ : stmt->classes) {
-                class_->accept(this);
-            }
+            construct_ctables(stmt);
 
             check_inheritance(stmt);
+
+            // check program
             
         }
 
         void visitClassStmt(Class* stmt) {
-
-            Token class_name, parent_name;
-            class_name = stmt->name;
-            std::cout << class_name;
-            parent_name = stmt->superClass->name;
-            if (class_name == Main) {
-                class_main_exist = true;
-            }
-            if (class_name == SELF_TYPE) {
-                semant_error(class_name, "Cannot define a class named SELF_TYPE.");
-            }
-
-            if (classTable.get(class_name.lexeme)) {
-                semant_error(class_name, class_name.lexeme + " already defined.");
-            }
-
-            // We can't inherit from the basic class in Cool
-            if (parent_name == Main || parent_name == Int ||
-                parent_name == Str  || parent_name == SELF_TYPE) {
-                    semant_error(class_name, "Class " + class_name.lexeme + "cannot inherits from " + parent_name.lexeme + "\n");
-
-            }
-
-            classTable.insert(class_name.lexeme, stmt);
-
+            
         }
 
         virtual void visitFeatureExpr(Feature* expr) {}
@@ -99,7 +73,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
         }
 
         std::ostream& semant_error(Token& c, const std::string& msg) {
-            error_stream << "Error at : " << c.loc << msg << "\n";
+            error_stream << "Error at line : " << c.loc << " " << msg << "\n";
             return semant_error();
         }
 
@@ -141,10 +115,44 @@ class Semant : public StmtVisitor, public ExprVisitor {
             }
 
             if(!g.isDGA()) {
-                semant_error(curr_class.name, "Cyclic inheritance detected!"); // find better way to find the error position.
+                semant_error(curr_class->name, "Cyclic inheritance detected!"); // find better way to find the error position.
                 ret = false;
             }
             return ret;
+        }
+        void construct_ctables(Program* stmt) {
+
+            classTable.enterScope();
+
+            for (auto& class_: stmt->classes) {
+                Token class_name, parent_name;
+                class_name = class_->name;
+                curr_class = class_.get();
+                std::cout << class_name;
+                parent_name = class_->superClass->name;
+                if (class_name == Main) {
+                    class_main_exist = true;
+                }
+                if (class_name == SELF_TYPE) {
+                    semant_error(class_name, "Cannot define a class named SELF_TYPE.");
+                }
+
+                if (classTable.get(class_name.lexeme)) {
+                    semant_error(class_name, class_name.lexeme + " already defined.");
+                }
+
+                // We can't inherit from the basic class in Cool
+                if (parent_name == Main || parent_name == Int ||
+                    parent_name == Str  || parent_name == SELF_TYPE) {
+                        semant_error(class_name, "Class " + class_name.lexeme + "cannot inherits from " + parent_name.lexeme + "\n");
+
+                }
+
+                classTable.insert(class_name.lexeme, class_.get());
+            }
+
+            //classTable.exitScope();
+
         }
         void check_inheritance(Program* stmt) {
             // check if parents are defined.
