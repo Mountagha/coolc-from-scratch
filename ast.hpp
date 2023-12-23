@@ -63,6 +63,7 @@ class Expr {
         Expr() = default;
         ~Expr() = default;
         virtual void accept(ExprVisitor* visitor) = 0;
+        Token type_;
 };
 
 class Stmt {
