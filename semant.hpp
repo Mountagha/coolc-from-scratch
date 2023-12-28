@@ -89,7 +89,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             // ensure there's no attribute override.
             target_class = classTable.get(curr_class->superClass->name.lexeme);
             while (true) {
-                feat = get_attribut(curr_class, expr->id.lexeme, FeatureType::ATTRIBUT);
+                feat = get_feature(curr_class, expr->id.lexeme, FeatureType::ATTRIBUT);
                 if (feat) {
                     throw std::runtime_error("override occurs");
                     break;
@@ -103,17 +103,70 @@ class Semant : public StmtVisitor, public ExprVisitor {
             expr->expr->accept(this);       // check the init.
 
             Token init_type = expr->type_;
-            if (init_type != No_type && !g.conform(init_type, expr->type_)) {
+            if (init_type != No_type && !g.conform(init_type, expr->expr_type)) {
                 throw std::runtime_error("type error in attr_class.");
             }
             symboltable.insert(expr->id.lexeme, &expr->type_);
         }
 
         void check_method(Feature* expr) {
+            Feature* feat;
+            Class* target_class;
+            Token parent;            
+
+            symboltable.enterScope();
+
+            if (!classTable.get(expr->type_.lexeme) && expr->type_ != SELF_TYPE) {
+                throw std::runtime_error("Invalid return type");
+            }
+
+            feat = nullptr;
+            target_class = classTable.get(curr_class->name.lexeme);
+
+            while (true) {
+                feat = get_feature(target_class, expr->id.lexeme, FeatureType::METHOD);
+                if (feat) 
+                    break;
+                parent = target_class->superClass->name;
+                if (parent == No_class)
+                    break;
+                target_class = classTable.get(parent.lexeme);
+            }
+
+            if (feat) {
+                if (feat->formals.size() != expr->formals.size()) {
+                    throw std::runtime_error("Invalid formals.");
+                }
+
+                for (size_t i = 0; i < expr->formals.size(); i++) {
+                    expr->formals[i]->accept(this);
+
+                    if (expr->formals[i]->type_ != feat->formals[i]->type_) {
+                        throw std::runtime_error("formal type mismatch");
+                    }
+                }
+                if (expr->type_ != feat->type_) {
+                    throw std::runtime_error("Formal type mismatch");
+                }
+
+            } else {
+                for (auto& formal: expr->formals) {
+                    formal->accept(this);
+                }
+            } 
+
+            // check the body of the class
+            expr->expr->accept(this);
+
+            if (!g.conform(expr->type_, expr->expr_type)) {
+                throw std::runtime_error("Types do not conform.");
+            }
+
+            symboltable.exitScope();
 
         }
 
-        Feature* get_attribut(Class* stmt, const std::string& name, FeatureType ft) {
+        Feature* get_feature(Class* stmt, const std::string& name, FeatureType ft) {
             for(auto& feat: stmt->features) {
                 if (feat->id.lexeme == name && feat->featuretype == ft)
                     return feat.get();
