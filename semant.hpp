@@ -10,14 +10,6 @@
 
 namespace cool {
 
-/*
-    Symbols
-
-    For convenience, a large number of symbols are predefined here.
-    These symbols include the primitive type and method names, as well 
-    as fixed names used by the runtime system.
-*/
-
 
 class Semant : public StmtVisitor, public ExprVisitor {
     public:
@@ -40,15 +32,31 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             check_inheritance(stmt);
 
-            // check program
-            
+            // check every class in the program
+            for (auto& class_ : stmt->classes) {
+                curr_class = class_.get();
+                symboltable.enterScope();
+                class_->accept(this);
+                symboltable.exitScope();
+            } 
         }
 
         void visitClassStmt(Class* stmt) {
-            
+            // check every feature in each class.
+            for (auto& feat: stmt->features) {
+                feat->accept(this);
+            }    
         }
 
-        virtual void visitFeatureExpr(Feature* expr) {}
+        virtual void visitFeatureExpr(Feature* expr) {
+            
+            switch (expr->featuretype) {
+                case FeatureType::ATTRIBUT:
+                    check_attribut(expr);
+                case FeatureType::METHOD:
+                    check_method(expr);
+            }
+        }
         virtual void visitFormalExpr(Formal* expr) {}
         virtual void visitAssignExpr(Assign* expr) {}
         virtual void visitIfExpr(If* expr) {}
@@ -64,6 +72,14 @@ class Semant : public StmtVisitor, public ExprVisitor {
         virtual void visitLetExpr(Let* expr) {}
         virtual void visitCaseExpr(Case* expr) {}
 
+        void check_attribut(Feature* expr) {
+
+        }
+
+        void check_method(Feature* expr) {
+
+        }
+
 
         std::ostream& semant_error() {
             semant_errors++;
@@ -78,6 +94,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
     private:
         SymbolTable<std::string, Class> classTable;
+        SymbolTable<std::string, Token> symboltable;
         unsigned int semant_errors;
         std::ostream& error_stream;
         bool class_main_exist{false};
@@ -118,6 +135,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             }
             return ret;
         }
+
         void construct_ctables(Program* stmt) {
 
             classTable.enterScope();
@@ -152,6 +170,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             //classTable.exitScope();
 
         }
+
         void check_inheritance(Program* stmt) {
             // check if parents are defined.
             if (!check_parents(stmt)) return;

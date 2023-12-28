@@ -5,6 +5,11 @@
 
 namespace cool {
 
+enum FeatureType {
+    METHOD,
+    ATTRIBUT, 
+};
+
 enum TokenType {
     // Single character tokens
     LEFT_PAREN, RIGHT_PAREN, 

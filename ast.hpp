@@ -63,7 +63,7 @@ class Expr {
         Expr() = default;
         ~Expr() = default;
         virtual void accept(ExprVisitor* visitor) = 0;
-        Token type_;
+        Token expr_type;
 };
 
 class Stmt {
@@ -101,11 +101,12 @@ class Class: public Stmt {
 
 class Feature: public Expr {
     public:
-        Feature(Token id_, std::vector<std::unique_ptr<Formal>>&& formals_, Token type__, std::unique_ptr<Expr>&& expr_){
+        Feature(Token id_, std::vector<std::unique_ptr<Formal>>&& formals_, Token type__, std::unique_ptr<Expr>&& expr_, FeatureType ft){
             id = id_;
             formals = std::move(formals_);
             type_ = type__;
             expr = std::move(expr_);
+            featuretype = ft;
         }
         void accept(ExprVisitor* visitor) {
             visitor->visitFeatureExpr(this);
@@ -114,6 +115,7 @@ class Feature: public Expr {
         std::vector<std::unique_ptr<Formal>> formals;
         Token type_;
         std::unique_ptr<Expr> expr;
+        FeatureType featuretype;
          
 };
 

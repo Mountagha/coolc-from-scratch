@@ -37,6 +37,15 @@ IdTable idtable;
 
 static Class* curr_class;
 
+/*
+    Symbols
+
+    For convenience, a large number of symbols are predefined here.
+    These symbols include the primitive type and method names, as well 
+    as fixed names used by the runtime system.
+*/
+
+
 static Token 
     arg{TokenType::IDENTIFIER, "arg"},
     arg2{TokenType::IDENTIFIER, "arg2"},

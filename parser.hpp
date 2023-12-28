@@ -74,6 +74,7 @@ class Parser {
             Token id = consume(IDENTIFIER, "Expecting an identifier.");
             std::vector<std::unique_ptr<Formal>> formals{};
             PExpr expr;
+            FeatureType featuretype = check(LEFT_PAREN) ? FeatureType::METHOD : FeatureType::ATTRIBUT;
             if (match({LEFT_PAREN}) && !match({RIGHT_PAREN})) {
                 do {
                     auto formal = parseFormal(); 
@@ -89,7 +90,7 @@ class Parser {
             } else if (match({ASSIGN})) {
                 expr = parseExpression();
             }
-            return std::make_unique<Feature>(id, std::move(formals), type_, std::move(expr));
+            return std::make_unique<Feature>(id, std::move(formals), type_, std::move(expr), featuretype);
         }
 
         PExpr parseFormal() {
