@@ -158,7 +158,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
             // check the body of the class
             expr->expr->accept(this);
 
-            if (!g.conform(expr->type_, expr->expr_type)) {
+            // method return type must conform to body expr type.
+            if (!g.conform(expr->type_, expr->expr->expr_type)) {
                 throw std::runtime_error("Types do not conform.");
             }
 
