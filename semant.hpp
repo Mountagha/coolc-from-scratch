@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <ostream>
+#include <stdexcept>
 
 #include "token.hpp"
 #include "utilities.hpp"
@@ -73,12 +74,54 @@ class Semant : public StmtVisitor, public ExprVisitor {
         virtual void visitCaseExpr(Case* expr) {}
 
         void check_attribut(Feature* expr) {
+            Token parent;
+            Class* target_class;
+            Feature* feat;
 
+            if (expr->type_ == SELF_TYPE) {
+                expr->type_ = curr_class->name;
+            }
+
+            if (expr->id.lexeme == "self"){
+                throw std::runtime_error("Can't use keyword 'self' as name");
+            }
+
+            // ensure there's no attribute override.
+            target_class = classTable.get(curr_class->superClass->name.lexeme);
+            while (true) {
+                feat = get_attribut(curr_class, expr->id.lexeme, FeatureType::ATTRIBUT);
+                if (feat) {
+                    throw std::runtime_error("override occurs");
+                    break;
+                } 
+                parent = target_class->superClass->name;
+                if (parent == No_class)
+                    break;
+                target_class = classTable.get(parent.lexeme);
+            }
+
+            expr->expr->accept(this);       // check the init.
+
+            Token init_type = expr->type_;
+            if (init_type != No_type && !g.conform(init_type, expr->type_)) {
+                throw std::runtime_error("type error in attr_class.");
+            }
+            symboltable.insert(expr->id.lexeme, &expr->type_);
         }
 
         void check_method(Feature* expr) {
 
         }
+
+        Feature* get_attribut(Class* stmt, const std::string& name, FeatureType ft) {
+            for(auto& feat: stmt->features) {
+                if (feat->id.lexeme == name && feat->featuretype == ft)
+                    return feat.get();
+            }
+            return nullptr;
+        }
+
+
 
 
         std::ostream& semant_error() {
@@ -98,6 +141,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
         unsigned int semant_errors;
         std::ostream& error_stream;
         bool class_main_exist{false};
+        InheritanceGraph g;
 
         bool check_parents(Program* stmt) {
             // make sure all classes have parent class.
@@ -119,7 +163,6 @@ class Semant : public StmtVisitor, public ExprVisitor {
             bool ret = true;
             // Build the inheritance_graph
 
-            InheritanceGraph g;
             g.addEdge(IO, Object);
             g.addEdge(Int, Object);
             g.addEdge(Str, Object);
