@@ -4,6 +4,7 @@
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
+#include <tuple>
 
 #include "token.hpp"
 #include "utilities.hpp"
@@ -103,7 +104,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             expr->cond->accept(this);
             Token cond_type = expr->cond->expr_type;
             if (cond_type != Bool) {
-                throw std::runtime_error("predicate must have Bool type.");
+                throw std::runtime_error("predicate inside If branch must have Bool type.");
             }
             expr->thenBranch->accept(this);
             expr->elseBranch->accept(this);
@@ -111,16 +112,46 @@ class Semant : public StmtVisitor, public ExprVisitor {
             expr->expr_type = join_type;
         }
 
-        virtual void visitWhileExpr(While* expr) {}
+        virtual void visitWhileExpr(While* expr) {
+            expr->cond->accept(this);
+            if (expr->cond->expr_type != Bool) {
+                throw std::runtime_error("predicate inside while branch must have Bool type.");
+            }
+            expr->expr->accept(this);
+            expr->expr_type = Object;
+        }
+
         virtual void visitBinaryExpr(Binary* expr) {}
         virtual void visitUnaryExpr(Unary* expr) {}
         virtual void visitVariableExpr(Variable* expr) {}
         virtual void visitCallExpr(Call* expr) {}
-        virtual void visitBlockExpr(Block* expr) {}
+
+        virtual void visitBlockExpr(Block* expr) {
+            Token block_type;
+            for (auto& expr_: expr->exprs) {
+                expr_->accept(this);
+                block_type = expr_->expr_type;
+            }
+            expr->expr_type = block_type;
+        }
+
         virtual void visitGroupingExpr(Grouping* expr) {}
         virtual void visitGetExpr(Get* expression) {}
         virtual void visitLiteralExpr(Literal* expr) {}
-        virtual void visitLetExpr(Let* expr) {}
+
+        virtual void visitLetExpr(Let* expr) {
+            
+            symboltable.enterScope();
+            for (auto& let: expr->vecAssigns) {
+                Token id = std::get<0>(let);
+                Token id_type = std::get<1>(let);
+                Expr* let_expr = std::get<2>(let).get(); // Since smart pointer.
+                if (let_expr) {
+
+                }
+            }
+        }
+
         virtual void visitCaseExpr(Case* expr) {}
 
         void check_attribut(Feature* expr) {
