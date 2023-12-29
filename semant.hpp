@@ -58,9 +58,59 @@ class Semant : public StmtVisitor, public ExprVisitor {
                     check_method(expr);
             }
         }
-        virtual void visitFormalExpr(Formal* expr) {}
-        virtual void visitAssignExpr(Assign* expr) {}
-        virtual void visitIfExpr(If* expr) {}
+
+        virtual void visitFormalExpr(Formal* expr) {
+            if (symboltable.probe(expr->id.lexeme)) {
+                throw std::runtime_error("Supplicated name.");
+            }
+            if (expr->id == self) {
+                throw std::runtime_error("Can't use keyword 'self'. Preserved");
+            }
+            if (expr->type_ == SELF_TYPE) {
+                throw std::runtime_error("Can't use the keyword 'SELF_TYPE'. Preserved.");
+            }
+            symboltable.insert(expr->id.lexeme, &expr->type_);
+        }
+
+        virtual void visitAssignExpr(Assign* expr) {
+            expr->expr->accept(this);
+            Token assign_type = expr->expr->expr_type;
+            Token *id_type = symboltable.get(expr->id.lexeme);
+            if (!id_type) {
+                Class* target_class = curr_class;
+                while (true) {
+                    Feature* attr = get_feature(target_class, expr->id.lexeme, FeatureType::ATTRIBUT);
+                    if (attr) {
+                        *id_type = attr->expr_type;
+                        break;       
+                    }
+                    Token parent = target_class->superClass->name;
+                    if (parent == No_class)
+                        break;
+                    target_class = classTable.get(parent.lexeme);
+                }
+            }
+            if (!id_type) {
+                throw std::runtime_error("type error in object class");
+            }
+            if (!g.conform(assign_type, *id_type)) {
+                throw std::runtime_error("type error in assign construct.");
+            }
+            expr->expr_type = assign_type;
+        }
+
+        virtual void visitIfExpr(If* expr) {
+            expr->cond->accept(this);
+            Token cond_type = expr->cond->expr_type;
+            if (cond_type != Bool) {
+                throw std::runtime_error("predicate must have Bool type.");
+            }
+            expr->thenBranch->accept(this);
+            expr->elseBranch->accept(this);
+            Token join_type = g.lca(expr->thenBranch->expr_type, expr->elseBranch->expr_type);
+            expr->expr_type = join_type;
+        }
+
         virtual void visitWhileExpr(While* expr) {}
         virtual void visitBinaryExpr(Binary* expr) {}
         virtual void visitUnaryExpr(Unary* expr) {}
@@ -155,7 +205,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 }
             } 
 
-            // check the body of the class
+            // check the body of the method.
             expr->expr->accept(this);
 
             // method return type must conform to body expr type.
