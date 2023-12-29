@@ -140,19 +140,65 @@ class Semant : public StmtVisitor, public ExprVisitor {
         virtual void visitLiteralExpr(Literal* expr) {}
 
         virtual void visitLetExpr(Let* expr) {
-            
+
             symboltable.enterScope();
             for (auto& let: expr->vecAssigns) {
                 Token id = std::get<0>(let);
                 Token id_type = std::get<1>(let);
                 Expr* let_expr = std::get<2>(let).get(); // Since smart pointer.
-                if (let_expr) {
 
+                if (id == self) {
+                    throw std::runtime_error("type error in let.");
+                }
+
+                if (let_expr) {
+                    let_expr->accept(this);
+                    if (let_expr->expr_type != No_type && !g.conform(id_type, let_expr->expr_type))
+                        throw std::runtime_error("Type error in let assign");
+                    symboltable.insert(id.lexeme, &let_expr->expr_type);
+                } else {
+                    symboltable.insert(id.lexeme, &std::get<1>(let)); // !TODO: doubt on pointer here.
                 }
             }
+
+            expr->body->accept(this);
+            expr->expr_type = expr->body->expr_type;
+            symboltable.exitScope();
         }
 
-        virtual void visitCaseExpr(Case* expr) {}
+        virtual void visitCaseExpr(Case* expr) {
+
+            Token join_type = Object;
+            expr->expr->accept(this);
+            Token expr0_type = expr->expr->expr_type;
+            if (expr0_type == No_type)
+                throw std::runtime_error("Type error in case expression.");
+            
+            SymbolTable<std::string, Token> casetable; // to track duplicated branches.
+            for (auto& match: expr->matches) {
+                symboltable.enterScope();
+
+                Token id = std::get<0>(match);
+                Token id_type = std::get<1>(match);
+                Expr* match_expr = std::get<2>(match).get();
+
+                if (casetable.get(id_type.lexeme)) {
+                    throw std::runtime_error("Duplicated branch in case statement.");
+                }
+
+                casetable.insert(id_type.lexeme, &std::get<1>(match));
+
+                match_expr->accept(this);
+
+                if (!g.conform(match_expr->expr_type, id_type)) {
+                    throw std::runtime_error("Type error in case evaluation.");
+                }
+
+                join_type = g.lca(join_type, match_expr->expr_type);
+
+            }
+            expr->expr_type = join_type;
+        }
 
         void check_attribut(Feature* expr) {
             Token parent;
