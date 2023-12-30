@@ -121,7 +121,31 @@ class Semant : public StmtVisitor, public ExprVisitor {
             expr->expr_type = Object;
         }
 
-        virtual void visitBinaryExpr(Binary* expr) {}
+        virtual void visitBinaryExpr(Binary* expr) {
+
+            expr->lhs->accept(this);
+            expr->rhs->accept(this);
+            switch (expr->op.token_type) {
+                case PLUS:
+                case MINUS:
+                case STAR:
+                case SLASH: {
+                    if (expr->lhs->expr_type != Int || expr->rhs->expr_type != Int)
+                        throw std::runtime_error("Binary arithmetic operands must be type Int.");
+                    expr->expr_type = Int;
+                    break;
+                }
+                case LESS:
+                case LESS_EQUAL:
+                    if (expr->lhs->expr_type != Int || expr->rhs->expr_type != Int)
+                        throw std::runtime_error("Binary comparison operands must be type Int.");
+                    expr->expr_type = Bool;
+                    break;
+ 
+
+            }
+        }
+
         virtual void visitUnaryExpr(Unary* expr) {}
         virtual void visitVariableExpr(Variable* expr) {}
         virtual void visitCallExpr(Call* expr) {}
