@@ -130,21 +130,30 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 case MINUS:
                 case STAR:
                 case SLASH: {
-                    if (expr->lhs->expr_type != Int || expr->rhs->expr_type != Int)
+                    if (expr->lhs->expr_type != Int || expr->rhs->expr_type != Int) {
+                        expr->expr_type = Object;
                         throw std::runtime_error("Binary arithmetic operands must be type Int.");
+                    }
                     expr->expr_type = Int;
                     break;
                 }
                 case LESS:
                 case LESS_EQUAL: {
-                    if (expr->lhs->expr_type != Int || expr->rhs->expr_type != Int)
+                    if (expr->lhs->expr_type != Int || expr->rhs->expr_type != Int) {
+                        expr->expr_type = Object;
                         throw std::runtime_error("Binary comparison operands must be type Int.");
+                    }
                     expr->expr_type = Bool;
                     break;
                 }
                 case EQUAL: {
                     Token lhs_type = expr->lhs->expr_type;
                     Token rhs_type = expr->rhs->expr_type;
+                    if (lhs_type == Int || lhs_type == Bool || lhs_type == Str) {
+                        expr->rhs->expr_type = expr->lhs->expr_type;
+                    } else if (rhs_type == Int || rhs_type == Bool || rhs_type == Str) {
+                        expr->lhs->expr_type = expr->rhs->expr_type;
+                    }
                 }
 
             }
