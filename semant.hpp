@@ -149,17 +149,61 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 case EQUAL: {
                     Token lhs_type = expr->lhs->expr_type;
                     Token rhs_type = expr->rhs->expr_type;
-                    if (lhs_type == Int || lhs_type == Bool || lhs_type == Str) {
-                        expr->rhs->expr_type = expr->lhs->expr_type;
-                    } else if (rhs_type == Int || rhs_type == Bool || rhs_type == Str) {
-                        expr->lhs->expr_type = expr->rhs->expr_type;
+                    if (lhs_type == Int) {
+                        if (rhs_type == Int) {
+                            expr->expr_type = Bool;
+                        } else {
+                            expr->expr_type = Object;
+                            throw std::runtime_error("type mismatch in '=' operator.");
+                        }
+                    } else if (lhs_type == Bool) {
+                        if (rhs_type == Bool) {
+                            expr->expr_type = Bool;
+                        } else {
+                            expr->expr_type = Object;
+                            throw std::runtime_error("type mismatch in '=' operator.");
+                        }
+                    } else if (lhs_type == Str) {
+                        if (rhs_type == Str) {
+                            expr->expr_type = Bool;
+                        } else {
+                            expr->expr_type = Object;
+                            throw std::runtime_error("type mismatch in '=' operator.");
+                        }
                     }
+                    expr->expr_type = Bool;     // !TODO: recheck =. Not sure on the logics.
+                    break;
                 }
 
             }
         }
 
-        virtual void visitUnaryExpr(Unary* expr) {}
+        virtual void visitUnaryExpr(Unary* expr) {
+            expr->expr->accept(this);
+            switch (expr->op.token_type) {
+                case TILDE: {
+                    if (expr->expr->expr_type != Int) {
+                        expr->expr_type = Object;
+                        throw std::runtime_error("Type error in '~' operator.");
+                    }
+                    expr->expr_type = Int;
+                    break;
+                }
+                case NOT: {
+                    if (expr->expr->expr_type != Bool) {
+                        expr->expr_type = Object;
+                        throw std::runtime_error("Type error in '=' operator.");
+                    }
+                    expr->expr_type = Bool;
+                    break;
+                }
+                case ISVOID: {
+                    expr->expr_type = Bool;
+                    break;
+                }
+            }
+        }
+
         virtual void visitVariableExpr(Variable* expr) {}
         virtual void visitCallExpr(Call* expr) {}
 
