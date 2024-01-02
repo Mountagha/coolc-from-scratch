@@ -136,12 +136,16 @@ class Semant : public StmtVisitor, public ExprVisitor {
                     break;
                 }
                 case LESS:
-                case LESS_EQUAL:
+                case LESS_EQUAL: {
                     if (expr->lhs->expr_type != Int || expr->rhs->expr_type != Int)
                         throw std::runtime_error("Binary comparison operands must be type Int.");
                     expr->expr_type = Bool;
                     break;
- 
+                }
+                case EQUAL: {
+                    Token lhs_type = expr->lhs->expr_type;
+                    Token rhs_type = expr->rhs->expr_type;
+                }
 
             }
         }
