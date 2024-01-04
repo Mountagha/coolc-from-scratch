@@ -45,7 +45,7 @@ class ExprVisitor {
         virtual void visitCallExpr(Call* expr) = 0;
         virtual void visitBlockExpr(Block* expr) = 0;
         virtual void visitGroupingExpr(Grouping* expr) = 0;
-        virtual void visitGetExpr(Get* expression) = 0;
+        virtual void visitGetExpr(Get* expr) = 0;
         virtual void visitLiteralExpr(Literal* expr) = 0;
         virtual void visitLetExpr(Let* expr) = 0;
         virtual void visitCaseExpr(Case* expr) = 0;

@@ -18,6 +18,7 @@ class CoolObject{
         explicit CoolObject(int n): coolType{CoolType::Number_t}, number{n} {}
         explicit CoolObject(std::string s): coolType{CoolType::String_t}, string{s} {}
         std::string to_string();
+        CoolType type() const {return coolType; }
 
     private:
         CoolType coolType;

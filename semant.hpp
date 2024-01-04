@@ -204,7 +204,24 @@ class Semant : public StmtVisitor, public ExprVisitor {
             }
         }
 
-        virtual void visitVariableExpr(Variable* expr) {}
+        virtual void visitVariableExpr(Variable* expr) {
+            Feature* feat;
+            if (expr->name == self) {
+                expr->expr_type = curr_class->name;
+            }
+            auto target_class = curr_class;
+            while (true) {
+                feat = get_feature(target_class, expr->name.lexeme, FeatureType::ATTRIBUT);
+                if (feat) break;
+                Token parent = target_class->superClass->name;
+                if (parent == No_class) break;
+                target_class = classTable.get(parent.lexeme);
+            }
+            if (!feat)
+                std::runtime_error(expr->name.lexeme + " is not defined.");
+            expr->expr_type = feat->type_;
+        }
+
         virtual void visitCallExpr(Call* expr) {}
 
         virtual void visitBlockExpr(Block* expr) {
@@ -220,7 +237,11 @@ class Semant : public StmtVisitor, public ExprVisitor {
             expr->expr->accept(this);
         }
 
-        virtual void visitGetExpr(Get* expression) {}
+        virtual void visitGetExpr(Get* expr) {
+            expr->expr->accept(this);
+
+        }
+
         virtual void visitLiteralExpr(Literal* expr) {
             switch (expr->object.type()) {
                 case CoolType::Bool_t:
