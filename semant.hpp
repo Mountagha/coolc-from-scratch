@@ -216,7 +216,10 @@ class Semant : public StmtVisitor, public ExprVisitor {
             expr->expr_type = block_type;
         }
 
-        virtual void visitGroupingExpr(Grouping* expr) {}
+        virtual void visitGroupingExpr(Grouping* expr) {
+            expr->expr->accept(this);
+        }
+
         virtual void visitGetExpr(Get* expression) {}
         virtual void visitLiteralExpr(Literal* expr) {}
 
