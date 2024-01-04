@@ -221,7 +221,22 @@ class Semant : public StmtVisitor, public ExprVisitor {
         }
 
         virtual void visitGetExpr(Get* expression) {}
-        virtual void visitLiteralExpr(Literal* expr) {}
+        virtual void visitLiteralExpr(Literal* expr) {
+            switch (expr->object.type()) {
+                case CoolType::Bool_t:
+                    expr->expr_type = Bool;
+                    break;
+                case CoolType::Number_t:
+                    expr->expr_type = Int;
+                    break;
+                case CoolType::String_t:
+                    expr->expr_type = Str;
+                    break;
+                case CoolType::Void_t:
+                    expr->expr_type = No_type; // !TODO: to check later.
+                    break;
+            }
+        }
 
         virtual void visitLetExpr(Let* expr) {
 
