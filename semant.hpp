@@ -239,6 +239,24 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
         virtual void visitGetExpr(Get* expr) {
             expr->expr->accept(this);
+            if (expr->class_)
+                expr->class_->accept(this);
+            if (!g.conform(expr->expr->expr_type, expr->class_->expr_type))
+                std::runtime_error("Type error in Get.");
+            Class* target_class = classTable.get(expr->class_->name.lexeme);
+            Feature *feat;
+            while (true) {
+                feat = get_feature(target_class, expr->name.lexeme, FeatureType::METHOD);
+                if (feat)
+                    break;
+                Token parent = target_class->superClass->name;
+                if (parent == No_class)
+                    break;
+                target_class = classTable.get(parent.lexeme);
+            }
+            if (!feat)
+                throw std::runtime_error("typere error in Get.");
+            expr->expr_type = feat->expr_type; // !TODO: A revoir ca.
 
         }
 

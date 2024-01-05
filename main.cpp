@@ -35,8 +35,8 @@ int main(int argc, char* argv[]) {
     auto program = p.parse();
 
     if(!p.hasError()) {
-        //ASTPrinter{}.print(program);
-        Semant{}.semant(program);
+        ASTPrinter{}.print(program);
+        //Semant{}.semant(program);
     }
         
 }
