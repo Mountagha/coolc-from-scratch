@@ -6,6 +6,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <memory>
 
 #include "ast.hpp"
 #include "token.hpp"
@@ -32,6 +33,7 @@ using IntTable = std::unordered_map<std::string, Token>;
 
 
 IdTable idtable;
+StringTable stringtable;
 
 // later find a way to get rid of those globals.
 
@@ -105,6 +107,71 @@ static void initialize_constants() {
     idtable.insert({"substr", substr});
     idtable.insert({"type_name", type_name});
     idtable.insert({"_val", val});
+
+}
+
+void install_basic_classes() {
+    // The tree package uses these globals to annotate the classes built below.
+    // curr_lineno  = 0;
+    stringtable.insert({"<basic_class", {TokenType::IDENTIFIER, "<basic_class>"}});
+    
+    // The following demonstrates how to create dummy parse trees to
+    // refer to basic Cool classes.  There's no need for method
+    // bodies -- these are already built into the runtime system.
+    
+    // IMPORTANT: The results of the following expressions are
+    // stored in local variables.  You will want to do something
+    // with those variables at the end of this method to make this
+    // code meaningful.
+
+    // 
+    // The Object class has no parent class. Its methods are
+    //        abort() : Object    aborts the program
+    //        type_name() : Str   returns a string representation of class name
+    //        copy() : SELF_TYPE  returns a copy of the object
+    //
+    // There is no need for method bodies in the basic classes---these
+    // are already built in to the runtime system.
+
+    std::vector<std::unique_ptr<Formal>> abort_formals;
+    std::vector<std::unique_ptr<Formal>> typename_formals;
+    std::vector<std::unique_ptr<Formal>> copy_formals;
+    Token obj{TokenType::IDENTIFIER, "Object"};
+    std::vector<std::unique_ptr<Feature>> feats = {
+        std::make_unique<Feature>(cool_abort, abort_formals, Object, nullptr, FeatureType::METHOD),
+        std::make_unique<Feature>(type_name, typename_formals, Str, nullptr, FeatureType::METHOD),
+        std::make_unique<Feature>(copy, copy_formals, SELF_TYPE, nullptr, FeatureType::METHOD)
+    };
+
+    auto Object_class = std::make_unique<Class> (
+        obj,
+        std::make_unique<Variable>(No_class),
+        std::move(feats)
+    );
+
+    // 
+    // The IO class inherits from Object. Its methods are
+    //        out_string(Str) : SELF_TYPE       writes a string to the output
+    //        out_int(Int) : SELF_TYPE            "    an int    "  "     "
+    //        in_string() : Str                 reads a string from the input
+    //        in_int() : Int                      "   an int     "  "     "
+    //
+    std::vector<std::unique_ptr<Formal>> out_string_formals = { std::make_unique<Formal>(arg, Str) };
+    std::vector<std::unique_ptr<Formal>> out_int_formals = { std::make_unique<Formal>(arg, Int) };
+    std::vector<std::unique_ptr<Formal>> in_string_formals;
+    std::vector<std::unique_ptr<Formal>> in_int_formals;
+    Token io{TokenType::IDENTIFIER, "IO"};
+    std::vector<std::unique_ptr<Feature>> io_feats = {
+        std::make_unique<Feature>(out_string, out_string_formals, SELF_TYPE, nullptr, FeatureType::METHOD);
+        std::make_unique<Feature>(out_int, out_int_formals, SELF_TYPE, nullptr, FeatureType::METHOD);
+        std::make_unique<Feature>(in_string, in_string_formals, Str, nullptr, FeatureType::METHOD),
+        std::make_unique<Feature>(in_int, in_int_formals, Int, nullptr, FeatureType::METHOD);
+    };
+    auto IO_class = std:make_unique<Class>(
+        io,
+        std::make_unique<Variable>(Object),
+        std::move(io_feats)
+    ); 
 
 }
 
