@@ -263,6 +263,7 @@ class Parser {
         }
 
         PExpr finishCall(PExpr& callee) {
+            Token callee_name = previous();
             std::vector<PExpr> arguments{};
             if (!check({RIGHT_PAREN})) {
                 do {
@@ -270,7 +271,7 @@ class Parser {
                 }while(match({COMMA}) && !isAtEnd());
             }
             Token paren = consume(RIGHT_PAREN, "Expect a right parenthesis at the end of a function call.");
-            return std::make_unique<Call>(std::move(callee), paren, std::move(arguments));
+            return std::make_unique<Call>(std::move(callee), callee_name, std::move(arguments));
         }
 
         PExpr parsePrimary() {

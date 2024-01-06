@@ -222,7 +222,22 @@ class Semant : public StmtVisitor, public ExprVisitor {
             expr->expr_type = feat->type_;
         }
 
-        virtual void visitCallExpr(Call* expr) {}
+        virtual void visitCallExpr(Call* expr) {
+            expr->callee->accept(this);
+            Token fun_type = expr->callee->expr_type;
+            // check formals
+            Class* target_class = classTable.get(fun_type.lexeme);
+            Feature* feat = get_feature(target_class, expr->name.lexeme, FeatureType::METHOD);
+            // At this point no need to check feat existence since already done while
+            // typechecking callee. 
+            for (size_t i = 0; i < expr->args.size(); i++) {
+                expr->args[i]->accept(this);
+                if (!g.conform(expr->args[i]->expr_type, feat->formals[i]->expr_type)){
+                    throw std::runtime_error("Type mismatch in function Call.");
+                }
+            }
+            expr->expr_type = fun_type; 
+        }
 
         virtual void visitBlockExpr(Block* expr) {
             Token block_type;
@@ -238,13 +253,20 @@ class Semant : public StmtVisitor, public ExprVisitor {
         }
 
         virtual void visitGetExpr(Get* expr) {
-            expr->expr->accept(this);
-            if (expr->class_)
-                expr->class_->accept(this);
-            if (!g.conform(expr->expr->expr_type, expr->class_->expr_type))
-                std::runtime_error("Type error in Get.");
-            Class* target_class = classTable.get(expr->class_->name.lexeme);
             Feature *feat;
+            Class* target_class;
+
+            expr->expr->accept(this);
+            if (expr->class_) {     // static dispatch
+                expr->class_->accept(this);
+                if (!g.conform(expr->expr->expr_type, expr->class_->expr_type))
+                    std::runtime_error("Type error in Get.");
+                target_class = classTable.get(expr->class_->name.lexeme);
+            } else {    // dynamic dispatch
+                if (expr->expr->expr_type == SELF_TYPE)
+                    expr->expr->expr_type = curr_class->name;
+                target_class = classTable.get(expr->expr->expr_type.lexeme);
+            }
             while (true) {
                 feat = get_feature(target_class, expr->name.lexeme, FeatureType::METHOD);
                 if (feat)
@@ -256,6 +278,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
             }
             if (!feat)
                 throw std::runtime_error("typere error in Get.");
+            if (feat->expr_type == SELF_TYPE)
+                feat->expr_type = expr->expr->expr_type;
             expr->expr_type = feat->expr_type; // !TODO: A revoir ca.
 
         }

@@ -212,14 +212,14 @@ class Call: public Expr {
         Call(std::unique_ptr<Expr>&& callee_, Token t_, std::vector<std::unique_ptr<Expr>>&& args_) {
            args = std::move(args_); 
            callee = std::move(callee_);
-           tok = t_;
+           name = t_;
         }
         void accept(ExprVisitor* visitor) {
             visitor->visitCallExpr(this);
         }
         std::vector<std::unique_ptr<Expr>> args;
         std::unique_ptr<Expr> callee;
-        Token tok;
+        Token name;
 };
 
 class Block: public Expr {
