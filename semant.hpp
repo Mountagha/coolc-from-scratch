@@ -30,6 +30,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             initialize_constants();
 
+            install_basic_classes();
+
             construct_ctables(stmt);
 
             check_inheritance(stmt);
@@ -481,6 +483,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
     private:
         SymbolTable<std::string, Class> classTable;
         SymbolTable<std::string, Token> symboltable;
+        // the base classes.
+        std::unique_ptr<Class> Object_class, IO_class, Int_class, Bool_class, Str_class;
         unsigned int semant_errors;
         std::ostream& error_stream;
         bool class_main_exist{false};
@@ -565,7 +569,141 @@ class Semant : public StmtVisitor, public ExprVisitor {
             check_DAG(stmt);
         }
 
-        
+        void install_basic_classes() {
+            // The tree package uses these globals to annotate the classes built below.
+            // curr_lineno  = 0;
+            stringtable.insert({"<basic_class", {TokenType::IDENTIFIER, "<basic_class>"}});
+            
+            // The following demonstrates how to create dummy parse trees to
+            // refer to basic Cool classes.  There's no need for method
+            // bodies -- these are already built into the runtime system.
+            
+            // IMPORTANT: The results of the following expressions are
+            // stored in local variables.  You will want to do something
+            // with those variables at the end of this method to make this
+            // code meaningful.
+
+            // 
+            // The Object class has no parent class. Its methods are
+            //        abort() : Object    aborts the program
+            //        type_name() : Str   returns a string representation of class name
+            //        copy() : SELF_TYPE  returns a copy of the object
+            //
+            // There is no need for method bodies in the basic classes---these
+            // are already built in to the runtime system.
+
+            std::vector<std::unique_ptr<Formal>> abort_formals;
+            std::vector<std::unique_ptr<Formal>> typename_formals;
+            std::vector<std::unique_ptr<Formal>> copy_formals;
+            std::vector<std::unique_ptr<Feature>> feats;
+            feats.push_back(std::make_unique<Feature>(cool_abort, std::move(abort_formals), Object, nullptr, FeatureType::METHOD));
+            feats.push_back(std::make_unique<Feature>(type_name, std::move(typename_formals), Str, nullptr, FeatureType::METHOD));
+            feats.push_back(std::make_unique<Feature>(copy, std::move(copy_formals), SELF_TYPE, nullptr, FeatureType::METHOD));
+
+            auto Object_class_ = std::make_unique<Class> (
+                Object,
+                std::make_unique<Variable>(No_class),
+                std::move(feats)
+            );
+            Object_class = std::move(Object_class_);
+
+            // 
+            // The IO class inherits from Object. Its methods are
+            //        out_string(Str) : SELF_TYPE       writes a string to the output
+            //        out_int(Int) : SELF_TYPE            "    an int    "  "     "
+            //        in_string() : Str                 reads a string from the input
+            //        in_int() : Int                      "   an int     "  "     "
+            //
+            std::vector<std::unique_ptr<Formal>> out_string_formals;
+            out_string_formals.push_back(std::make_unique<Formal>(arg, Str));
+            std::vector<std::unique_ptr<Formal>> out_int_formals;
+            out_int_formals.push_back(std::make_unique<Formal>(arg, Int));
+            std::vector<std::unique_ptr<Formal>> in_string_formals;
+            std::vector<std::unique_ptr<Formal>> in_int_formals;
+
+            std::vector<std::unique_ptr<Feature>> io_feats;
+            feats.push_back(std::make_unique<Feature>(out_string, std::move(out_string_formals), SELF_TYPE, nullptr, FeatureType::METHOD));
+            feats.push_back(std::make_unique<Feature>(out_int, std::move(out_int_formals), SELF_TYPE, nullptr, FeatureType::METHOD));
+            feats.push_back(std::make_unique<Feature>(in_string, std::move(in_string_formals), Str, nullptr, FeatureType::METHOD));
+            feats.push_back(std::make_unique<Feature>(in_int, std::move(in_int_formals), Int, nullptr, FeatureType::METHOD));
+
+            auto IO_class_ = std::make_unique<Class>(
+                IO,
+                std::make_unique<Variable>(Object),
+                std::move(io_feats)
+            ); 
+            IO_class = std::move(IO_class_);
+
+            //
+            // The Int class has no methods and only a single attribute, the
+            // "val" for the integer. 
+            //
+            std::vector<std::unique_ptr<Formal>> int_attr_formals;
+            std::vector<std::unique_ptr<Feature>> int_feats; 
+            int_feats.push_back(std::make_unique<Feature>(val, std::move(int_attr_formals), prim_slot, nullptr, FeatureType::ATTRIBUT)); 
+
+            auto Int_class_ = std::make_unique<Class>(
+                Int,
+                std::make_unique<Variable>(Object),
+                std::move(int_feats)
+            );
+            Int_class = std::move(Int_class_);
+
+            //
+            // Bool also has only the "val" slot.
+            //
+            std::vector<std::unique_ptr<Formal>> bool_attr_formals;
+            std::vector<std::unique_ptr<Feature>> bool_feats;
+            bool_feats.push_back(std::make_unique<Feature>(val, std::move(bool_attr_formals), prim_slot, nullptr, FeatureType::ATTRIBUT)); 
+
+            auto Bool_class_ = std::make_unique<Class>(
+                Bool,
+                std::make_unique<Variable>(Object),
+                std::move(int_feats)
+            );
+            Bool_class = std::move(Bool_class_);
+
+            //
+            // The class Str has a number of slots and operations:
+            //       val                                  the length of the string
+            //       str_field                            the string itself
+            //       length() : Int                       returns length of the string
+            //       concat(arg: Str) : Str               performs string concatenation
+            //       substr(arg: Int, arg2: Int): Str     substring selection
+            //       
+
+            std::vector<std::unique_ptr<Formal>> val_formals = { };
+            std::vector<std::unique_ptr<Formal>> str_field_formals = { };
+            std::vector<std::unique_ptr<Formal>> length_formals = { };
+            std::vector<std::unique_ptr<Formal>> concat_formals;
+            concat_formals.push_back(std::make_unique<Formal>(arg, Int));
+            std::vector<std::unique_ptr<Formal>> substr_formals;
+            substr_formals.push_back(std::make_unique<Formal>(arg, Int));
+            substr_formals.push_back(std::make_unique<Formal>(arg2, Int)); 
+
+            std::vector<std::unique_ptr<Feature>> str_features;
+            str_features.push_back(std::make_unique<Feature>(val, std::move(val_formals), Int, nullptr, FeatureType::ATTRIBUT));
+            str_features.push_back(std::make_unique<Feature>(str_field, std::move(str_field_formals), prim_slot, nullptr, FeatureType::METHOD));
+            str_features.push_back(std::make_unique<Feature>(length, std::move(length_formals), Int, nullptr, FeatureType::METHOD));
+            str_features.push_back(std::make_unique<Feature>(concat, std::move(concat_formals), Str, nullptr, FeatureType::METHOD));
+            str_features.push_back(std::make_unique<Feature>(substr, std::move(substr_formals), Str, nullptr, FeatureType::METHOD));
+
+            auto Str_class_ = std::make_unique<Class>(
+                Str,
+                std::make_unique<Variable>(Object),
+                std::move(str_features)
+            );
+            Str_class = std::move(Str_class);
+
+            // now add these base classes to the class_table.
+
+            classTable.insert(Object.lexeme, Object_class.get());
+            classTable.insert(IO.lexeme, IO_class.get());
+            classTable.insert(Int.lexeme, Int_class.get());
+            classTable.insert(Bool.lexeme, Bool_class.get());
+            classTable.insert(Str.lexeme, Str_class.get());
+
+        }
 };
 
 } // namespace cool
