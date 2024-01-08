@@ -167,7 +167,7 @@ void install_basic_classes() {
         std::make_unique<Feature>(in_string, in_string_formals, Str, nullptr, FeatureType::METHOD),
         std::make_unique<Feature>(in_int, in_int_formals, Int, nullptr, FeatureType::METHOD);
     };
-    auto IO_class = std:make_unique<Class>(
+    auto IO_class = std::make_unique<Class>(
         io,
         std::make_unique<Variable>(Object),
         std::move(io_feats)
