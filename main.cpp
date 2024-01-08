@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
     auto program = p.parse();
 
     if(!p.hasError()) {
+        std::cout << "Semanting...\n";
         //ASTPrinter{}.print(program);
         Semant{}.semant(program);
     }

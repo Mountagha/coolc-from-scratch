@@ -207,21 +207,22 @@ class Semant : public StmtVisitor, public ExprVisitor {
         }
 
         virtual void visitVariableExpr(Variable* expr) {
-            Feature* feat;
+            Feature *feat_attr, *feat_meth;
             if (expr->name == self) {
                 expr->expr_type = curr_class->name;
             }
             auto target_class = curr_class;
             while (true) {
-                feat = get_feature(target_class, expr->name.lexeme, FeatureType::ATTRIBUT);
-                if (feat) break;
+                feat_attr = get_feature(target_class, expr->name.lexeme, FeatureType::ATTRIBUT);
+                feat_meth = get_feature(target_class, expr->name.lexeme, FeatureType::METHOD);
+                if (feat_attr || feat_meth) break; // !TODO: CHECK for when both meth and attr have the same lexeme.
                 Token parent = target_class->superClass->name;
                 if (parent == No_class) break;
                 target_class = classTable.get(parent.lexeme);
             }
-            if (!feat)
-                std::runtime_error(expr->name.lexeme + " is not defined.");
-            expr->expr_type = feat->type_;
+            if (!feat_attr || !feat_meth)
+                throw std::runtime_error(expr->name.lexeme + " is not defined.");
+            expr->expr_type = (feat_attr) ? feat_attr->type_ : feat_meth->type_;
         }
 
         virtual void visitCallExpr(Call* expr) {
@@ -262,7 +263,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             if (expr->class_) {     // static dispatch
                 expr->class_->accept(this);
                 if (!g.conform(expr->expr->expr_type, expr->class_->expr_type))
-                    std::runtime_error("Type error in Get.");
+                    throw std::runtime_error("Type error in Get.");
                 target_class = classTable.get(expr->class_->name.lexeme);
             } else {    // dynamic dispatch
                 if (expr->expr->expr_type == SELF_TYPE)
@@ -466,9 +467,6 @@ class Semant : public StmtVisitor, public ExprVisitor {
             return nullptr;
         }
 
-
-
-
         std::ostream& semant_error() {
             semant_errors++;
             return error_stream;
@@ -528,8 +526,6 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
         void construct_ctables(Program* stmt) {
 
-            classTable.enterScope();
-
             for (auto& class_: stmt->classes) {
                 Token class_name, parent_name;
                 class_name = class_->name;
@@ -570,6 +566,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
         }
 
         void install_basic_classes() {
+
+            classTable.enterScope();
             // The tree package uses these globals to annotate the classes built below.
             // curr_lineno  = 0;
             stringtable.insert({"<basic_class", {TokenType::IDENTIFIER, "<basic_class>"}});
@@ -693,7 +691,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 std::make_unique<Variable>(Object),
                 std::move(str_features)
             );
-            Str_class = std::move(Str_class);
+            Str_class = std::move(Str_class_);
 
             // now add these base classes to the class_table.
 
