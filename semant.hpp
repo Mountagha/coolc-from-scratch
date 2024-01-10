@@ -220,13 +220,13 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 if (parent == No_class) break;
                 target_class = classTable.get(parent.lexeme);
             }
-            if (!feat_attr || !feat_meth)
+            if (!feat_attr && !feat_meth)
                 throw std::runtime_error(expr->name.lexeme + " is not defined.");
             expr->expr_type = (feat_attr) ? feat_attr->type_ : feat_meth->type_;
         }
 
         virtual void visitCallExpr(Call* expr) {
-            expr->callee->accept(this);
+            //expr->callee->accept(this);
             Token fun_type = expr->callee->expr_type;
             // check formals
             Class* target_class = classTable.get(fun_type.lexeme);
@@ -620,10 +620,10 @@ class Semant : public StmtVisitor, public ExprVisitor {
             std::vector<std::unique_ptr<Formal>> in_int_formals;
 
             std::vector<std::unique_ptr<Feature>> io_feats;
-            feats.push_back(std::make_unique<Feature>(out_string, std::move(out_string_formals), SELF_TYPE, nullptr, FeatureType::METHOD));
-            feats.push_back(std::make_unique<Feature>(out_int, std::move(out_int_formals), SELF_TYPE, nullptr, FeatureType::METHOD));
-            feats.push_back(std::make_unique<Feature>(in_string, std::move(in_string_formals), Str, nullptr, FeatureType::METHOD));
-            feats.push_back(std::make_unique<Feature>(in_int, std::move(in_int_formals), Int, nullptr, FeatureType::METHOD));
+            io_feats.push_back(std::make_unique<Feature>(out_string, std::move(out_string_formals), SELF_TYPE, nullptr, FeatureType::METHOD));
+            io_feats.push_back(std::make_unique<Feature>(out_int, std::move(out_int_formals), SELF_TYPE, nullptr, FeatureType::METHOD));
+            io_feats.push_back(std::make_unique<Feature>(in_string, std::move(in_string_formals), Str, nullptr, FeatureType::METHOD));
+            io_feats.push_back(std::make_unique<Feature>(in_int, std::move(in_int_formals), Int, nullptr, FeatureType::METHOD));
 
             auto IO_class_ = std::make_unique<Class>(
                 IO,

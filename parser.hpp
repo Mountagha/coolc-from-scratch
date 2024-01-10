@@ -244,7 +244,7 @@ class Parser {
         PExpr parseCall() {
             PExpr expr = parsePrimary();
             while (true) {
-                if (match({LEFT_PAREN})) {
+                if (check(LEFT_PAREN)) {
                     expr = finishCall(expr);
                 } else if (match({AT})) {
                     Token className = consume(IDENTIFIER, "Expect a valid class name after `@`");
@@ -264,6 +264,7 @@ class Parser {
 
         PExpr finishCall(PExpr& callee) {
             Token callee_name = previous();
+            consume(LEFT_PAREN, "Expect '(' at call beginning.");
             std::vector<PExpr> arguments{};
             if (!check({RIGHT_PAREN})) {
                 do {
