@@ -29,10 +29,10 @@ class typeIdentifier: public StmtVisitor, public ExprVisitor {
         void visitBinaryExpr(Binary* expr) {}
         void visitUnaryExpr(Unary* expr) {}
         void visitVariableExpr(Variable* expr) { type = Type::Variable; }
-        void visitCallExpr(Call* expr) {}
         void visitBlockExpr(Block* expr) {}
         void visitGroupingExpr(Grouping* expr) {}
-        void visitGetExpr(Get* expr) {}
+        void visitDispatchExpr(Dispatch* expr) { }
+        void visitStaticDispatchExpr(StaticDispatch* expr) { }
         void visitLiteralExpr(Literal* expr) {}
         void visitLetExpr(Let* expr) {}
         void visitCaseExpr(Case* expr) {}

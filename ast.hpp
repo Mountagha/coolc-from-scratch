@@ -20,13 +20,13 @@ class While;
 class Let;
 class Binary;
 class Unary;
-class Get;
 class Block;
-class Call;
 class Variable;
 class Grouping;
 class Literal;
 class Case;
+class StaticDispatch;
+class Dispatch;
 
 using PExpr = std::unique_ptr<Expr>;
 using letAssign = std::tuple<Token, Token, PExpr>; // to represent id: token: expr into 1 object.
@@ -42,7 +42,6 @@ class ExprVisitor {
         virtual void visitBinaryExpr(Binary* expr) = 0;
         virtual void visitUnaryExpr(Unary* expr) = 0;
         virtual void visitVariableExpr(Variable* expr) = 0;
-        virtual void visitCallExpr(Call* expr) = 0;
         virtual void visitBlockExpr(Block* expr) = 0;
         virtual void visitGroupingExpr(Grouping* expr) = 0;
         virtual void visitStaticDispatchExpr(StaticDispatch* expr) = 0;
@@ -205,21 +204,6 @@ class Variable: public Expr {
         void accept(ExprVisitor* visitor) {
             visitor->visitVariableExpr(this);
         }
-        Token name;
-};
-
-class Call: public Expr {
-    public:
-        Call(std::unique_ptr<Variable>&& callee_, Token t_, std::vector<std::unique_ptr<Expr>>&& args_) {
-           args = std::move(args_); 
-           callee = std::move(callee_);
-           name = t_;
-        }
-        void accept(ExprVisitor* visitor) {
-            visitor->visitCallExpr(this);
-        }
-        std::vector<std::unique_ptr<Expr>> args;
-        std::unique_ptr<Variable> callee;
         Token name;
 };
 

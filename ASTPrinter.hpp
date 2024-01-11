@@ -29,10 +29,10 @@ class ASTPrinter : public ExprVisitor, public StmtVisitor  {
         void visitBinaryExpr(Binary* expr);
         void visitUnaryExpr(Unary* expr);
         void visitVariableExpr(Variable* expr); 
-        void visitCallExpr(Call* expr);
         void visitBlockExpr(Block* expr);
         void visitGroupingExpr(Grouping* expr);
-        void visitGetExpr(Get* expr);
+        void visitStaticDispatchExpr(StaticDispatch* expr);
+        void visitDispatchExpr(Dispatch* expr);
         void visitLiteralExpr(Literal* expr);
         void visitLetExpr(Let* expr);
         void visitCaseExpr(Case* expr);
