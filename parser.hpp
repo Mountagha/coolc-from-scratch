@@ -243,6 +243,17 @@ class Parser {
 
         PExpr parseCall() {
             PExpr expr = parsePrimary();
+            if (match({AT})) { // static dispatch
+                Token className = consume(IDENTIFIER, "Expect a valid class name after `@`");
+                consume(DOT, "Expect a dot after type identifier.");
+                Token id = consume(IDENTIFIER, "Expect an identifier after `.`.");
+                auto class_ = std::make_unique<Variable>(className);
+                return std::make_unique<StaticDispatch>(id, std::move(expr), std::move(class_), parseArgs());
+            } else if (match ({DOT})) { // dynamic dispatch
+                Token id = consume(IDENTIFIER, "Expect an identifier after `.`.");
+                return std::make_unique<Dispatch>(id, std::move(expr), parseArgs());
+            } 
+            /*
             while (true) {
                 if (check(LEFT_PAREN)) {
                     expr = finishCall(expr);
@@ -260,10 +271,11 @@ class Parser {
                 }
             }
             return expr;
+            */
+            return expr;
         }
 
-        PExpr finishCall(PExpr& callee) {
-            Token callee_name = previous();
+        std::vector<PExpr> parseArgs() {
             consume(LEFT_PAREN, "Expect '(' at call beginning.");
             std::vector<PExpr> arguments{};
             if (!check({RIGHT_PAREN})) {
@@ -272,7 +284,7 @@ class Parser {
                 }while(match({COMMA}) && !isAtEnd());
             }
             Token paren = consume(RIGHT_PAREN, "Expect a right parenthesis at the end of a function call.");
-            return std::make_unique<Call>(std::move(callee), callee_name, std::move(arguments));
+            return arguments;
         }
 
         PExpr parsePrimary() {
