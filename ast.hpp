@@ -232,7 +232,7 @@ class Grouping: public Expr {
 class StaticDispatch: public Expr {
     public:
         StaticDispatch(Token callee_name_, std::unique_ptr<Expr>&& expr_, 
-        std::vector<std::unique_ptr<Expr>>&& args_, std::unique_ptr<Variable>&& class__) {
+        std::unique_ptr<Variable>&& class__ ,std::vector<std::unique_ptr<Expr>>&& args_) {
             callee_name = callee_name_;
             expr = std::move(expr_);
             class_ = std::move(class__);
