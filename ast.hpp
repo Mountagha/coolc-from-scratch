@@ -45,7 +45,8 @@ class ExprVisitor {
         virtual void visitCallExpr(Call* expr) = 0;
         virtual void visitBlockExpr(Block* expr) = 0;
         virtual void visitGroupingExpr(Grouping* expr) = 0;
-        virtual void visitGetExpr(Get* expr) = 0;
+        virtual void visitStaticDispatchExpr(StaticDispatch* expr) = 0;
+        virtual void visitDispatchExpr(Dispatch* expr) = 0;
         virtual void visitLiteralExpr(Literal* expr) = 0;
         virtual void visitLetExpr(Let* expr) = 0;
         virtual void visitCaseExpr(Case* expr) = 0;
@@ -209,7 +210,7 @@ class Variable: public Expr {
 
 class Call: public Expr {
     public:
-        Call(std::unique_ptr<Expr>&& callee_, Token t_, std::vector<std::unique_ptr<Expr>>&& args_) {
+        Call(std::unique_ptr<Variable>&& callee_, Token t_, std::vector<std::unique_ptr<Expr>>&& args_) {
            args = std::move(args_); 
            callee = std::move(callee_);
            name = t_;
@@ -218,7 +219,7 @@ class Call: public Expr {
             visitor->visitCallExpr(this);
         }
         std::vector<std::unique_ptr<Expr>> args;
-        std::unique_ptr<Expr> callee;
+        std::unique_ptr<Variable> callee;
         Token name;
 };
 
@@ -244,20 +245,40 @@ class Grouping: public Expr {
         std::unique_ptr<Expr> expr;
 };
 
-class Get: public Expr {
+class StaticDispatch: public Expr {
     public:
-        Get(Token name_, std::unique_ptr<Expr>&& expr_, std::unique_ptr<Variable>&& class__=nullptr) {
-            name = name_;
+        StaticDispatch(Token callee_name_, std::unique_ptr<Expr>&& expr_, 
+        std::vector<std::unique_ptr<Expr>>&& args_, std::unique_ptr<Variable>&& class__) {
+            callee_name = callee_name_;
             expr = std::move(expr_);
             class_ = std::move(class__);
+            args = std::move(args_);
         }
         void accept(ExprVisitor* visitor) {
-            visitor->visitGetExpr(this);
+            visitor->visitStaticDispatchExpr(this);
         }
         std::unique_ptr<Expr> expr;
         std::unique_ptr<Variable> class_;
-        Token name;
+        std::vector<std::unique_ptr<Expr>> args;
+        Token callee_name;
 };
+
+class Dispatch: public Expr {
+    public:
+        Dispatch(Token callee_name_, std::unique_ptr<Expr>&& expr_, 
+        std::vector<std::unique_ptr<Expr>>&& args_) {
+            callee_name = callee_name_;
+            expr = std::move(expr_);
+            args = std::move(args_);
+        }
+        void accept(ExprVisitor* visitor) {
+            visitor->visitDispatchExpr(this);
+        }
+        std::unique_ptr<Expr> expr;
+        std::vector<std::unique_ptr<Expr>> args;
+        Token callee_name;
+};
+
 
 class Literal: public Expr {
     public:
