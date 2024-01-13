@@ -256,8 +256,12 @@ class Parser {
                 auto class_ = std::make_unique<Variable>(className);
                 return std::make_unique<StaticDispatch>(id, std::move(expr), std::move(class_), parseArgs());
             } else if (match ({DOT})) { // dynamic dispatch
-                Token id = consume(IDENTIFIER, "Expect an identifier after `.`.");
-                return std::make_unique<Dispatch>(id, std::move(expr), parseArgs());
+                do{
+                    Token id = consume(IDENTIFIER, "Expect an identifier after `.`.");
+                    expr = std::make_unique<Dispatch>(id, std::move(expr), parseArgs());
+                    std::cout << id;
+                } while (match({DOT}) && !isAtEnd());
+                return expr;
             } 
             /*
             while (true) {
