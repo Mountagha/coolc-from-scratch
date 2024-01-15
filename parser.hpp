@@ -161,18 +161,6 @@ class Parser {
 
         PExpr parseExpression() {
 
-            // if (match({LEFT_BRACE})) return parseBlock(); 
-            // if (match({IF})) return parseIf();
-            // if (match({WHILE})) return parseWhile();
-            // if (match({CASE})) return parseCase();
-            // if (match ({LET})) return parseLet();
-
-            // if (match({LEFT_PAREN})) {
-            //     PExpr expr = parseExpression();
-            //     consume(RIGHT_PAREN, "Expect ')' at the end of a grouping expression.");
-            //     return std::make_unique<Grouping>(std::move(expr));
-            // }
-
             return parseAssignment();
         }
 
