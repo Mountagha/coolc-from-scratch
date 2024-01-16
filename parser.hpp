@@ -231,26 +231,31 @@ class Parser {
 
         PExpr parseCall() {
             PExpr expr = parsePrimary();
+            while (true) {
             if (check(LEFT_PAREN)){
                 Token self_tok = Token{TokenType::IDENTIFIER, "self"}; // !TODO: find a way to add line number later.
                 PExpr self_expr = std::make_unique<Variable>(self_tok);
                 // if we enter this branch then parsePrimary returned a Variable Expr which is the nanme of the func.
                 Token id = static_cast<Variable*>(expr.release())->name;
-                return std::make_unique<Dispatch>(id, std::move(self_expr), parseArgs());
+                expr = std::make_unique<Dispatch>(id, std::move(self_expr), parseArgs());
             } else if (match({AT})) { // static dispatch
                 Token className = consume(IDENTIFIER, "Expect a valid class name after `@`");
                 consume(DOT, "Expect a dot after type identifier.");
                 Token id = consume(IDENTIFIER, "Expect an identifier after `.`.");
                 auto class_ = std::make_unique<Variable>(className);
-                return std::make_unique<StaticDispatch>(id, std::move(expr), std::move(class_), parseArgs());
+                expr = std::make_unique<StaticDispatch>(id, std::move(expr), std::move(class_), parseArgs());
             } else if (match ({DOT})) { // dynamic dispatch
-                do{
+                //do{
                     Token id = consume(IDENTIFIER, "Expect an identifier after `.`.");
                     expr = std::make_unique<Dispatch>(id, std::move(expr), parseArgs());
                     std::cout << id;
-                } while (match({DOT}) && !isAtEnd());
-                return expr;
+                //} while (match({DOT}) && !isAtEnd());
+                //return expr;
+            } else {
+                break;
             } 
+            //return expr;
+            }
             /*
             while (true) {
                 if (check(LEFT_PAREN)) {
