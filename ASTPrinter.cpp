@@ -128,15 +128,20 @@ void ASTPrinter::visitGroupingExpr(Grouping* expr) {
 void ASTPrinter::visitStaticDispatchExpr(StaticDispatch* expr) {
     ast_string += "static_dispatch (";
     ast_string.nl().indent();
-    expr->expr->accept(this);
-    ast_string += "@";
-    expr->class_->accept(this);
-    ast_string += ".";
+    ast_string += "callee name: ";
     ast_string += expr->callee_name.lexeme;
+    ast_string.nl();
+    ast_string += "expr: ";
+    expr->expr->accept(this);
+    ast_string.nl();
+    ast_string += "class: ";
+    expr->class_->accept(this);
+    ast_string.nl();
     ast_string += "Args (";
     ast_string.nl().indent();
     for (auto& arg: expr->args) {
         arg->accept(this);
+        ast_string += ", ";
     }
     ast_string += ")\n";
     ast_string.nl().unindent();
@@ -146,13 +151,16 @@ void ASTPrinter::visitStaticDispatchExpr(StaticDispatch* expr) {
 void ASTPrinter::visitDispatchExpr(Dispatch* expr) {
     ast_string += "dynamic_dispatch (";
     ast_string.nl().indent();
-    expr->expr->accept(this);
-    ast_string += ".";
+    ast_string += "callee name: ";
     ast_string += expr->callee_name.lexeme;
+    ast_string.nl();
+    ast_string += "expr: ";
+    expr->expr->accept(this);
     ast_string += "Args (";
     ast_string.nl().indent();
     for (auto& arg: expr->args) {
         arg->accept(this);
+        ast_string += ", ";
     }
     ast_string += ")\n";
     ast_string.nl().unindent();
