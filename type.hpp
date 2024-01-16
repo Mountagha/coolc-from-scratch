@@ -6,6 +6,8 @@ namespace cool {
 
 enum class Type {
     Variable, // to be completed
+    Dispatch,
+    StaticDispatch,
 };
 
 class typeIdentifier: public StmtVisitor, public ExprVisitor {
@@ -31,8 +33,8 @@ class typeIdentifier: public StmtVisitor, public ExprVisitor {
         void visitVariableExpr(Variable* expr) { type = Type::Variable; }
         void visitBlockExpr(Block* expr) {}
         void visitGroupingExpr(Grouping* expr) {}
-        void visitDispatchExpr(Dispatch* expr) { }
-        void visitStaticDispatchExpr(StaticDispatch* expr) { }
+        void visitDispatchExpr(Dispatch* expr) { type = Type::Dispatch; }
+        void visitStaticDispatchExpr(StaticDispatch* expr) { type = Type::StaticDispatch; }
         void visitLiteralExpr(Literal* expr) {}
         void visitLetExpr(Let* expr) {}
         void visitCaseExpr(Case* expr) {}

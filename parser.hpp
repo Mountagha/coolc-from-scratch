@@ -33,6 +33,7 @@ class Parser {
         struct ParseError : std::runtime_error {
             using std::runtime_error::runtime_error;
         };
+        typeIdentifier typeId;
         std::vector<Token> tokens;
         unsigned int current;
         bool parseError;
@@ -169,7 +170,6 @@ class Parser {
             if (match({ASSIGN})) {
                 Token assign_ = previous();
                 PExpr value = parseAssignment(); // Not sure if I'm handling left associativity correctly here.
-                typeIdentifier typeId;
                 if (typeId.identify(expr) == Type::Variable) {
                     Token name = static_cast<Variable*>(expr.get())->name;
                     return std::make_unique<Assign>(name, std::move(value));
@@ -232,49 +232,35 @@ class Parser {
         PExpr parseCall() {
             PExpr expr = parsePrimary();
             while (true) {
-            if (check(LEFT_PAREN)){
-                Token self_tok = Token{TokenType::IDENTIFIER, "self"}; // !TODO: find a way to add line number later.
-                PExpr self_expr = std::make_unique<Variable>(self_tok);
-                // if we enter this branch then parsePrimary returned a Variable Expr which is the nanme of the func.
-                Token id = static_cast<Variable*>(expr.release())->name;
-                expr = std::make_unique<Dispatch>(id, std::move(self_expr), parseArgs());
-            } else if (match({AT})) { // static dispatch
-                Token className = consume(IDENTIFIER, "Expect a valid class name after `@`");
-                consume(DOT, "Expect a dot after type identifier.");
-                Token id = consume(IDENTIFIER, "Expect an identifier after `.`.");
-                auto class_ = std::make_unique<Variable>(className);
-                expr = std::make_unique<StaticDispatch>(id, std::move(expr), std::move(class_), parseArgs());
-            } else if (match ({DOT})) { // dynamic dispatch
-                //do{
-                    Token id = consume(IDENTIFIER, "Expect an identifier after `.`.");
-                    expr = std::make_unique<Dispatch>(id, std::move(expr), parseArgs());
-                    std::cout << id;
-                //} while (match({DOT}) && !isAtEnd());
-                //return expr;
-            } else {
-                break;
-            } 
-            //return expr;
-            }
-            /*
-            while (true) {
-                if (check(LEFT_PAREN)) {
-                    expr = finishCall(expr);
-                } else if (match({AT})) {
+                if (check(LEFT_PAREN)){
+                    if (typeId.identify(expr) == Type::Dispatch || typeId.identify(expr) == Type::StaticDispatch) {
+                        Token id;
+                        // redundant checking by heyyy.
+                        if (typeId.identify(expr) == Type::Dispatch)
+                            id = static_cast<Dispatch*>(expr.release())->callee_name;
+                        else 
+                            id = static_cast<StaticDispatch*>(expr.release())->callee_name;
+                        expr = std::make_unique<Dispatch>(id, std::move(expr), parseArgs());
+                    } else {
+                        Token self_tok = Token{TokenType::IDENTIFIER, "self"}; // !TODO: find a way to add line number later.
+                        PExpr self_expr = std::make_unique<Variable>(self_tok);
+                        // if we enter this branch then parsePrimary returned a Variable Expr which is the nanme of the func.
+                        Token id = static_cast<Variable*>(expr.release())->name;
+                        expr = std::make_unique<Dispatch>(id, std::move(self_expr), parseArgs());
+                    }
+                } else if (match({AT})) { // static dispatch
                     Token className = consume(IDENTIFIER, "Expect a valid class name after `@`");
                     consume(DOT, "Expect a dot after type identifier.");
                     Token id = consume(IDENTIFIER, "Expect an identifier after `.`.");
                     auto class_ = std::make_unique<Variable>(className);
-                    expr = std::make_unique<Get>(id, std::move(expr), std::move(class_));
-                } else if (match ({DOT})){
+                    expr = std::make_unique<StaticDispatch>(id, std::move(expr), std::move(class_), parseArgs());
+                } else if (match ({DOT})) { // dynamic dispatch
                     Token id = consume(IDENTIFIER, "Expect an identifier after `.`.");
-                    expr = std::make_unique<Get>(id, std::move(expr));
+                    expr = std::make_unique<Dispatch>(id, std::move(expr), parseArgs());
                 } else {
                     break;
-                }
+                } 
             }
-            return expr;
-            */
             return expr;
         }
 
@@ -376,7 +362,6 @@ class Parser {
 
         // To get the parser unstuck.
         void synchronize() {
-            std::cout << "Problem somewhere ";
             advance(); 
             while(!isAtEnd()) {
                 switch (peek().token_type){
