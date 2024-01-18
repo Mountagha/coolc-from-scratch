@@ -194,7 +194,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 case NOT: {
                     if (expr->expr->expr_type != Bool) {
                         expr->expr_type = Object;
-                        throw std::runtime_error("Type error in '=' operator.");
+                        throw std::runtime_error("Type error in 'NOT' operator.");
                     }
                     expr->expr_type = Bool;
                     break;
@@ -244,6 +244,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
         virtual void visitGroupingExpr(Grouping* expr) {
             expr->expr->accept(this);
+            expr->expr_type = expr->expr->expr_type;
         }
 
         virtual void visitStaticDispatchExpr(StaticDispatch* expr) {
@@ -403,7 +404,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             Feature* feat;
 
             if (expr->type_ == SELF_TYPE) {
-                expr->type_ = curr_class->name;
+                expr->expr_type = expr->type_ = curr_class->name;
             }
 
             if (expr->id.lexeme == "self"){
@@ -431,6 +432,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 throw std::runtime_error("type error in attr_class.");
             }
             symboltable.insert(expr->id.lexeme, &expr->type_);
+
+            expr->expr_type = expr->type_;
         }
 
         void check_method(Feature* expr) {
@@ -488,6 +491,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
             }
 
             symboltable.exitScope();
+            
+            expr->expr_type = expr->type_;
 
         }
 
@@ -629,6 +634,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             feats.push_back(std::make_unique<Feature>(cool_abort, std::move(abort_formals), Object, nullptr, FeatureType::METHOD));
             feats.push_back(std::make_unique<Feature>(type_name, std::move(typename_formals), Str, nullptr, FeatureType::METHOD));
             feats.push_back(std::make_unique<Feature>(copy, std::move(copy_formals), SELF_TYPE, nullptr, FeatureType::METHOD));
+            set_features_type(feats);
 
             auto Object_class_ = std::make_unique<Class> (
                 Object,
@@ -646,8 +652,10 @@ class Semant : public StmtVisitor, public ExprVisitor {
             //
             std::vector<std::unique_ptr<Formal>> out_string_formals;
             out_string_formals.push_back(std::make_unique<Formal>(arg, Str));
+            set_formals_type(out_string_formals);
             std::vector<std::unique_ptr<Formal>> out_int_formals;
             out_int_formals.push_back(std::make_unique<Formal>(arg, Int));
+            set_formals_type(out_int_formals);
             std::vector<std::unique_ptr<Formal>> in_string_formals;
             std::vector<std::unique_ptr<Formal>> in_int_formals;
 
@@ -656,6 +664,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
             io_feats.push_back(std::make_unique<Feature>(out_int, std::move(out_int_formals), SELF_TYPE, nullptr, FeatureType::METHOD));
             io_feats.push_back(std::make_unique<Feature>(in_string, std::move(in_string_formals), Str, nullptr, FeatureType::METHOD));
             io_feats.push_back(std::make_unique<Feature>(in_int, std::move(in_int_formals), Int, nullptr, FeatureType::METHOD));
+            set_features_type(io_feats);
+
 
             auto IO_class_ = std::make_unique<Class>(
                 IO,
@@ -671,6 +681,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             std::vector<std::unique_ptr<Formal>> int_attr_formals;
             std::vector<std::unique_ptr<Feature>> int_feats; 
             int_feats.push_back(std::make_unique<Feature>(val, std::move(int_attr_formals), prim_slot, nullptr, FeatureType::ATTRIBUT)); 
+            set_features_type(int_feats);
 
             auto Int_class_ = std::make_unique<Class>(
                 Int,
@@ -685,6 +696,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
             std::vector<std::unique_ptr<Formal>> bool_attr_formals;
             std::vector<std::unique_ptr<Feature>> bool_feats;
             bool_feats.push_back(std::make_unique<Feature>(val, std::move(bool_attr_formals), prim_slot, nullptr, FeatureType::ATTRIBUT)); 
+            set_features_type(bool_feats);
+
 
             auto Bool_class_ = std::make_unique<Class>(
                 Bool,
@@ -707,9 +720,11 @@ class Semant : public StmtVisitor, public ExprVisitor {
             std::vector<std::unique_ptr<Formal>> length_formals = { };
             std::vector<std::unique_ptr<Formal>> concat_formals;
             concat_formals.push_back(std::make_unique<Formal>(arg, Int));
+            set_formals_type(concat_formals);
             std::vector<std::unique_ptr<Formal>> substr_formals;
             substr_formals.push_back(std::make_unique<Formal>(arg, Int));
             substr_formals.push_back(std::make_unique<Formal>(arg2, Int)); 
+            set_formals_type(substr_formals);
 
             std::vector<std::unique_ptr<Feature>> str_features;
             str_features.push_back(std::make_unique<Feature>(val, std::move(val_formals), Int, nullptr, FeatureType::ATTRIBUT));
@@ -717,6 +732,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             str_features.push_back(std::make_unique<Feature>(length, std::move(length_formals), Int, nullptr, FeatureType::METHOD));
             str_features.push_back(std::make_unique<Feature>(concat, std::move(concat_formals), Str, nullptr, FeatureType::METHOD));
             str_features.push_back(std::make_unique<Feature>(substr, std::move(substr_formals), Str, nullptr, FeatureType::METHOD));
+            set_features_type(str_features);
 
             auto Str_class_ = std::make_unique<Class>(
                 Str,
