@@ -137,8 +137,8 @@ void ASTPrinter::visitStaticDispatchExpr(StaticDispatch* expr) {
     ast_string += "class: ";
     expr->class_->accept(this);
     ast_string.nl();
-    ast_string += "Args (";
-    ast_string.nl().indent();
+    ast_string += "Args ( ";
+    // ast_string.nl().indent();
     for (auto& arg: expr->args) {
         arg->accept(this);
         ast_string += ", ";
@@ -156,8 +156,9 @@ void ASTPrinter::visitDispatchExpr(Dispatch* expr) {
     ast_string.nl();
     ast_string += "expr: ";
     expr->expr->accept(this);
-    ast_string += "Args (";
-    ast_string.nl().indent();
+    ast_string.nl();
+    ast_string += "Args ( ";
+    //ast_string.nl().indent();
     for (auto& arg: expr->args) {
         arg->accept(this);
         ast_string += ", ";
