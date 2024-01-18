@@ -107,6 +107,11 @@ void ASTPrinter::visitVariableExpr(Variable* expr) {
     ast_string += expr->name.lexeme;
 }
 
+void ASTPrinter::visitNewExpr(New* expr) {
+    ast_string += "NEW ";
+    ast_string += expr->type_.lexeme;
+}
+
 void ASTPrinter::visitBlockExpr(Block* expr) {
     ast_string += " Block (";
     ast_string.nl().indent();

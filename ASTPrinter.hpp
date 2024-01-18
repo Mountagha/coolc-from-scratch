@@ -29,6 +29,7 @@ class ASTPrinter : public ExprVisitor, public StmtVisitor  {
         void visitBinaryExpr(Binary* expr);
         void visitUnaryExpr(Unary* expr);
         void visitVariableExpr(Variable* expr); 
+        void visitNewExpr(New* expr);
         void visitBlockExpr(Block* expr);
         void visitGroupingExpr(Grouping* expr);
         void visitStaticDispatchExpr(StaticDispatch* expr);

@@ -279,7 +279,7 @@ class Parser {
         PExpr parsePrimary() {
             if (match ({NEW})) {
                 Token type_ = consume(IDENTIFIER, "Expect a valide class type after new");
-                return std::make_unique<Variable>(type_);
+                return std::make_unique<New>(type_);
             }
             if (match ({ISVOID})) return parseExpression();
             if (match ({IDENTIFIER})) return std::make_unique<Variable>(previous());

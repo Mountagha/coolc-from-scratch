@@ -210,6 +210,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             Feature *feat_attr, *feat_meth;
             if (expr->name == self) {
                 expr->expr_type = curr_class->name;
+                return;
             }
             auto target_class = curr_class;
             while (true) {
@@ -223,6 +224,13 @@ class Semant : public StmtVisitor, public ExprVisitor {
             if (!feat_attr && !feat_meth)
                 throw std::runtime_error(expr->name.lexeme + " is not defined.");
             expr->expr_type = (feat_attr) ? feat_attr->type_ : feat_meth->type_;
+        }
+         
+        virtual void visitNewExpr(New* expr) {
+            if (expr->type_ == SELF_TYPE)
+                expr->expr_type = curr_class->name;
+            else 
+                expr->expr_type = expr->type_;
         }
 
         virtual void visitBlockExpr(Block* expr) {
@@ -245,7 +253,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             expr->expr->accept(this);
             expr->class_->accept(this);
             if (!g.conform(expr->expr->expr_type, expr->class_->expr_type))
-                throw std::runtime_error("Type error in Get.");
+                throw std::runtime_error("Type error in Static_dispatch.");
 
             target_class = classTable.get(expr->class_->name.lexeme);
             while (true) {

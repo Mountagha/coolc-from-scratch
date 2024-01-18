@@ -31,6 +31,7 @@ class typeIdentifier: public StmtVisitor, public ExprVisitor {
         void visitBinaryExpr(Binary* expr) {}
         void visitUnaryExpr(Unary* expr) {}
         void visitVariableExpr(Variable* expr) { type = Type::Variable; }
+        void visitNewExpr(New* expr) { }  
         void visitBlockExpr(Block* expr) {}
         void visitGroupingExpr(Grouping* expr) {}
         void visitDispatchExpr(Dispatch* expr) { type = Type::Dispatch; }

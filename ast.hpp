@@ -22,6 +22,7 @@ class Binary;
 class Unary;
 class Block;
 class Variable;
+class New;
 class Grouping;
 class Literal;
 class Case;
@@ -42,6 +43,7 @@ class ExprVisitor {
         virtual void visitBinaryExpr(Binary* expr) = 0;
         virtual void visitUnaryExpr(Unary* expr) = 0;
         virtual void visitVariableExpr(Variable* expr) = 0;
+        virtual void visitNewExpr(New* expr) = 0;
         virtual void visitBlockExpr(Block* expr) = 0;
         virtual void visitGroupingExpr(Grouping* expr) = 0;
         virtual void visitStaticDispatchExpr(StaticDispatch* expr) = 0;
@@ -205,6 +207,18 @@ class Variable: public Expr {
             visitor->visitVariableExpr(this);
         }
         Token name;
+};
+
+class New: public Expr {
+    // Can't stuff this neither into Variable nor Unary so make its own class.
+    public:
+        New(Token type__) {
+            type_ = type__;
+        }
+        void accept(ExprVisitor* visitor) {
+            visitor->visitNewExpr(this);
+        }
+        Token type_;
 };
 
 class Block: public Expr {
