@@ -10,8 +10,8 @@ void ASTPrinter::visitFeatureExpr(Feature* expr) {
     ast_string.nl().indent();
     for (auto& f: expr->formals)
         f->accept(this);
-    ast_string += ")\n";
     ast_string.nl().unindent();
+    ast_string += ")\n";
     ast_string += " BodyExprOrAssign : {";
     if (expr->expr != nullptr) {
         ast_string.nl().indent();
@@ -117,6 +117,7 @@ void ASTPrinter::visitBlockExpr(Block* expr) {
     ast_string.nl().indent();
     for (auto& e: expr->exprs) {
         e->accept(this);
+        ast_string += "\n";
     }
     ast_string.nl().unindent();
     ast_string += ")\n";

@@ -57,8 +57,10 @@ class Semant : public StmtVisitor, public ExprVisitor {
             switch (expr->featuretype) {
                 case FeatureType::ATTRIBUT:
                     check_attribut(expr);
+                    break;
                 case FeatureType::METHOD:
                     check_method(expr);
+                    break;
             }
         }
 
@@ -212,6 +214,14 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 expr->expr_type = curr_class->name;
                 return;
             }
+
+            auto v = symboltable.probe(expr->name.lexeme);
+            // variable already defined in the current scope.
+            if (v) {
+                expr->expr_type = *v;
+                return;
+            }
+
             auto target_class = curr_class;
             while (true) {
                 feat_attr = get_feature(target_class, expr->name.lexeme, FeatureType::ATTRIBUT);
@@ -414,7 +424,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             // ensure there's no attribute override.
             target_class = classTable.get(curr_class->superClass->name.lexeme);
             while (true) {
-                feat = get_feature(curr_class, expr->id.lexeme, FeatureType::ATTRIBUT);
+                feat = get_feature(target_class, expr->id.lexeme, FeatureType::ATTRIBUT);
                 if (feat) {
                     throw std::runtime_error("override occurs");
                     break;
@@ -425,7 +435,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 target_class = classTable.get(parent.lexeme);
             }
 
-            expr->expr->accept(this);       // check the init.
+            if (expr->expr)
+                expr->expr->accept(this);       // check the init.
 
             Token init_type = expr->type_;
             if (init_type != No_type && !g.conform(init_type, expr->expr_type)) {
@@ -452,7 +463,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             while (true) {
                 feat = get_feature(target_class, expr->id.lexeme, FeatureType::METHOD);
-                if (feat) 
+                if (!feat) 
                     break;
                 parent = target_class->superClass->name;
                 if (parent == No_class)
