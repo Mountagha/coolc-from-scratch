@@ -88,16 +88,15 @@ class Program: public Stmt {
 
 class Class: public Stmt {
     public:
-        Class(Token name_, std::unique_ptr<Variable>&& superClass_, std::vector<std::unique_ptr<Feature>>&& features_){
+        Class(Token name_, Token superClass_, std::vector<std::unique_ptr<Feature>>&& features_){
             name = name_;
-            superClass = std::move(superClass_);
+            superClass = superClass_;
             features = std::move(features_);
         }
         void accept(StmtVisitor* visitor) {
             visitor->visitClassStmt(this);
         }
-        Token name;
-        std::unique_ptr<Variable> superClass;
+        Token name, superClass;
         std::vector<std::unique_ptr<Feature>> features; 
 };
 

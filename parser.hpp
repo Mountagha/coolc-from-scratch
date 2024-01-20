@@ -53,13 +53,11 @@ class Parser {
         PStmt parseClass() {
             consume(CLASS, "Expect the keyword `class` at the beginning of class definition.");
             Token className = consume(IDENTIFIER, "Expect a class type after `class`.");
-            std::unique_ptr<Variable> superclass;
             Token superClassName;
             if(match({INHERITS})) 
                 superClassName = consume(IDENTIFIER, "Expect a Class Name after `inherits`");
             else
                 superClassName = Token(TokenType::IDENTIFIER, "Object");
-            superclass = std::make_unique<Variable>(superClassName);
             std::vector<std::unique_ptr<Feature>> features{};
             consume(LEFT_BRACE, "Expect a left brace at the beginning of a class definition.");
             while (isCurToken(IDENTIFIER)){
@@ -68,7 +66,7 @@ class Parser {
                 consume(SEMICOLON, "Expect a `;` at the end of a feature definition.");
             }
             consume(RIGHT_BRACE, "Expect a right brace after class definition.");
-            return std::make_unique<Class>(className, std::move(superclass), std::move(features));
+            return std::make_unique<Class>(className, superClassName, std::move(features));
         }
 
         PExpr parseFeature() {

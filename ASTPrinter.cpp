@@ -234,8 +234,7 @@ void ASTPrinter::visitProgramStmt(Program* stmt) {
 
 void ASTPrinter::visitClassStmt(Class* stmt) {
     ast_string += "Class " + stmt->name.lexeme + " "; 
-    if (stmt->superClass != nullptr)
-        ast_string += ": SUPERCLASS " + stmt->superClass->name.lexeme;
+    ast_string += ": SUPERCLASS " + stmt->superClass.lexeme;
     ast_string.nl().indent();
     for (auto& f : stmt->features) {
         f->accept(this);

@@ -89,7 +89,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                         *id_type = attr->expr_type;
                         break;       
                     }
-                    Token parent = target_class->superClass->name;
+                    Token parent = target_class->superClass;
                     if (parent == No_class)
                         break;
                     target_class = classTable.get(parent.lexeme);
@@ -227,7 +227,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 feat_attr = get_feature(target_class, expr->name.lexeme, FeatureType::ATTRIBUT);
                 feat_meth = get_feature(target_class, expr->name.lexeme, FeatureType::METHOD);
                 if (feat_attr || feat_meth) break; // !TODO: CHECK for when both meth and attr have the same lexeme.
-                Token parent = target_class->superClass->name;
+                Token parent = target_class->superClass;
                 if (parent == No_class) break;
                 target_class = classTable.get(parent.lexeme);
             }
@@ -271,7 +271,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 feat = get_feature(target_class, expr->callee_name.lexeme, FeatureType::METHOD);
                 if (feat)
                     break;
-                Token parent = target_class->superClass->name;
+                Token parent = target_class->superClass;
                 if (parent == No_class)
                     break;
                 target_class = classTable.get(parent.lexeme);
@@ -307,7 +307,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 feat = get_feature(target_class, expr->callee_name.lexeme, FeatureType::METHOD);
                 if (feat)
                     break;
-                Token parent = target_class->superClass->name;
+                Token parent = target_class->superClass;
                 if (parent == No_class)
                     break;
                 target_class = classTable.get(parent.lexeme);
@@ -422,14 +422,14 @@ class Semant : public StmtVisitor, public ExprVisitor {
             }
 
             // ensure there's no attribute override.
-            target_class = classTable.get(curr_class->superClass->name.lexeme);
+            target_class = classTable.get(curr_class->superClass.lexeme);
             while (true) {
                 feat = get_feature(target_class, expr->id.lexeme, FeatureType::ATTRIBUT);
                 if (feat) {
                     throw std::runtime_error("override occurs");
                     break;
                 } 
-                parent = target_class->superClass->name;
+                parent = target_class->superClass;
                 if (parent == No_class)
                     break;
                 target_class = classTable.get(parent.lexeme);
@@ -465,7 +465,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 feat = get_feature(target_class, expr->id.lexeme, FeatureType::METHOD);
                 if (!feat) 
                     break;
-                parent = target_class->superClass->name;
+                parent = target_class->superClass;
                 if (parent == No_class)
                     break;
                 target_class = classTable.get(parent.lexeme);
@@ -542,7 +542,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             Token className, parentClassName;
             for (auto& class_ : stmt->classes) {
                 className = class_->name;
-                parentClassName = class_->superClass->name;
+                parentClassName = class_->superClass;
                 if (!classTable.get(parentClassName.lexeme) && (parentClassName == No_class)) {
                     semant_error(class_->name, "Parent class " + parentClassName.lexeme + " of class " + className.lexeme + " is not defined.");
                     ret = false;
@@ -562,7 +562,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             g.addEdge(Bool, Object);
 
             for (auto& class_: stmt->classes) {
-                g.addEdge(class_->name, class_->superClass->name);
+                g.addEdge(class_->name, class_->superClass);
             }
 
             if(!g.isDGA()) {
@@ -579,7 +579,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 class_name = class_->name;
                 curr_class = class_.get();
                 std::cout << class_name;
-                parent_name = class_->superClass->name;
+                parent_name = class_->superClass;
                 if (class_name == Main) {
                     class_main_exist = true;
                 }
@@ -649,7 +649,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             auto Object_class_ = std::make_unique<Class> (
                 Object,
-                std::make_unique<Variable>(No_class),
+                No_class,
                 std::move(feats)
             );
             Object_class = std::move(Object_class_);
@@ -680,7 +680,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             auto IO_class_ = std::make_unique<Class>(
                 IO,
-                std::make_unique<Variable>(Object),
+                Object,
                 std::move(io_feats)
             ); 
             IO_class = std::move(IO_class_);
@@ -696,7 +696,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             auto Int_class_ = std::make_unique<Class>(
                 Int,
-                std::make_unique<Variable>(Object),
+                Object,
                 std::move(int_feats)
             );
             Int_class = std::move(Int_class_);
@@ -712,7 +712,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             auto Bool_class_ = std::make_unique<Class>(
                 Bool,
-                std::make_unique<Variable>(Object),
+                Object,
                 std::move(int_feats)
             );
             Bool_class = std::move(Bool_class_);
@@ -747,7 +747,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             auto Str_class_ = std::make_unique<Class>(
                 Str,
-                std::make_unique<Variable>(Object),
+                Object,
                 std::move(str_features)
             );
             Str_class = std::move(Str_class_);
