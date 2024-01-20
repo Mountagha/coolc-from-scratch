@@ -262,11 +262,10 @@ class Semant : public StmtVisitor, public ExprVisitor {
             Class* target_class;
 
             expr->expr->accept(this);
-            expr->class_->accept(this);
-            if (!g.conform(expr->expr->expr_type, expr->class_->expr_type))
+            if (!g.conform(expr->expr->expr_type, expr->class_))
                 throw std::runtime_error("Type error in Static_dispatch.");
 
-            target_class = classTable.get(expr->class_->name.lexeme);
+            target_class = classTable.get(expr->class_.lexeme);
             while (true) {
                 feat = get_feature(target_class, expr->callee_name.lexeme, FeatureType::METHOD);
                 if (feat)

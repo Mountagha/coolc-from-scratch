@@ -141,7 +141,7 @@ void ASTPrinter::visitStaticDispatchExpr(StaticDispatch* expr) {
     expr->expr->accept(this);
     ast_string.nl();
     ast_string += "class: ";
-    expr->class_->accept(this);
+    ast_string += expr->class_.lexeme;
     ast_string.nl();
     ast_string += "Args ( ";
     // ast_string.nl().indent();

@@ -250,8 +250,7 @@ class Parser {
                     Token className = consume(IDENTIFIER, "Expect a valid class name after `@`");
                     consume(DOT, "Expect a dot after type identifier.");
                     Token id = consume(IDENTIFIER, "Expect an identifier after `.`.");
-                    auto class_ = std::make_unique<Variable>(className);
-                    expr = std::make_unique<StaticDispatch>(id, std::move(expr), std::move(class_), parseArgs());
+                    expr = std::make_unique<StaticDispatch>(id, std::move(expr), className, parseArgs());
                 } else if (match ({DOT})) { // dynamic dispatch
                     Token id = consume(IDENTIFIER, "Expect an identifier after `.`.");
                     expr = std::make_unique<Dispatch>(id, std::move(expr), parseArgs());

@@ -245,19 +245,18 @@ class Grouping: public Expr {
 class StaticDispatch: public Expr {
     public:
         StaticDispatch(Token callee_name_, std::unique_ptr<Expr>&& expr_, 
-        std::unique_ptr<Variable>&& class__ ,std::vector<std::unique_ptr<Expr>>&& args_) {
+        Token class__ ,std::vector<std::unique_ptr<Expr>>&& args_) {
             callee_name = callee_name_;
             expr = std::move(expr_);
-            class_ = std::move(class__);
+            class_ = class__;
             args = std::move(args_);
         }
         void accept(ExprVisitor* visitor) {
             visitor->visitStaticDispatchExpr(this);
         }
         std::unique_ptr<Expr> expr;
-        std::unique_ptr<Variable> class_;
         std::vector<std::unique_ptr<Expr>> args;
-        Token callee_name;
+        Token callee_name, class_;
 };
 
 class Dispatch: public Expr {
