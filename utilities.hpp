@@ -83,7 +83,7 @@ static Token
     prim_slot{TokenType::IDENTIFIER, "prim_slot"},
     self{TokenType::IDENTIFIER, "self"},
     SELF_TYPE{TokenType::IDENTIFIER, "SELF_TYPE"},
-    Str{TokenType::IDENTIFIER, "Str"},
+    Str{TokenType::IDENTIFIER, "String"},
     str_field{TokenType::IDENTIFIER, "str_field"},
     substr{TokenType::IDENTIFIER, "substr"},
     type_name{TokenType::IDENTIFIER, "type_name"},

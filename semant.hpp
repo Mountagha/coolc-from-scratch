@@ -209,31 +209,18 @@ class Semant : public StmtVisitor, public ExprVisitor {
         }
 
         virtual void visitVariableExpr(Variable* expr) {
-            Feature *feat_attr, *feat_meth;
             if (expr->name == self) {
                 expr->expr_type = curr_class->name;
                 return;
             }
 
-            auto v = symboltable.probe(expr->name.lexeme);
-            // variable already defined in the current scope.
+            auto v = symboltable.get(expr->name.lexeme);
             if (v) {
                 expr->expr_type = *v;
                 return;
             }
 
-            auto target_class = curr_class;
-            while (true) {
-                feat_attr = get_feature(target_class, expr->name.lexeme, FeatureType::ATTRIBUT);
-                feat_meth = get_feature(target_class, expr->name.lexeme, FeatureType::METHOD);
-                if (feat_attr || feat_meth) break; // !TODO: CHECK for when both meth and attr have the same lexeme.
-                Token parent = target_class->superClass;
-                if (parent == No_class) break;
-                target_class = classTable.get(parent.lexeme);
-            }
-            if (!feat_attr && !feat_meth)
-                throw std::runtime_error(expr->name.lexeme + " is not defined.");
-            expr->expr_type = (feat_attr) ? feat_attr->type_ : feat_meth->type_;
+            throw std::runtime_error("Variable `" + expr->name.lexeme + "` is not defined.");
         }
          
         virtual void visitNewExpr(New* expr) {
@@ -434,16 +421,19 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 target_class = classTable.get(parent.lexeme);
             }
 
-            if (expr->expr)
+            if (expr->expr) {
                 expr->expr->accept(this);       // check the init.
 
-            Token init_type = expr->type_;
-            if (init_type != No_type && !g.conform(init_type, expr->expr_type)) {
-                throw std::runtime_error("type error in attr_class.");
+                Token init_type = expr->expr->expr_type;
+                if (init_type != No_type && !g.conform(init_type, expr->type_)) {
+                    throw std::runtime_error("type error in attr_class.");
+                }
+                expr->expr_type = expr->expr->expr_type;
+            } else {
+                expr->expr_type = expr->type_;
             }
-            symboltable.insert(expr->id.lexeme, &expr->type_);
+            symboltable.insert(expr->id.lexeme, &expr->expr_type);
 
-            expr->expr_type = expr->type_;
         }
 
         void check_method(Feature* expr) {
@@ -729,7 +719,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             std::vector<std::unique_ptr<Formal>> str_field_formals = { };
             std::vector<std::unique_ptr<Formal>> length_formals = { };
             std::vector<std::unique_ptr<Formal>> concat_formals;
-            concat_formals.push_back(std::make_unique<Formal>(arg, Int));
+            concat_formals.push_back(std::make_unique<Formal>(arg, Str));
             set_formals_type(concat_formals);
             std::vector<std::unique_ptr<Formal>> substr_formals;
             substr_formals.push_back(std::make_unique<Formal>(arg, Int));
