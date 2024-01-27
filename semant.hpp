@@ -74,7 +74,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
             if (expr->type_ == SELF_TYPE) {
                 throw std::runtime_error("Can't use the keyword 'SELF_TYPE'. Preserved.");
             }
-            symboltable.insert(expr->id.lexeme, &expr->type_);
+            expr->expr_type = expr->type_;
+            symboltable.insert(expr->id.lexeme, &expr->expr_type);
         }
 
         virtual void visitAssignExpr(Assign* expr) {
