@@ -743,6 +743,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             // now add these base classes to the class_table.
 
+
             classTable.insert(Object.lexeme, Object_class.get());
             classTable.insert(IO.lexeme, IO_class.get());
             classTable.insert(Int.lexeme, Int_class.get());
