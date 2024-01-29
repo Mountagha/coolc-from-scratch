@@ -66,7 +66,7 @@ static Token
     arg2{TokenType::IDENTIFIER, "arg2"},
     Bool{TokenType::IDENTIFIER, "Bool"},
     concat{TokenType::IDENTIFIER, "concat"},
-    cool_abort{TokenType::IDENTIFIER, "cool_abort"},
+    cool_abort{TokenType::IDENTIFIER, "abort"},
     copy{TokenType::IDENTIFIER, "copy"},
     Int{TokenType::IDENTIFIER, "Int"},
     in_int{TokenType::IDENTIFIER, "in_int"},
