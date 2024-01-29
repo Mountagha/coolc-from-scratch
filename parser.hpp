@@ -141,8 +141,7 @@ class Parser {
                 consume(COLON, "Expect `:` after identifier in `Case expression`.");
                 Token type_ = consume(IDENTIFIER, "Expect a valid type.");
                 consume(ARROW, "Expect an arrow in case expression.");
-                PExpr expr = parseExpression();
-                matches.push_back(std::make_tuple(id, type_, std::move(expr)));
+                matches.push_back(std::make_tuple(id, type_, parseExpression()));
                 consume(SEMICOLON, "Expect a `;` after expression within Case.");
             }
             consume(ESAC, "Expect an `esac` keyword at the end of a case expression.");

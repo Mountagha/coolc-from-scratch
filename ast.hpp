@@ -289,7 +289,7 @@ class Literal: public Expr {
 
 class Let: public Expr {
     public: 
-        Let(letAssigns&& vecAssigns_, std::unique_ptr<Expr> body_) {
+        Let(letAssigns&& vecAssigns_, std::unique_ptr<Expr>&& body_) {
             vecAssigns = std::move(vecAssigns_);
             body = std::move(body_);
         }
@@ -303,7 +303,7 @@ class Let: public Expr {
 
 class Case: public Expr {
     public: 
-        Case(letAssigns&& matches_, std::unique_ptr<Expr> expr_) {
+        Case(letAssigns&& matches_, std::unique_ptr<Expr>&& expr_) {
             matches = std::move(matches_);
             expr = std::move(expr_);
         }
