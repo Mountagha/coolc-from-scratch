@@ -265,21 +265,22 @@ class Semant : public StmtVisitor, public ExprVisitor {
             }
             if (!feat)
                 throw std::runtime_error("type error in static_dispatch.");
-            Token fun_type = feat->expr_type;
+
+            // We still got the type even if the feature isn't visited yet; hence the ternary.
+            Token fun_type = feat->expr_type.lexeme != "" ? feat->expr_type : feat->type_;
             if (fun_type == SELF_TYPE)
                 fun_type = expr->expr->expr_type;
 
             // check args
             for (size_t i = 0; i < expr->args.size(); i++) {
                 expr->args[i]->accept(this);
-                if (!g.conform(expr->args[i]->expr_type, feat->formals[i]->expr_type)){
+                if (!g.conform(expr->args[i]->expr_type, feat->formals[i]->type_)){
                     throw std::runtime_error("Type mismatch in function Call.");
                 }
             }
             expr->expr_type = fun_type;
 
         }
-
 
         virtual void visitDispatchExpr(Dispatch* expr) {
             Feature *feat;
@@ -302,14 +303,15 @@ class Semant : public StmtVisitor, public ExprVisitor {
             if (!feat)
                 throw std::runtime_error("type error in dynamic dispatch.");
 
-            Token fun_type = feat->expr_type;
+            // We still got the type even if the feature isn't visited yet; hence the ternary.
+            Token fun_type = feat->expr_type.lexeme != "" ? feat->expr_type : feat->type_;
             if (fun_type == SELF_TYPE)
                 fun_type = expr->expr->expr_type;
 
             // check args
             for (size_t i = 0; i < expr->args.size(); i++) {
                 expr->args[i]->accept(this);
-                if (!g.conform(expr->args[i]->expr_type, feat->formals[i]->expr_type)){
+                if (!g.conform(expr->args[i]->expr_type, feat->formals[i]->type_)){
                     throw std::runtime_error("Type mismatch in function Call.");
                 }
             }
@@ -370,6 +372,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 throw std::runtime_error("Type error in case expression.");
             
             SymbolTable<std::string, Token> casetable; // to track duplicated branches.
+            casetable.enterScope();
             for (auto& match: expr->matches) {
                 symboltable.enterScope();
 
