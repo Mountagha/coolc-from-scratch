@@ -184,7 +184,7 @@ void ASTPrinter::visitLetExpr(Let* expr) {
     for (auto& assign: expr->vecAssigns) {
         auto id = std::get<0>(assign);
         auto type_ = std::get<1>(assign);
-        auto expr1 = std::move(std::get<2>(assign));
+        auto expr1 = std::get<2>(assign).get();
         ast_string += id.lexeme + " : " + type_.lexeme;
         if (expr1 != nullptr) {
             ast_string += " <- ";
@@ -210,7 +210,7 @@ void ASTPrinter::visitCaseExpr(Case* expr) {
     for (auto& match : expr->matches){
         auto id = std::get<0>(match);
         auto type_ = std::get<1>(match);
-        auto expr1 = std::move(std::get<2>(match));
+        auto expr1 = std::get<2>(match).get();
         ast_string += id.lexeme + " : " + type_.lexeme + " => ";
         expr1->accept(this);
         ast_string.nl();
