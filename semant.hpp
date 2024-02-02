@@ -365,7 +365,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
         virtual void visitCaseExpr(Case* expr) {
 
-            Token join_type = Object;
+            Token join_type = No_type;
             expr->expr->accept(this);
             Token expr0_type = expr->expr->expr_type;
             if (expr0_type == No_type)
@@ -388,11 +388,16 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
                 match_expr->accept(this);
 
-                if (!g.conform(match_expr->expr_type, id_type)) {
-                    throw std::runtime_error("Type error in case evaluation.");
-                }
-
-                join_type = g.lca(join_type, match_expr->expr_type);
+                // does not make that much sense to me. !TODO CHECK LATER
+                //if (!g.conform(match_expr->expr_type, id_type)) {
+                //    throw std::runtime_error("Type error in case evaluation.");
+                //}
+                if (join_type == No_type)
+                    join_type = match_expr->expr_type;
+                else 
+                    join_type = g.lca(join_type, match_expr->expr_type);
+                
+                std::cout << join_type;
 
             }
             expr->expr_type = join_type;
