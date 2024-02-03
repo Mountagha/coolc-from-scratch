@@ -462,6 +462,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             feat = nullptr;
             target_class = classTable.get(curr_class->name.lexeme);
+            if (!target_class) 
+                throw std::runtime_error("Unable to find " + curr_class->name.lexeme);
 
             while (true) {
                 feat = get_feature(target_class, expr->id.lexeme, FeatureType::METHOD);
