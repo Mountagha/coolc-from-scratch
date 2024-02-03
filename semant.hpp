@@ -398,6 +398,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                     join_type = g.lca(join_type, match_expr->expr_type);
                 
                 std::cout << join_type;
+                symboltable.exitScope();
 
             }
             expr->expr_type = join_type;
