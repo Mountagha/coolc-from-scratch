@@ -340,21 +340,20 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             symboltable.enterScope();
             for (auto& let: expr->vecAssigns) {
-                Token id = std::get<0>(let);
-                Token id_type = std::get<1>(let);
-                Expr* let_expr = std::get<2>(let).get(); // Since smart pointer.
+                auto formal = std::get<0>(let).get();
+                Expr* let_expr = std::get<1>(let).get(); // Since smart pointer.
 
-                if (id == self) {
+                if (formal->id== self) {
                     throw std::runtime_error("type error in let.");
                 }
 
                 if (let_expr) {
                     let_expr->accept(this);
-                    if (let_expr->expr_type != No_type && !g.conform(id_type, let_expr->expr_type))
+                    if (let_expr->expr_type != No_type && !g.conform(formal->type_, let_expr->expr_type))
                         throw std::runtime_error("Type error in let assign");
-                    symboltable.insert(id.lexeme, &let_expr->expr_type);
+                    symboltable.insert(formal->id.lexeme, &let_expr->expr_type);
                 } else {
-                    symboltable.insert(id.lexeme, &std::get<1>(let)); // !TODO: doubt on pointer here.
+                    symboltable.insert(formal->id.lexeme, &formal->type_); // !TODO: doubt on pointer here.
                 }
             }
 
@@ -376,15 +375,16 @@ class Semant : public StmtVisitor, public ExprVisitor {
             for (auto& match: expr->matches) {
                 symboltable.enterScope();
 
-                Token id = std::get<0>(match);
-                Token id_type = std::get<1>(match);
-                Expr* match_expr = std::get<2>(match).get();
+                auto formal = std::get<0>(match).get();
+                Expr* match_expr = std::get<1>(match).get();
 
-                if (casetable.get(id_type.lexeme)) {
+                if (casetable.get(formal->type_.lexeme)) {
                     throw std::runtime_error("Duplicated branch in case statement.");
                 }
 
-                casetable.insert(id_type.lexeme, &std::get<1>(match));
+                casetable.insert(formal->type_.lexeme, &formal->type_);
+
+                formal->accept(this);
 
                 match_expr->accept(this);
 
@@ -397,7 +397,6 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 else 
                     join_type = g.lca(join_type, match_expr->expr_type);
                 
-                std::cout << join_type;
                 symboltable.exitScope();
 
             }

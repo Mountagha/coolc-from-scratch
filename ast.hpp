@@ -30,7 +30,7 @@ class StaticDispatch;
 class Dispatch;
 
 using PExpr = std::unique_ptr<Expr>;
-using letAssign = std::tuple<Token, Token, PExpr>; // to represent id: token: expr into 1 object.
+using letAssign = std::tuple<std::unique_ptr<Formal>, PExpr>; // to represent id: token: expr into 1 object. (id: token) = formal.
 using letAssigns = std::vector<letAssign>; // I know poor naming but hey.
 
 class ExprVisitor {

@@ -27,7 +27,8 @@ class Parser {
     private:
         using PExpr = std::unique_ptr<Expr>;
         using PStmt = std::unique_ptr<Stmt>;
-        using letAssign = std::tuple<Token, Token, PExpr>; // to represent id: token: expr into 1 object.
+        // to represent id: token: expr into 1 object. (id: token) = formal.
+        using letAssign = std::tuple<std::unique_ptr<Formal>, PExpr>; 
         using letAssigns = std::vector<letAssign>; // I know poor naming but hey.
 
         struct ParseError : std::runtime_error {
@@ -125,7 +126,10 @@ class Parser {
                 Token type_ = consume(IDENTIFIER, "Expect a valid type.");
                 PExpr expr;
                 if (match({ASSIGN})) expr = parseExpression();
-                vecAssigns.push_back(std::make_tuple(id, type_, std::move(expr)));
+                vecAssigns.push_back(std::make_tuple(
+                    std::make_unique<Formal>(id, type_),
+                    std::move(expr))
+                );
             }while(match({COMMA}) && !isAtEnd());
             consume(IN, "Expect in after let assigns.");
             PExpr body = parseExpression();
@@ -141,8 +145,10 @@ class Parser {
                 consume(COLON, "Expect `:` after identifier in `Case expression`.");
                 Token type_ = consume(IDENTIFIER, "Expect a valid type.");
                 consume(ARROW, "Expect an arrow in case expression.");
-                PExpr expr = parseExpression();
-                matches.push_back(std::make_tuple(id, type_, std::move(expr)));
+                matches.push_back(std::make_tuple(
+                    std::make_unique<Formal>(id, type_), 
+                    parseExpression())
+                );
                 consume(SEMICOLON, "Expect a `;` after expression within Case.");
             }
             consume(ESAC, "Expect an `esac` keyword at the end of a case expression.");
