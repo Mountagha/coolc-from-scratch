@@ -254,6 +254,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 throw std::runtime_error("Type error in Static_dispatch.");
 
             target_class = classTable.get(expr->class_.lexeme);
+            if (!target_class)
+                throw std::runtime_error("Unable to find " + expr->class_.lexeme);
             while (true) {
                 feat = get_feature(target_class, expr->callee_name.lexeme, FeatureType::METHOD);
                 if (feat)
@@ -291,6 +293,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 expr->expr->expr_type = curr_class->name;
 
             target_class = classTable.get(expr->expr->expr_type.lexeme);
+            if (!target_class)
+                throw std::runtime_error("Unable to find " + expr->expr->expr_type.lexeme);
             while (true) {
                 feat = get_feature(target_class, expr->callee_name.lexeme, FeatureType::METHOD);
                 if (feat)
@@ -498,7 +502,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             expr->expr->accept(this);
 
             // method return type must conform to body expr type.
-            if (!g.conform(expr->expr_type, expr->expr->expr_type)) {
+            if (!g.conform(expr->expr->expr_type, expr->expr_type)) {
                 throw std::runtime_error("Types do not conform.");
             }
 
