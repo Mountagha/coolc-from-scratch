@@ -10,18 +10,22 @@
 using namespace cool;
 
 int main(int argc, char* argv[]) {
-    if (argc != 2) {
-        std::cerr << "Usage coolc filename.cool\n";
+    if (argc < 2) {
+        std::cerr << "Usage coolc [filename.cool...]\n";
         exit(64);
     }
-    std::ifstream f{argv[1]};
-    if (!f) {
-        std::cerr << "failed to open file" << "\n";
-        exit(EXIT_FAILURE);
+    std::string source;
+    for (int i = 1; i < argc; i++) {
+        std::ifstream f{argv[i]};
+        if (!f) {
+            std::cerr << "failed to open file" << argv[i] << "\n";
+            exit(EXIT_FAILURE);
+        }
+        std::stringstream sstr;
+        sstr << f.rdbuf();
+        std::string file_source = sstr.str();
+        source += file_source;
     }
-    std::stringstream sstr;
-    sstr << f.rdbuf();
-    std::string source = sstr.str();
 
     Scanner s{source};
 
