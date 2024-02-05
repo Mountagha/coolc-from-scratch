@@ -130,7 +130,7 @@ class InheritanceGraph {
     public:
         InheritanceGraph() = default;
         void addEdge(const Token& a, const Token& b); // a inherits from b
-        bool conform(const Token& a, const Token& b); // a is conform to b
+        bool conform(Token a, Token b); // a is conform to b
         Token lca(Token a, Token b);    // common lowest ancestor of a and b
         bool isDGA();                  // whether the graph is acyclic or not.
 };
@@ -157,19 +157,20 @@ bool InheritanceGraph::isDGA() {
     return true;
 }
 
-bool InheritanceGraph::conform(const Token& a, const Token& b) {
+bool InheritanceGraph::conform(Token a, Token b) {
 
-    Token current = a;
     if (a == b) 
         return true;
-    if (current == SELF_TYPE)
-        current = curr_class->name;
-    while (current != Object) {
-        if(current == b)
+    if (a == SELF_TYPE)
+        a = curr_class->name;
+    if (b == SELF_TYPE)
+        b = curr_class->name;
+    while (a != Object) {
+        if(a == b)
             return true;
-        current = graph[current]; 
+        a = graph[a]; 
     }
-    return current == b;
+    return a == b;
 }
 
 Token InheritanceGraph::lca(Token a, Token b) {
