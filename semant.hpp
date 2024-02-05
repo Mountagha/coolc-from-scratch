@@ -81,13 +81,18 @@ class Semant : public StmtVisitor, public ExprVisitor {
         virtual void visitAssignExpr(Assign* expr) {
             expr->expr->accept(this);
             Token assign_type = expr->expr->expr_type;
-            Token *id_type = symboltable.get(expr->id.lexeme);
-            if (!id_type) {
+            Token id_type;
+            Token *id_type_ptr = symboltable.get(expr->id.lexeme);
+            if (id_type_ptr) {
+                id_type = *id_type_ptr;
+            }
+            else {
                 Class* target_class = curr_class;
                 while (true) {
                     Feature* attr = get_feature(target_class, expr->id.lexeme, FeatureType::ATTRIBUT);
                     if (attr) {
-                        *id_type = attr->expr_type;
+                        id_type_ptr = &id_type;
+                        *id_type_ptr = attr->expr_type;
                         break;       
                     }
                     Token parent = target_class->superClass;
@@ -96,10 +101,11 @@ class Semant : public StmtVisitor, public ExprVisitor {
                     target_class = classTable.get(parent.lexeme);
                 }
             }
-            if (!id_type) {
+            // if still no id_type_ptr also meaning did not find the attribute.
+            if (!id_type_ptr) {
                 throw std::runtime_error("type error in object class");
             }
-            if (!g.conform(assign_type, *id_type)) {
+            if (!g.conform(assign_type, id_type)) {
                 throw std::runtime_error("type error in assign construct.");
             }
             expr->expr_type = assign_type;
@@ -219,6 +225,20 @@ class Semant : public StmtVisitor, public ExprVisitor {
             if (v) {
                 expr->expr_type = *v;
                 return;
+            } else {
+                auto target_class = curr_class;
+                while(true) {
+                    Feature *attr = get_feature(target_class, expr->name.lexeme, FeatureType::ATTRIBUT);
+                    if (attr) {
+                        expr->expr_type = attr->expr_type;
+                        return;
+                    }
+
+                    Token parent = target_class->superClass;
+                    if (parent == No_class)
+                        break;
+                    target_class = classTable.get(parent.lexeme);
+                }
             }
 
             throw std::runtime_error("Variable `" + expr->name.lexeme + "` is not defined.");

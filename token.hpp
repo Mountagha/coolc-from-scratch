@@ -83,6 +83,9 @@ class Token {
     public:
         Token() = default;
         Token(TokenType token_type, std::string lexeme, unsigned int loc=0);
+        //Token(const Token& other);
+        //Token& operator=(Token& other);
+        //Token operator=(Token other);
         friend std::ostream& operator<<(std::ostream& os, const Token& token);
         friend bool operator==(const Token& a, const Token& b);
         friend bool operator!=(const Token& a, const Token& b);

@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
     for (int i = 1; i < argc; i++) {
         std::ifstream f{argv[i]};
         if (!f) {
-            std::cerr << "failed to open file" << argv[i] << "\n";
+            std::cerr << "failed to open file `" << argv[i] << "`\n";
             exit(EXIT_FAILURE);
         }
         std::stringstream sstr;

@@ -268,6 +268,7 @@ class Parse inherits IO {
       } )
    };
 
+   rest : String;
 
    parse_line(s : String) : Vertice {
       (let v : Vertice <- (new Vertice).init(a2i(s)) in {
@@ -302,7 +303,6 @@ class Parse inherits IO {
         fi fi fi fi fi fi fi fi fi fi
      };
 
-     rest : String;
 
      a2i(s : String) : Int {
         if s.length() = 0 then 0 else
