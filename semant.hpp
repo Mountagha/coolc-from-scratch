@@ -101,6 +101,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
                     if (parent == No_class)
                         break;
                     target_class = classTable.get(parent.lexeme);
+                    if (!target_class) 
+                        throw std::runtime_error("Unable to find class `" + parent.lexeme + "`");
                 }
             }
             // if still no id_type_ptr also meaning did not find the attribute.
@@ -241,6 +243,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
                     if (parent == No_class)
                         break;
                     target_class = classTable.get(parent.lexeme);
+                    if (!target_class) 
+                        throw std::runtime_error("Unable to find class `" + parent.lexeme + "`");
                 }
             }
 
@@ -278,7 +282,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             target_class = classTable.get(expr->class_.lexeme);
             if (!target_class)
-                throw std::runtime_error("Unable to find " + expr->class_.lexeme);
+                throw std::runtime_error("Unable to find class `" + expr->class_.lexeme + "`");
             while (true) {
                 feat = get_feature(target_class, expr->callee_name.lexeme, FeatureType::METHOD);
                 if (feat)
@@ -287,7 +291,10 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 if (parent == No_class)
                     break;
                 target_class = classTable.get(parent.lexeme);
+                if (!target_class)
+                    throw std::runtime_error("Unable to find class `" + parent.lexeme + "`");
             }
+
             if (!feat)
                 throw std::runtime_error("type error in static_dispatch.");
 
@@ -317,7 +324,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             target_class = classTable.get(expr->expr->expr_type.lexeme);
             if (!target_class)
-                throw std::runtime_error("Unable to find " + expr->expr->expr_type.lexeme);
+                throw std::runtime_error("Unable to find class `" + expr->expr->expr_type.lexeme + "`");
             while (true) {
                 feat = get_feature(target_class, expr->callee_name.lexeme, FeatureType::METHOD);
                 if (feat)
@@ -326,6 +333,9 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 if (parent == No_class)
                     break;
                 target_class = classTable.get(parent.lexeme);
+                if (!target_class)
+                    throw std::runtime_error("Unable to find class `" + parent.lexeme + "`");
+ 
             }
             if (!feat)
                 throw std::runtime_error("type error in dynamic dispatch.");
@@ -445,6 +455,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             // ensure there's no attribute override.
             target_class = classTable.get(curr_class->superClass.lexeme);
+            if (!target_class)
+                throw std::runtime_error("Unable to find class `" + curr_class->superClass.lexeme + "`");
             while (true) {
                 feat = get_feature(target_class, expr->id.lexeme, FeatureType::ATTRIBUT);
                 if (feat) {
@@ -455,6 +467,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 if (parent == No_class)
                     break;
                 target_class = classTable.get(parent.lexeme);
+                if (!target_class) 
+                    throw std::runtime_error("Unable to find class `" + parent.lexeme + "`");
             }
 
             if (expr->expr) {
@@ -486,7 +500,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             feat = nullptr;
             target_class = classTable.get(curr_class->name.lexeme);
             if (!target_class) 
-                throw std::runtime_error("Unable to find " + curr_class->name.lexeme);
+                throw std::runtime_error("Unable to find class `" + curr_class->name.lexeme + "`");
 
             while (true) {
                 feat = get_feature(target_class, expr->id.lexeme, FeatureType::METHOD);
@@ -496,6 +510,9 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 if (parent == No_class)
                     break;
                 target_class = classTable.get(parent.lexeme);
+                if (!target_class) {
+                    throw std::runtime_error("unable to find class `" + parent.lexeme + "`");
+                }
             }
 
             if (feat) {
