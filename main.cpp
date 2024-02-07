@@ -43,6 +43,9 @@ int main(int argc, char* argv[]) {
         ASTPrinter{}.print(program);
         std::cout << "Semanting...\n";
         Semant{}.semant(program);
+        std::cout << "Printing AST after semant analysis...\n";
+        ASTPrinter{}.print(program);
+
     }
         
 }

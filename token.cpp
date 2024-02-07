@@ -22,7 +22,7 @@ std::ostream& operator<<(std::ostream& os, const Token& token) {
 }
 
 Token::operator bool() const {
-    return token_type == TokenType::_NULL && lexeme == "";
+    return token_type != TokenType::_NULL && lexeme != "";
 }
 
 /*Token Token::operator=(Token other) {

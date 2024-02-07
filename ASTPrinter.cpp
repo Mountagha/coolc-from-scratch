@@ -19,6 +19,8 @@ void ASTPrinter::visitFeatureExpr(Feature* expr) {
         ast_string.nl().unindent();
     }
     ast_string += "}\n";
+    if (expr->expr_type)
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 } 
@@ -28,6 +30,8 @@ void ASTPrinter::visitFormalExpr(Formal* expr)  {
     ast_string.nl().indent();
     ast_string += "ID: " + expr->id.lexeme;
     ast_string.nl() += "Type: " + expr->type_.lexeme;
+    if (expr->expr_type)
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
@@ -36,6 +40,8 @@ void ASTPrinter::visitAssignExpr(Assign* expr) {
     ast_string.nl().indent();
     ast_string += expr->id.lexeme + " <- ";
     expr->expr->accept(this);
+    if (expr->expr_type)
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
     ast_string.unindent();
 }
 
@@ -57,6 +63,8 @@ void ASTPrinter::visitIfExpr(If* expr) {
     expr->elseBranch->accept(this);
     ast_string.nl().unindent();
     ast_string += ")";
+    if (expr->expr_type)
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
@@ -74,6 +82,8 @@ void ASTPrinter::visitWhileExpr(While* expr) {
     expr->expr->accept(this);
     ast_string.nl().unindent();
     ast_string += ")";
+    if (expr->expr_type)
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")";
 }
@@ -88,6 +98,8 @@ void ASTPrinter::visitBinaryExpr(Binary* expr) {
     ast_string += "RHS (";
     expr->rhs->accept(this);
     ast_string += ")";
+    if (expr->expr_type)
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
@@ -99,17 +111,28 @@ void ASTPrinter::visitUnaryExpr(Unary* expr) {
     ast_string += "Expr (";
     expr->expr->accept(this);
     ast_string += ")";
+    if (expr->expr_type)
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
 
 void ASTPrinter::visitVariableExpr(Variable* expr) {
     ast_string += expr->name.lexeme;
+    if (expr->expr_type) {
+        ast_string += " [ ";
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
+        ast_string += " ] ";
+    }
+ 
 }
 
 void ASTPrinter::visitNewExpr(New* expr) {
     ast_string += "NEW ";
     ast_string += expr->type_.lexeme;
+    if (expr->expr_type)
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
+ 
 }
 
 void ASTPrinter::visitBlockExpr(Block* expr) {
@@ -119,6 +142,8 @@ void ASTPrinter::visitBlockExpr(Block* expr) {
         e->accept(this);
         ast_string += "\n";
     }
+    if (expr->expr_type)
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
@@ -127,6 +152,8 @@ void ASTPrinter::visitGroupingExpr(Grouping* expr) {
     ast_string += "Grouping (";
     ast_string.nl().indent();
     expr->expr->accept(this);
+    if (expr->expr_type)
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
@@ -150,6 +177,8 @@ void ASTPrinter::visitStaticDispatchExpr(StaticDispatch* expr) {
         ast_string += ", ";
     }
     ast_string += ")\n";
+    if (expr->expr_type)
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
@@ -170,12 +199,20 @@ void ASTPrinter::visitDispatchExpr(Dispatch* expr) {
         ast_string += ", ";
     }
     ast_string += ")\n";
+    if (expr->expr_type)
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
 
 void ASTPrinter::visitLiteralExpr(Literal* expr) {
     ast_string += expr->object.to_string();
+    if (expr->expr_type) {
+        ast_string += " [ ";
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
+        ast_string += " ] ";
+    }
+    
 }
 
 void ASTPrinter::visitLetExpr(Let* expr) {
@@ -196,6 +233,8 @@ void ASTPrinter::visitLetExpr(Let* expr) {
     expr->body->accept(this);
     ast_string.nl().unindent();
     ast_string += ")\n";
+    if (expr->expr_type)
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
     ast_string.unindent();
     ast_string += ")\n";
 }
@@ -216,6 +255,8 @@ void ASTPrinter::visitCaseExpr(Case* expr) {
     }
     ast_string.nl().unindent();
     ast_string += "\n)";
+    if (expr->expr_type)
+        ast_string += "TYPE: " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += "\n)";
 }

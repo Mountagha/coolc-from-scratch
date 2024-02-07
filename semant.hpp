@@ -538,7 +538,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             } 
 
             // important to set method type before body semanting cause of recursion.
-            expr->expr_type = expr->type_;
+            expr->expr_type = expr->type_ == SELF_TYPE ? curr_class->name : expr->type_;
 
             // check the body of the method.
             expr->expr->accept(this);
