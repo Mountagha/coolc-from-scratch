@@ -1,0 +1,3 @@
+/home/mountagha/coolc-from-scratch/build/CMakeFiles/edit_cache.dir
+/home/mountagha/coolc-from-scratch/build/CMakeFiles/rebuild_cache.dir
+/home/mountagha/coolc-from-scratch/build/CMakeFiles/coolc.dir
