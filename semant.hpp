@@ -94,7 +94,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                     Feature* attr = get_feature(target_class, expr->id.lexeme, FeatureType::ATTRIBUT);
                     if (attr) {
                         id_type_ptr = &id_type;
-                        *id_type_ptr = attr->expr_type.lexeme != "" ? attr->expr_type : attr->type_;
+                        *id_type_ptr = attr->expr_type ? attr->expr_type : attr->type_;
                         break;       
                     }
                     Token parent = target_class->superClass;
@@ -235,7 +235,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                     Feature *attr = get_feature(target_class, expr->name.lexeme, FeatureType::ATTRIBUT);
                     if (attr) {
                         // in case the feature not been visited yet.
-                        expr->expr_type = attr->expr_type.lexeme != "" ? attr->expr_type : attr->type_;
+                        expr->expr_type = attr->expr_type ? attr->expr_type : attr->type_;
                         return;
                     }
 
@@ -299,7 +299,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 throw std::runtime_error("type error in static_dispatch.");
 
             // We still got the type even if the feature isn't visited yet; hence the ternary.
-            Token fun_type = feat->expr_type.lexeme != "" ? feat->expr_type : feat->type_;
+            Token fun_type = feat->expr_type ? feat->expr_type : feat->type_;
             if (fun_type == SELF_TYPE)
                 fun_type = expr->expr->expr_type;
 
@@ -334,14 +334,14 @@ class Semant : public StmtVisitor, public ExprVisitor {
                     break;
                 target_class = classTable.get(parent.lexeme);
                 if (!target_class)
-                    throw std::runtime_error("Unable to find class `" + parent.lexeme + "`");
+                    throw std::runtime_error("Unable to find `" + parent.lexeme + "`");
  
             }
             if (!feat)
                 throw std::runtime_error("type error in dynamic dispatch.");
 
             // We still got the type even if the feature isn't visited yet; hence the ternary.
-            Token fun_type = feat->expr_type.lexeme != "" ? feat->expr_type : feat->type_;
+            Token fun_type = feat->expr_type ? feat->expr_type : feat->type_;
             if (fun_type == SELF_TYPE)
                 fun_type = expr->expr->expr_type;
 
