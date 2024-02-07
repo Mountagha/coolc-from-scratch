@@ -146,7 +146,7 @@ bool InheritanceGraph::isDGA() {
         Token next = it->second;
         std::set<Token> visited;
         visited.insert(current);
-        while (current != Object) {
+        while (current && current != Object) {
             if(visited.count(next) != 0)
                 return false;
             visited.insert(next);

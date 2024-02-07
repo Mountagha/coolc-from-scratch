@@ -36,6 +36,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             check_inheritance(stmt);
 
+            gather_features(stmt);
+
             // check every class in the program
             for (auto& class_ : stmt->classes) {
                 curr_class = class_.get();
@@ -92,7 +94,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                     Feature* attr = get_feature(target_class, expr->id.lexeme, FeatureType::ATTRIBUT);
                     if (attr) {
                         id_type_ptr = &id_type;
-                        *id_type_ptr = attr->expr_type;
+                        *id_type_ptr = attr->expr_type.lexeme != "" ? attr->expr_type : attr->type_;
                         break;       
                     }
                     Token parent = target_class->superClass;
@@ -230,7 +232,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 while(true) {
                     Feature *attr = get_feature(target_class, expr->name.lexeme, FeatureType::ATTRIBUT);
                     if (attr) {
-                        expr->expr_type = attr->expr_type;
+                        // in case the feature not been visited yet.
+                        expr->expr_type = attr->expr_type.lexeme != "" ? attr->expr_type : attr->type_;
                         return;
                     }
 
@@ -555,6 +558,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
     private:
         SymbolTable<std::string, Class> classTable;
         SymbolTable<std::string, Token> symboltable;
+        SymbolTable<std::string, Token> earger_features; // allow use before declarations.
         // the base classes.
         std::unique_ptr<Class> Object_class, IO_class, Int_class, Bool_class, Str_class;
         unsigned int semant_errors;
@@ -627,25 +631,33 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 classTable.insert(class_name.lexeme, class_.get());
             }
 
-            void features_eager_gathering(Program *stmt) {
-                
-                for (auto& class_: stmt->classes) {
-                    for (auto& feat: class_->features) {
-                        // gather
-                    }
-                }
-            }
-
+            
             //classTable.exitScope();
 
         }
 
+        void gather_features(Program *stmt) {
+
+            earger_features.enterScope();
+
+            for (auto& class_: stmt->classes) {
+                for (auto& feat: class_->features) {
+                    earger_features.insert(feat->id.lexeme, &feat->type_);                           
+                }
+            }
+
+            earger_features.exitScope();
+        }
+
+
         void check_inheritance(Program* stmt) {
             // check if parents are defined.
-            if (!check_parents(stmt)) return;
+            if (!check_parents(stmt)) 
+                throw std::runtime_error("Failed to check inheritance.");
 
             // check if the graph does not contains cycle. 
-            check_DAG(stmt);
+            if (!check_DAG(stmt))
+                throw std::runtime_error("Failed to check inheritance.");
         }
 
         void install_basic_classes() {

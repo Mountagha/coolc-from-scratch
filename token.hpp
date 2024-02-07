@@ -11,6 +11,8 @@ enum FeatureType {
 };
 
 enum TokenType {
+    // Null token
+    _NULL,
     // Single character tokens
     LEFT_PAREN, RIGHT_PAREN, 
     LEFT_BRACE, RIGHT_BRACE, COMMA, 
@@ -34,6 +36,7 @@ enum TokenType {
 };
 
 const std::unordered_map<int, std::string> enum_string_map = {
+    {TokenType::_NULL, "NULL_TOKEN"},
     {TokenType::LEFT_PAREN, "LEFT_PAREN"},
     {TokenType::RIGHT_PAREN, "RIGHT_PAREN"},
     {TokenType::LEFT_BRACE, "LEFT_BRACE"},
@@ -83,6 +86,7 @@ class Token {
     public:
         Token() = default;
         Token(TokenType token_type, std::string lexeme, unsigned int loc=0);
+        operator bool() const;
         //Token(const Token& other);
         //Token& operator=(Token& other);
         //Token operator=(Token other);
