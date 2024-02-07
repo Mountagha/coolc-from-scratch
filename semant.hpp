@@ -627,6 +627,15 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 classTable.insert(class_name.lexeme, class_.get());
             }
 
+            void features_eager_gathering(Program *stmt) {
+                
+                for (auto& class_: stmt->classes) {
+                    for (auto& feat: class_->features) {
+                        // gather
+                    }
+                }
+            }
+
             //classTable.exitScope();
 
         }
