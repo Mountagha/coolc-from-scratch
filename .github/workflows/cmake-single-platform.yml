@@ -35,7 +35,7 @@ jobs:
         cd ..
         ls
         pwd
-        chmod +x run_test.sh && ./run_tests.sh
+        chmod +x run_tests.sh && ./run_tests.sh
         rm -r build 
 
     # - name: Build
