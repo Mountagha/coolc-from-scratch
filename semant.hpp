@@ -537,17 +537,19 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 }
             } 
 
-            // important to set method type before body semanting cause of recursion.
-            expr->expr_type = expr->type_ == SELF_TYPE ? curr_class->name : expr->type_;
+            // important to set method type before body semanting cause of recursion call.
+            //expr->expr_type = expr->type_;
 
             // check the body of the method.
             expr->expr->accept(this);
 
             // method return type must conform to body expr type.
-            if (!g.conform(expr->expr->expr_type, expr->expr_type)) {
+            if (!g.conform(expr->expr->expr_type, expr->type_)) {
                 throw std::runtime_error("Types do not conform.");
             }
 
+            //expr->expr_type = expr->expr->expr_type;
+            expr->expr_type = expr->type_;
             symboltable.exitScope();
             
 

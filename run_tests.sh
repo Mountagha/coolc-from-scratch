@@ -1,18 +1,35 @@
 #!/bin/bash
 
-for f in $(find ./tests)
+for f in $(ls ./examples)
 do 
-    if [[ -d "$f" ]]
+    if [[ -d `pwd`"/examples/$f" ]]
     then
-        echo -e "==== Running test for files in $f====\n"
-        ./build/coolc $(ls "$f") 
-        echo -e "\n"
-    elif [[ -f "$f" ]]
-    then
-        if [[ $f == "*.cl" ]]
+        echo -e "==== Running test for files in $f ====\n"
+        args=""
+        for f1 in $(ls `pwd`"/examples/$f")
+        do 
+            args=`pwd`"/examples/$f/$f1 "$args
+        done
+        echo "args are $args"
+        ./build/coolc $args 
+        if [ $? -ne 0 ]
         then
+            echo "******* Failed to run test for $f ********"
+            break
+        fi
+        echo -e "\n"
+    elif [[ -f `pwd`"/examples/$f" ]]
+    then
+        if [[ $f == *.cl ]]
+        then
+            echo "hein"
             echo -e "==== Running test for $f====\n"
-            ./build/coolc "$f"
+            ./build/coolc "./examples/$f"
+            if [ $? -ne 0 ]
+            then
+                echo "******** testing $f failed. ********" 
+                break
+            fi
             echo -e "\n"
         fi
     fi
