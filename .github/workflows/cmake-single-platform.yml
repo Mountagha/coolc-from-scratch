@@ -33,6 +33,8 @@ jobs:
         cmake ..
         make
         cd ..
+        ls
+        pwd
         chmod +x run_test.sh && ./run_tests.sh
         rm -r build 
 
