@@ -15,7 +15,7 @@ do
         if [ $? -ne 0 ]
         then
             echo "******* Failed to run test for $f ********"
-            break
+            exit 1
         fi
         echo -e "\n"
     elif [[ -f `pwd`"/examples/$f" ]]
@@ -28,7 +28,7 @@ do
             if [ $? -ne 0 ]
             then
                 echo "******** testing $f failed. ********" 
-                break
+                exit 1
             fi
             echo -e "\n"
         fi
