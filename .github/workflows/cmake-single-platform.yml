@@ -28,6 +28,7 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       # run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
       run: |
+        set -e
         mkdir build
         cd build
         cmake ..
@@ -36,7 +37,7 @@ jobs:
         ls
         pwd
         chmod +x run_tests.sh 
-        ./run_tests.sh && { echo "Failed to run tests. "; exit 1; }
+        ./run_tests.sh
         rm -r build 
 
     # - name: Build
