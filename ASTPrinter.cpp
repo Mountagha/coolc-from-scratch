@@ -20,7 +20,7 @@ void ASTPrinter::visitFeatureExpr(Feature* expr) {
     }
     ast_string += "}\n";
     if (expr->expr_type)
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "Feature infered TYPE : " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 } 
@@ -31,7 +31,7 @@ void ASTPrinter::visitFormalExpr(Formal* expr)  {
     ast_string += "ID: " + expr->id.lexeme;
     ast_string.nl() += "Type: " + expr->type_.lexeme;
     if (expr->expr_type)
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "Formal infered TYPE : " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
@@ -41,7 +41,7 @@ void ASTPrinter::visitAssignExpr(Assign* expr) {
     ast_string += expr->id.lexeme + " <- ";
     expr->expr->accept(this);
     if (expr->expr_type)
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "Assign infered TYPE : " + expr->expr_type.lexeme;
     ast_string.unindent();
 }
 
@@ -64,7 +64,7 @@ void ASTPrinter::visitIfExpr(If* expr) {
     ast_string.nl().unindent();
     ast_string += ")";
     if (expr->expr_type)
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "If infered TYPE : " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
@@ -83,7 +83,7 @@ void ASTPrinter::visitWhileExpr(While* expr) {
     ast_string.nl().unindent();
     ast_string += ")";
     if (expr->expr_type)
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "While infered TYPE : " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")";
 }
@@ -99,7 +99,7 @@ void ASTPrinter::visitBinaryExpr(Binary* expr) {
     expr->rhs->accept(this);
     ast_string += ")";
     if (expr->expr_type)
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "Binary infered TYPE : " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
@@ -112,7 +112,7 @@ void ASTPrinter::visitUnaryExpr(Unary* expr) {
     expr->expr->accept(this);
     ast_string += ")";
     if (expr->expr_type)
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "Unary infered TYPE : " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
@@ -121,7 +121,7 @@ void ASTPrinter::visitVariableExpr(Variable* expr) {
     ast_string += expr->name.lexeme;
     if (expr->expr_type) {
         ast_string += " [ ";
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "Variable infered TYPE : " + expr->expr_type.lexeme;
         ast_string += " ] ";
     }
  
@@ -131,7 +131,7 @@ void ASTPrinter::visitNewExpr(New* expr) {
     ast_string += "NEW ";
     ast_string += expr->type_.lexeme;
     if (expr->expr_type)
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "New infered TYPE : " + expr->expr_type.lexeme;
  
 }
 
@@ -143,7 +143,7 @@ void ASTPrinter::visitBlockExpr(Block* expr) {
         ast_string += "\n";
     }
     if (expr->expr_type)
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "Block infered TYPE : " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
@@ -153,7 +153,7 @@ void ASTPrinter::visitGroupingExpr(Grouping* expr) {
     ast_string.nl().indent();
     expr->expr->accept(this);
     if (expr->expr_type)
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "Grouping infered TYPE : " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
@@ -178,7 +178,7 @@ void ASTPrinter::visitStaticDispatchExpr(StaticDispatch* expr) {
     }
     ast_string += ")\n";
     if (expr->expr_type)
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "StaticDispatch infered TYPE : " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
@@ -200,7 +200,7 @@ void ASTPrinter::visitDispatchExpr(Dispatch* expr) {
     }
     ast_string += ")\n";
     if (expr->expr_type)
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "DynamicDispatch infered TYPE : " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += ")\n";
 }
@@ -209,7 +209,7 @@ void ASTPrinter::visitLiteralExpr(Literal* expr) {
     ast_string += expr->object.to_string();
     if (expr->expr_type) {
         ast_string += " [ ";
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "Literal infered TYPE : " + expr->expr_type.lexeme;
         ast_string += " ] ";
     }
     
@@ -234,7 +234,7 @@ void ASTPrinter::visitLetExpr(Let* expr) {
     ast_string.nl().unindent();
     ast_string += ")\n";
     if (expr->expr_type)
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "Let infered TYPE : " + expr->expr_type.lexeme;
     ast_string.unindent();
     ast_string += ")\n";
 }
@@ -256,7 +256,7 @@ void ASTPrinter::visitCaseExpr(Case* expr) {
     ast_string.nl().unindent();
     ast_string += "\n)";
     if (expr->expr_type)
-        ast_string += "infered TYPE : " + expr->expr_type.lexeme;
+        ast_string += "Case infered TYPE : " + expr->expr_type.lexeme;
     ast_string.nl().unindent();
     ast_string += "\n)";
 }

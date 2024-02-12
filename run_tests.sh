@@ -1,5 +1,5 @@
 #!/bin/bash
-
+n_test=0
 for f in $(ls ./examples)
 do 
     if [[ -d `pwd`"/examples/$f" ]]
@@ -17,20 +17,22 @@ do
             echo "******* Failed to run test for $f ********"
             exit 1
         fi
+        ((n_test++))
         echo -e "\n"
     elif [[ -f `pwd`"/examples/$f" ]]
     then
         if [[ $f == *.cl ]]
         then
-            echo "hein"
             echo -e "==== Running test for $f====\n"
             ./build/coolc "./examples/$f"
             if [ $? -ne 0 ]
             then
-                echo "******** testing $f failed. ********" 
+                echo "******** failed to run test for $f. ********" 
                 exit 1
             fi
+            ((n_test++))
             echo -e "\n"
         fi
     fi
 done
+echo "********* $n_test tests in total. ************* "
