@@ -12,8 +12,6 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-#include "stringtab.h"
-
 #define MAXINT  100000000    
 #define WORD_SIZE    4
 #define LOG_WORD_SIZE 2     // for logical shifts
