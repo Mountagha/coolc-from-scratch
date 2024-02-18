@@ -23,7 +23,7 @@ do
     then
         if [[ $f == *.cl ]]
         then
-            echo -e "==== Running test for $f====\n"
+            echo -e "==== Running test for $f ====\n"
             ./build/coolc "./examples/$f"
             if [ $? -ne 0 ]
             then
