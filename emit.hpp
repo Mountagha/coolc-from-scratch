@@ -87,11 +87,13 @@
 
 #define MOVE  "\tmove\t"
 #define NEG   "\tneg\t"
+#define AND   "\tand\t"
 #define ADD   "\tadd\t"
 #define ADDI  "\taddi\t"
 #define ADDU  "\taddu\t"
 #define ADDIU "\taddiu\t"
 #define DIV   "\tdiv\t"
+#define DIVU   "\tdivu\t"
 #define MUL   "\tmul\t"
 #define SUB   "\tsub\t"
 #define SLL   "\tsll\t"

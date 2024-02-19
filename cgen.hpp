@@ -12,7 +12,7 @@ namespace cool {
 class Cgen: public StmtVisitor, public ExprVisitor {
 
     public:
-        Cgen(std::ostream& out=std::cout): out_stream{out} {}
+        Cgen(std::ostream& out=std::cout): os{out} {}
 
         void cgen(std::unique_ptr<Expr>& expr) {
             expr->accept(this);
@@ -23,7 +23,7 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         }
 
     private:
-        std::ostream& out_stream;
+        std::ostream& os;
 
         //////////////////////////////////////////////////////////////////////////////
         //
