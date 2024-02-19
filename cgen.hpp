@@ -51,6 +51,7 @@ class Cgen: public StmtVisitor, public ExprVisitor {
 
         // arithmetic instructions.
         void emit_add(const char*, const char*, const char*);
+        void emit_addu(const char*, const char*, const char*);
         void emit_addi(const char*, const char*, int);
         void emit_addiu(const char*, const char*, int);
         void emit_div(const char*, const char*, const char*);
