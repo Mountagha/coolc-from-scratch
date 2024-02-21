@@ -91,8 +91,8 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         void emit_bge(const char*, int, const std::string&);
         void emit_bne(const char*, const char*, const std::string&);
         void emit_bne(const char*, int, const std::string&);
-        void emit_j(const std::string);
-        void emit_jal(const std::string);
+        void emit_j(const std::string&);
+        void emit_jal(const std::string&);
         void emit_jalr(const char*);
         void emit_jr(const char*);
 
