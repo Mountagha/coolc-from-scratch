@@ -22,6 +22,29 @@ class Cgen: public StmtVisitor, public ExprVisitor {
             stmt->accept(this);
         }
 
+        // emit code for string and integer constants
+        void code_constants();
+
+        void visitFeatureExpr(Feature* expr);
+        void visitFormalExpr(Formal* expr);
+        void visitAssignExpr(Assign* expr);
+        void visitIfExpr(If* expr);
+        void visitWhileExpr(While* expr);
+        void visitBinaryExpr(Binary* expr);
+        void visitUnaryExpr(Unary* expr);
+        void visitVariableExpr(Variable* expr);
+        void visitNewExpr(New* expr);
+        void visitBlockExpr(Block* expr);
+        void visitGroupingExpr(Grouping* expr);
+        void visitStaticDispatchExpr(StaticDispatch* expr);
+        void visitDispatchExpr(Dispatch* expr);
+        void visitLiteralExpr(Literal* expr);
+        void visitLetExpr(Let* expr);
+        void visitCaseExpr(Case* expr);
+        void visitProgramStmt(Program* stmt);
+        void visitClassStmt(Class* stmt);
+
+
     private:
         std::ostream& os;
 

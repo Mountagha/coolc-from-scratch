@@ -130,15 +130,15 @@ void Cgen::emit_bge(const char* src1, const char* src2, const std::string& label
 }
 
 void Cgen::emit_bge(const char* src, int imm, const std::string& label) {
-    os << BGE << src << ", $" << imm << ", " << label << std::endl;
+    os << BGE << src << ", " << imm << ", " << label << std::endl;
 }
 
 void Cgen::emit_bne(const char* src1, const char* src2, const std::string& label) {
     os << BNE << src1 << ", $" << src2 << ", " << label << std::endl;
 }
 
-void Cgen::emit_bge(const char* src, int imm, const std::string& label) {
-    os << BNE << src << ", $" << imm << ", " << label << std::endl;
+void Cgen::emit_bne(const char* src, int imm, const std::string& label) {
+    os << BNE << src << ", " << imm << ", " << label << std::endl;
 }
 
 void Cgen::emit_j(const std::string& label) {

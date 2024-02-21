@@ -828,6 +828,19 @@ class Semant : public StmtVisitor, public ExprVisitor {
             classTable.insert(Str.lexeme, Str_class.get());
 
         }
+
+        void set_formals_type(std::vector<std::unique_ptr<Formal>>& formals) {
+            for (auto& f: formals) {
+                f->expr_type = f->type_;
+        }
+}
+
+        void set_features_type(std::vector<std::unique_ptr<Feature>>& features) {
+        for (auto& f: features) {
+            f->expr_type = f->type_;
+        }
+}
+       
 };
 
 } // namespace cool
