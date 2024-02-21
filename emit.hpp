@@ -83,10 +83,14 @@
 #define SW    "\tsw\t"
 #define LW    "\tlw\t"
 #define LI    "\tli\t"
+#define LUI    "\tlui\t"
 #define LA    "\tla\t"
 
 #define MOVE  "\tmove\t"
 #define NEG   "\tneg\t"
+#define NOR   "\tnor\t"
+#define OR   "\tor\t"
+#define XOR   "\txor\t"
 #define AND   "\tand\t"
 #define ADD   "\tadd\t"
 #define ADDI  "\taddi\t"
@@ -104,4 +108,5 @@
 #define BLEQ     "\tble\t"
 #define BLT      "\tblt\t"
 #define BGT      "\tbgt\t"
+#define SEQ      "\tseq\t"
 
