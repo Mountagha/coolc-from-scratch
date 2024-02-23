@@ -10,6 +10,7 @@
 
 #include "ast.hpp"
 #include "token.hpp"
+#include "constants.hpp"
 
 namespace cool {
 
