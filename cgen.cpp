@@ -192,7 +192,11 @@ void Cgen::emit_move(const char* dest, const char* src) {
 void Cgen::code_constants() {
     //
     // Add constants that are required by the code generator
+    //
+    // add class names to string constants.
+    //for (auto& id: )
     
+
 }
 
 }

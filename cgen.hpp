@@ -4,7 +4,7 @@
 #include <ostream>
 
 #include "token.hpp"
-//#include "utilities.hpp"
+#include "utilities.hpp"
 #include "ast.hpp"
 #include "environment.hpp"
 
@@ -48,6 +48,20 @@ class Cgen: public StmtVisitor, public ExprVisitor {
 
     private:
         std::ostream& os;
+        InheritanceGraph g; // from semantic analyzer. 
+
+        /*
+            Class tags for some basic classes
+            Note that there are no pre-defined class tags for class Object
+            and IO simpoly because there is no need. These class tags are
+            used for determining equality since an object of type String
+            can only be compared with another object of the same type. The same
+            goes for Int and Bool.
+        */
+
+        static const int BOOL_CLASS_TAG = 5;
+        static const int INT_CLASS_TAG = 6;
+        static const int STRING_CLASS_TAG = 7;
 
         //////////////////////////////////////////////////////////////////////////////
         //
