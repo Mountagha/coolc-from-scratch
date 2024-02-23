@@ -4,7 +4,8 @@
 #include <ostream>
 
 #include "token.hpp"
-#include "utilities.hpp"
+//#include "utilities.hpp"
+#include "ast.hpp"
 #include "environment.hpp"
 
 namespace cool {

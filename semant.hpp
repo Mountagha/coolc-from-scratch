@@ -8,6 +8,7 @@
 
 #include "token.hpp"
 #include "utilities.hpp"
+#include "constants.hpp"
 #include "environment.hpp"
 
 namespace cool {
@@ -684,7 +685,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             classTable.enterScope();
             // The tree package uses these globals to annotate the classes built below.
             // curr_lineno  = 0;
-            stringtable.insert({"<basic_class", {TokenType::IDENTIFIER, "<basic_class>"}});
+            stringtable().insert({"<basic_class", {TokenType::IDENTIFIER, "<basic_class>"}});
             
             // The following demonstrates how to create dummy parse trees to
             // refer to basic Cool classes.  There's no need for method

@@ -187,4 +187,12 @@ void Cgen::emit_move(const char* dest, const char* src) {
     os << MOVE << dest << ", $" << src << std::endl;
 }
 
+//
+
+void Cgen::code_constants() {
+    //
+    // Add constants that are required by the code generator
+    
+}
+
 }
