@@ -575,6 +575,9 @@ class Semant : public StmtVisitor, public ExprVisitor {
             return semant_error();
         }
 
+        // some getters
+        SymbolTable<std::string, Class>* get_classtable() { return &classTable; }
+
 
     private:
         SymbolTable<std::string, Class> classTable;

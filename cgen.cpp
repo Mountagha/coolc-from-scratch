@@ -1,5 +1,8 @@
+#include <stack>
+
 #include "cgen.hpp"
 #include "emit.hpp"
+
 
 namespace cool {
 
@@ -196,7 +199,19 @@ void Cgen::emit_asciiz(const std::string& s) {
 }
 
 
+//********************************************************
 //
+// Emit code to reserve space for and initialize all of
+// the constants.  Class names should have been added to
+// the string table (in the supplied code, is is done
+// during the construction of the inheritance graph), and
+// code for emitting string constants as a side effect adds
+// the string's length to the integer table.  The constants
+// are emmitted by running through the stringtable and inttable
+// and producing code for each entry.
+//
+//********************************************************
+
 
 void Cgen::code_constants() {
     //
@@ -250,6 +265,54 @@ void Cgen::code_constants() {
     os << WORD << "Bool" << DISPTAB_SUFFIX << std::endl;
     os << WORD << "1" << std::endl;
 
+}
+
+void Cgen::code_dispatch_table(Class* class_) {
+    std::map<Token, Token>  mnames;
+    std::stack<Class*> class_ordering;
+
+    Class* curr_class = class_;
+    
+    while (curr_class->name != No_class) {
+        class_ordering.push(curr_class);
+        for(auto& m: curr_class->features) {
+            if (m->featuretype == FeatureType::METHOD) 
+                if (mnames.find(m->id) == mnames.end())
+                    mnames.insert({m->id, curr_class->name});
+        }
+        curr_class = class_table_ptr->get(curr_class->superClass); 
+    }
+
+    int dispoffset = 0; 
+
+    while (!class_ordering.empty()) {
+        curr_class = class_ordering.top();
+
+        for (auto& m: curr_class->features) {
+            if (mnames.find(m->id) != mnames.end()) {
+                method_table[curr_class->name][m->id] = dispoffset++;
+                os << WORD << curr_class->name << METHOD_SEP << m->id << std::endl;
+                mnames.erase(m->id);
+            }
+        }
+        class_ordering.pop();
+    }
+}
+
+int Cgen::calc_obj_size(Class* class_) {
+    int total = 0;
+    Class* curr_class = class_;
+
+    while (curr_class->name != No_class) {
+        for(auto& f: curr_class->features) {
+            if (f->featuretype == FeatureType::ATTRIBUT) {
+                total++;
+            }
+        }
+        curr_class = class_table_ptr->get(curr_class->superClass);
+    }
+    
+    return total;
 }
 
 

@@ -7,6 +7,7 @@
 #include "utilities.hpp"
 #include "ast.hpp"
 #include "environment.hpp"
+#include "constants.hpp"
 
 namespace cool {
 
@@ -49,11 +50,20 @@ class Cgen: public StmtVisitor, public ExprVisitor {
     private:
         std::ostream& os;
         InheritanceGraph g; // from semantic analyzer. 
+        SymbolTable<Token, Class>* class_table_ptr;
+
+        // contains mapping of [class_name][method_name] -> offset in 
+        // dispatch table used to implement dispatch.
+        std::map<Token, std::map<Token, int>> method_table;       
+
+        // table of class attributes used to detemine valid names 
+        // that are in scope
+        std::map<Token, std::map<Token, int>> attr_table;       
 
         /*
             Class tags for some basic classes
             Note that there are no pre-defined class tags for class Object
-            and IO simpoly because there is no need. These class tags are
+            and IO simply because there is no need. These class tags are
             used for determining equality since an object of type String
             can only be compared with another object of the same type. The same
             goes for Int and Bool.
@@ -153,8 +163,15 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         void emit_push(int);
         void emit_pop(int);
 
+        // emit code for each object's dispatch table
+        void code_dispatch_table(Class*);
 
+        // emit code for prototype objects
+        void code_prototype_objects();
 
+        // calculates the size of an object, used when generating
+        // code for each object prototype.
+        int calc_obj_size(Class* );
 
 
 };
