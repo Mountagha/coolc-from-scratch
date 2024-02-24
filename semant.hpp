@@ -110,7 +110,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             if (!id_type_ptr) {
                 throw std::runtime_error("type error in object class");
             }
-            if (!g.conform(assign_type, id_type)) {
+            if (!conform(assign_type, id_type)) {
                 throw std::runtime_error("type error in assign construct.");
             }
             expr->expr_type = assign_type;
@@ -124,7 +124,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             }
             expr->thenBranch->accept(this);
             expr->elseBranch->accept(this);
-            Token join_type = g.lca(expr->thenBranch->expr_type, expr->elseBranch->expr_type);
+            Token join_type = LCA(expr->thenBranch->expr_type, expr->elseBranch->expr_type);
             expr->expr_type = join_type;
         }
 
@@ -278,7 +278,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             Class* target_class;
 
             expr->expr->accept(this);
-            if (!g.conform(expr->expr->expr_type, expr->class_))
+            if (!conform(expr->expr->expr_type, expr->class_))
                 throw std::runtime_error("Type error in Static_dispatch.");
 
             target_class = classTable.get(expr->class_.lexeme);
@@ -307,7 +307,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             // check args
             for (size_t i = 0; i < expr->args.size(); i++) {
                 expr->args[i]->accept(this);
-                if (!g.conform(expr->args[i]->expr_type, feat->formals[i]->type_)){
+                if (!conform(expr->args[i]->expr_type, feat->formals[i]->type_)){
                     throw std::runtime_error("Type mismatch in function Call.");
                 }
             }
@@ -349,7 +349,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             // check args
             for (size_t i = 0; i < expr->args.size(); i++) {
                 expr->args[i]->accept(this);
-                if (!g.conform(expr->args[i]->expr_type, feat->formals[i]->type_)){
+                if (!conform(expr->args[i]->expr_type, feat->formals[i]->type_)){
                     throw std::runtime_error("Type mismatch in function Call.");
                 }
             }
@@ -387,7 +387,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
                 if (let_expr) {
                     let_expr->accept(this);
-                    if (let_expr->expr_type != No_type && !g.conform(formal->type_, let_expr->expr_type))
+                    if (let_expr->expr_type != No_type && !conform(formal->type_, let_expr->expr_type))
                         throw std::runtime_error("Type error in let assign");
                     symboltable.insert(formal->id.lexeme, &let_expr->expr_type);
                 } else {
@@ -427,13 +427,13 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 match_expr->accept(this);
 
                 // does not make that much sense to me. !TODO CHECK LATER
-                //if (!g.conform(match_expr->expr_type, id_type)) {
+                //if (!conform(match_expr->expr_type, id_type)) {
                 //    throw std::runtime_error("Type error in case evaluation.");
                 //}
                 if (join_type == No_type)
                     join_type = match_expr->expr_type;
                 else 
-                    join_type = g.lca(join_type, match_expr->expr_type);
+                    join_type = LCA(join_type, match_expr->expr_type);
                 
                 symboltable.exitScope();
 
@@ -476,7 +476,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 expr->expr->accept(this);       // check the init.
 
                 Token init_type = expr->expr->expr_type;
-                if (init_type != No_type && !g.conform(init_type, expr->type_)) {
+                if (init_type != No_type && !conform(init_type, expr->type_)) {
                     throw std::runtime_error("type error in attr_class.");
                 }
                 expr->expr_type = expr->expr->expr_type;
@@ -545,7 +545,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             expr->expr->accept(this);
 
             // method return type must conform to body expr type.
-            if (!g.conform(expr->expr->expr_type, expr->type_)) {
+            if (!conform(expr->expr->expr_type, expr->type_)) {
                 throw std::runtime_error("Types do not conform.");
             }
 
@@ -564,6 +564,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             return nullptr;
         }
 
+        // !TODO: better error handling. later!
         std::ostream& semant_error() {
             semant_errors++;
             return error_stream;
@@ -582,6 +583,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
         // the base classes.
         std::unique_ptr<Class> Object_class, IO_class, Int_class, Bool_class, Str_class;
         unsigned int semant_errors;
+        Class* curr_class;
         std::ostream& error_stream;
         bool class_main_exist{false};
         InheritanceGraph g;
@@ -616,7 +618,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
             }
 
             if(!g.isDGA()) {
-                semant_error(curr_class->name, "Cyclic inheritance detected!"); // find better way to find the error position.
+                semant_error();
+                error_stream << "Cyclic inheritance detected!";
                 ret = false;
             }
             return ret;
@@ -685,7 +688,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             classTable.enterScope();
             // The tree package uses these globals to annotate the classes built below.
             // curr_lineno  = 0;
-            stringtable().insert({"<basic_class", {TokenType::IDENTIFIER, "<basic_class>"}});
+            stringtable().insert({"<basic class>", {TokenType::IDENTIFIER, "<basic_class>"}});
             
             // The following demonstrates how to create dummy parse trees to
             // refer to basic Cool classes.  There's no need for method
@@ -838,9 +841,35 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
         void set_features_type(std::vector<std::unique_ptr<Feature>>& features) {
         for (auto& f: features) {
-            f->expr_type = f->type_;
+                f->expr_type = f->type_;
             }
         }
+
+        // this wrappers is for avoiding curr_class global
+        // in inheritanceGraph class. [separation of concerns]
+
+        bool conform(Token a, Token b) {
+            if (a == SELF_TYPE) {
+                a = curr_class->name;
+            }
+            if (b == SELF_TYPE) {
+                b = curr_class->name;
+            }
+            return g.conform(a, b);
+        }
+
+        Token LCA(Token a, Token b) {
+            if (a == SELF_TYPE) {
+                a = curr_class->name;
+            }
+            if (b == SELF_TYPE) {
+                b = curr_class->name;
+            }
+            return g.lca(a, b);
+        }
+
+
+
        
 };
 

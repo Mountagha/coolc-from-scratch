@@ -28,10 +28,6 @@ namespace cool {
     and references (respectively) to constants.
 */
 
-// !TODO later find a way to get rid of this curr_clas global.
-
-static Class* curr_class;
-
 // Inheritance graph
 class InheritanceGraph {
     private:

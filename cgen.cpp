@@ -252,4 +252,36 @@ void Cgen::code_constants() {
 
 }
 
+
+
+
+// Cgen for Exprs and Stmts
+void Cgen::visitProgramStmt(Program* stmt) {
+    std::cout << "debut code generation\n\n";
+    code_constants();
+    std::cout << "fin code generation\n\n";
+}
+
+
+void Cgen::visitClassStmt(Class* stmt) {}
+
+void Cgen::visitFeatureExpr(Feature* expr) {}
+void Cgen::visitFormalExpr(Formal* expr) {}
+void Cgen::visitAssignExpr(Assign* expr) {}
+void Cgen::visitIfExpr(If* expr) {}
+void Cgen::visitWhileExpr(While* expr) {}
+void Cgen::visitBinaryExpr(Binary* expr) {}
+void Cgen::visitUnaryExpr(Unary* expr) {}
+void Cgen::visitVariableExpr(Variable* expr) {}
+void Cgen::visitNewExpr(New* expr) {}
+void Cgen::visitBlockExpr(Block* expr) {}
+void Cgen::visitGroupingExpr(Grouping* expr) {}
+void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {}
+void Cgen::visitDispatchExpr(Dispatch* expr) {}
+void Cgen::visitLiteralExpr(Literal* expr) {}
+void Cgen::visitLetExpr(Let* expr) {}
+void Cgen::visitCaseExpr(Case* expr) {}
+
+
+
 }

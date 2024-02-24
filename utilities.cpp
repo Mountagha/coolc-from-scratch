@@ -28,10 +28,6 @@ bool InheritanceGraph::conform(Token a, Token b) {
 
     if (a == b) 
         return true;
-    if (a == SELF_TYPE)
-        a = curr_class->name;
-    if (b == SELF_TYPE)
-        b = curr_class->name;
     while (a != Object) {
         if(a == b)
             return true;
@@ -44,10 +40,6 @@ Token InheritanceGraph::lca(Token a, Token b) {
 
     if (a == b)
         return a;
-    if (a == SELF_TYPE)
-        a = curr_class->name;
-    if (b == SELF_TYPE)
-        b = curr_class->name;
     
     int high_a = 0, high_b = 0;
     Token temp_a = a, temp_b = b;

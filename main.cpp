@@ -6,6 +6,7 @@
 #include "parser.hpp"
 #include "ASTPrinter.hpp"
 #include "semant.hpp"
+#include "cgen.hpp"
 
 using namespace cool;
 
@@ -45,7 +46,7 @@ int main(int argc, char* argv[]) {
         Semant{}.semant(program);
         std::cout << "Printing AST after semant analysis...\n";
         ASTPrinter{}.print(program);
-
+        Cgen{}.cgen(program);
     }
         
 }
