@@ -187,6 +187,15 @@ void Cgen::emit_move(const char* dest, const char* src) {
     os << MOVE << dest << ", $" << src << std::endl;
 }
 
+void Cgen::emit_ascii(const std::string& s) {
+    os << "\t.ascii\t\"" << s << "\"\n";
+}
+
+void Cgen::emit_asciiz(const std::string& s) {
+    os << "\t.asciiz\t\"" << s << "\"\n";
+}
+
+
 //
 
 void Cgen::code_constants() {
@@ -194,8 +203,52 @@ void Cgen::code_constants() {
     // Add constants that are required by the code generator
     //
     // add class names to string constants.
-    //for (auto& id: )
+    for (auto& c_name: g.get_graph()) {
+        stringtable().insert({c_name.first.lexeme, c_name.first});
+    }
     
+    // add empty string to string const table since it's the default value 
+    // value of a newly allocated string.
+    stringtable().insert({"", Token{TokenType::_NULL, ""}});
+
+    int index = 1;
+    for (auto& elt: stringtable()) {
+        
+        os << INTCONST_PREFIX << index << LABEL;                                                // label
+        os << WORD << STRING_CLASS_TAG << std::endl;                                            // tag 
+        os << WORD << (DEFAULT_OBJFIELDS + STRING_SLOTS + (elt.first.size()/4)) << std::endl;   // size
+        os << WORD << "String" << DISPTAB_SUFFIX << std::endl;
+        os << WORD << elt.first.size() << std::endl;
+        os << ASCIIZ << "\"" << elt.first.c_str() << "\"\n";
+        os << ALIGN;
+        index++;
+
+    }
+
+    index = 1;
+    for (auto& elt: inttable()) {
+
+        os << INTCONST_PREFIX << index << LABEL;                                                // label
+        os << WORD << INT_CLASS_TAG << std::endl;
+        os << WORD << (DEFAULT_OBJFIELDS + INT_SLOTS) << std::endl;
+        os << WORD << "Int" << DISPTAB_SUFFIX << std::endl;
+        os << WORD << elt.first << std::endl;
+        index++;
+
+    }
+
+    // code gen for bools
+    os << BOOLCONST_PREFIX << "0" << LABEL; // false
+    os << WORD << BOOL_CLASS_TAG << std::endl;
+    os << WORD << (DEFAULT_OBJFIELDS + BOOL_SLOTS) << std::endl; 
+    os << WORD << "Bool" << DISPTAB_SUFFIX << std::endl;
+    os << WORD << "0" << std::endl;
+
+    os << BOOLCONST_PREFIX << "1" << LABEL; // true
+    os << WORD << BOOL_CLASS_TAG << std::endl;
+    os << WORD << (DEFAULT_OBJFIELDS + BOOL_SLOTS) << std::endl; 
+    os << WORD << "Bool" << DISPTAB_SUFFIX << std::endl;
+    os << WORD << "1" << std::endl;
 
 }
 
