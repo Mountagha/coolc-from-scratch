@@ -173,6 +173,11 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         // code for each object prototype.
         int calc_obj_size(Class* );
 
+        // emit code for the prototype objects attributes
+        void emit_obj_attributes(Class* );
+
+        void code_global_data();
+
 
 };
 

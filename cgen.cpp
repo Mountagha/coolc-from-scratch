@@ -218,8 +218,8 @@ void Cgen::code_constants() {
     // Add constants that are required by the code generator
     //
     // add class names to string constants.
-    for (auto& c_name: g.get_graph()) {
-        stringtable().insert({c_name.first.lexeme, c_name.first});
+    for (auto& class_: g.get_graph()) {
+        stringtable().insert({class_.first.lexeme, class_.first});
     }
     
     // add empty string to string const table since it's the default value 
@@ -315,8 +315,48 @@ int Cgen::calc_obj_size(Class* class_) {
     return total;
 }
 
+void Cgen::emit_obj_attributes(Class* class_) {
+    if (class_->name == No_class)
+        return;
+
+    emit_obj_attributes(class_table_ptr->get(class_->superClass));
+
+    for (auto& f: class_->features)
+        if (f->featuretype == FeatureType::ATTRIBUT)
+            os << WORD << "0" << std::endl;
+}
 
 
+void Cgen::code_prototype_objects() {
+    int classtag = 8;    // to avoid it being equal to basic class values
+    for (auto& class_: g.get_graph()) {
+
+        if (class_.first == No_class) 
+            return;
+        
+        os << class_.first.lexeme << PROTOBJ_SUFFIX << LABEL;
+
+        if (class_.first == Str)
+            os << WORD << STRING_CLASS_TAG << std::endl;
+        else if (class_.first == Int)
+            os << WORD << INT_CLASS_TAG << std::endl;
+        else if (class_.first == Bool)
+            os << WORD << BOOL_CLASS_TAG << std::endl;
+        else 
+            os << WORD << classtag++ << std::endl;
+
+        os << WORD << (DEFAULT_OBJFIELDS + calc_obj_size(class_table_ptr->get(class_.first)));
+        os << WORD << class_.first.lexeme << DISPTAB_SUFFIX << std::endl;
+        emit_obj_attributes(class_table_ptr->get(class_.first));
+    }
+}
+
+void Cgen::code_global_data() {
+
+    //os << "\t.data\n" << ALIGN;
+    //   << 
+
+}
 
 // Cgen for Exprs and Stmts
 void Cgen::visitProgramStmt(Program* stmt) {
