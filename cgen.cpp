@@ -198,6 +198,10 @@ void Cgen::emit_asciiz(const std::string& s) {
     os << "\t.asciiz\t\"" << s << "\"\n";
 }
 
+void Cgen::emit_protobj_ref(const char* s) {
+    os << s << PROTOBJ_SUFFIX;
+}
+
 
 //********************************************************
 //
@@ -280,7 +284,7 @@ void Cgen::code_dispatch_table(Class* class_) {
                 if (mnames.find(m->id) == mnames.end())
                     mnames.insert({m->id, curr_class->name});
         }
-        curr_class = class_table_ptr->get(curr_class->superClass); 
+        curr_class = class_table_ptr->get(curr_class->superClass.lexeme); 
     }
 
     int dispoffset = 0; 
@@ -290,7 +294,7 @@ void Cgen::code_dispatch_table(Class* class_) {
 
         for (auto& m: curr_class->features) {
             if (mnames.find(m->id) != mnames.end()) {
-                method_table[curr_class->name][m->id] = dispoffset++;
+                method_table[curr_class->name.lexeme][m->id.lexeme] = dispoffset++;
                 os << WORD << curr_class->name << METHOD_SEP << m->id << std::endl;
                 mnames.erase(m->id);
             }
@@ -309,7 +313,7 @@ int Cgen::calc_obj_size(Class* class_) {
                 total++;
             }
         }
-        curr_class = class_table_ptr->get(curr_class->superClass);
+        curr_class = class_table_ptr->get(curr_class->superClass.lexeme);
     }
     
     return total;
@@ -319,7 +323,7 @@ void Cgen::emit_obj_attributes(Class* class_) {
     if (class_->name == No_class)
         return;
 
-    emit_obj_attributes(class_table_ptr->get(class_->superClass));
+    emit_obj_attributes(class_table_ptr->get(class_->superClass.lexeme));
 
     for (auto& f: class_->features)
         if (f->featuretype == FeatureType::ATTRIBUT)
@@ -345,23 +349,51 @@ void Cgen::code_prototype_objects() {
         else 
             os << WORD << classtag++ << std::endl;
 
-        os << WORD << (DEFAULT_OBJFIELDS + calc_obj_size(class_table_ptr->get(class_.first)));
+        os << WORD << (DEFAULT_OBJFIELDS + calc_obj_size(class_table_ptr->get(class_.first.lexeme)));
         os << WORD << class_.first.lexeme << DISPTAB_SUFFIX << std::endl;
-        emit_obj_attributes(class_table_ptr->get(class_.first));
+        emit_obj_attributes(class_table_ptr->get(class_.first.lexeme));
     }
 }
 
 void Cgen::code_global_data() {
 
-    //os << "\t.data\n" << ALIGN;
-    //   << 
+    os << ".data\n" << ALIGN;
 
+    // The following global names should be defined first.
+    
+    os << GLOBAL; emit_protobj_ref("Main"); os << std::endl; 
+    os << GLOBAL; emit_protobj_ref("Int"); os << std::endl; 
+    os << GLOBAL; emit_protobj_ref("String"); os << std::endl; 
+    os << GLOBAL; os << "bool_const0" << std::endl; 
+    os << GLOBAL; os << "bool_const1" << std::endl; 
+    os << GLOBAL << INTTAG << std::endl;
+    os << GLOBAL << BOOLTAG << std::endl;
+    os << GLOBAL << STRINGTAG << std::endl;
+
+    // We also need to know the tag of the Int, String and Bool classes
+    // during code generation.
+
+    os << INTTAG << LABEL
+       << WORD << INT_CLASS_TAG << std::endl;
+    os << BOOLTAG << LABEL
+       << WORD << BOOL_CLASS_TAG << std::endl;
+    os << STRINGTAG << LABEL
+       << WORD << BOOL_CLASS_TAG << std::endl;
 }
 
 // Cgen for Exprs and Stmts
 void Cgen::visitProgramStmt(Program* stmt) {
     std::cout << "debut code generation\n\n";
+
+    code_global_data();
     code_constants();
+
+    std::cout << "Real code actually starting here.\n\n";
+    for(auto& p: g.get_graph()) {
+        auto class_ = class_table_ptr->get(p.first.lexeme);
+        os << class_->name.lexeme << DISPTAB_SUFFIX << LABEL;
+        code_dispatch_table(class_);
+    }
     std::cout << "fin code generation\n\n";
 }
 

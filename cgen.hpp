@@ -14,7 +14,7 @@ namespace cool {
 class Cgen: public StmtVisitor, public ExprVisitor {
 
     public:
-        Cgen(std::ostream& out=std::cout): os{out} {}
+        Cgen(InheritanceGraph* g_, std::ostream& out=std::cout): os{out}, g=g_ {}
 
         void cgen(std::unique_ptr<Expr>& expr) {
             expr->accept(this);
@@ -49,16 +49,16 @@ class Cgen: public StmtVisitor, public ExprVisitor {
 
     private:
         std::ostream& os;
-        InheritanceGraph g; // from semantic analyzer. 
-        SymbolTable<Token, Class>* class_table_ptr;
+        InheritanceGraph* g; // from semantic analyzer. 
+        SymbolTable<std::string, Class>* class_table_ptr;
 
         // contains mapping of [class_name][method_name] -> offset in 
         // dispatch table used to implement dispatch.
-        std::map<Token, std::map<Token, int>> method_table;       
+        std::map<std::string, std::map<std::string, int>> method_table;       
 
         // table of class attributes used to detemine valid names 
         // that are in scope
-        std::map<Token, std::map<Token, int>> attr_table;       
+        std::map<std::string, std::map<std::string, int>> attr_table;       
 
         /*
             Class tags for some basic classes
@@ -163,6 +163,8 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         void emit_push(int);
         void emit_pop(int);
 
+        void emit_protobj_ref(const char*);
+
         // emit code for each object's dispatch table
         void code_dispatch_table(Class*);
 
@@ -181,4 +183,4 @@ class Cgen: public StmtVisitor, public ExprVisitor {
 
 };
 
-}
+} // namespace cool

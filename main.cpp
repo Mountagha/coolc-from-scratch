@@ -42,11 +42,12 @@ int main(int argc, char* argv[]) {
     if(!p.hasError()) {
         //std::cout << "Printing AST...\n";
         //ASTPrinter{}.print(program);
+        auto semanter = Semant{};
         std::cout << "Semanting...\n";
-        Semant{}.semant(program);
+        semanter.semant(program);
         std::cout << "Printing AST after semant analysis...\n";
         ASTPrinter{}.print(program);
-        Cgen{}.cgen(program);
+        Cgen{semanter.get_inheritancegraph()}.cgen(program);
     }
         
 }

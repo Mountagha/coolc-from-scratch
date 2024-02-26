@@ -17,7 +17,7 @@ namespace cool {
 class Semant : public StmtVisitor, public ExprVisitor {
     public:
 
-        Semant(std::ostream& out=std::cerr): error_stream{out} {} 
+        Semant(std::ostream& out=std::cerr): error_stream{out}, semant_errors{0} {} 
 
         void semant(std::unique_ptr<Expr>& expr) {
             expr->accept(this);
@@ -577,6 +577,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
         // some getters
         SymbolTable<std::string, Class>* get_classtable() { return &classTable; }
+        InheritanceGraph* get_inheritancegraph() { return &g; }
 
 
     private:
