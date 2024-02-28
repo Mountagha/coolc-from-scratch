@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
         semanter.semant(program);
         std::cout << "Printing AST after semant analysis...\n";
         ASTPrinter{}.print(program);
-        Cgen{semanter.get_inheritancegraph()}.cgen(program);
+        Cgen{semanter.get_inheritancegraph(), semanter.get_classtable()}.cgen(program);
     }
         
 }

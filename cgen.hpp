@@ -14,7 +14,8 @@ namespace cool {
 class Cgen: public StmtVisitor, public ExprVisitor {
 
     public:
-        Cgen(InheritanceGraph* g_, std::ostream& out=std::cout): os{out}, g=g_ {}
+        Cgen(InheritanceGraph* g_, SymbolTable<std::string, Class>* ctable_ptr, std::ostream& out=std::cout): 
+            os{out}, class_table_ptr(ctable_ptr), g(g_) {}
 
         void cgen(std::unique_ptr<Expr>& expr) {
             expr->accept(this);

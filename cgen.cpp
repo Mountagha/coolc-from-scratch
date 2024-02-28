@@ -222,7 +222,7 @@ void Cgen::code_constants() {
     // Add constants that are required by the code generator
     //
     // add class names to string constants.
-    for (auto& class_: g.get_graph()) {
+    for (auto& class_: g->get_graph()) {
         stringtable().insert({class_.first.lexeme, class_.first});
     }
     
@@ -277,14 +277,17 @@ void Cgen::code_dispatch_table(Class* class_) {
 
     Class* curr_class = class_;
     
-    while (curr_class->name != No_class) {
+    while (true) {
         class_ordering.push(curr_class);
         for(auto& m: curr_class->features) {
             if (m->featuretype == FeatureType::METHOD) 
                 if (mnames.find(m->id) == mnames.end())
                     mnames.insert({m->id, curr_class->name});
         }
-        curr_class = class_table_ptr->get(curr_class->superClass.lexeme); 
+        Token parent = curr_class->superClass;
+        if (parent == No_class)
+            break;
+        curr_class = class_table_ptr->get(parent.lexeme); 
     }
 
     int dispoffset = 0; 
@@ -295,7 +298,7 @@ void Cgen::code_dispatch_table(Class* class_) {
         for (auto& m: curr_class->features) {
             if (mnames.find(m->id) != mnames.end()) {
                 method_table[curr_class->name.lexeme][m->id.lexeme] = dispoffset++;
-                os << WORD << curr_class->name << METHOD_SEP << m->id << std::endl;
+                os << WORD << curr_class->name.lexeme << METHOD_SEP << m->id.lexeme << std::endl;
                 mnames.erase(m->id);
             }
         }
@@ -307,33 +310,47 @@ int Cgen::calc_obj_size(Class* class_) {
     int total = 0;
     Class* curr_class = class_;
 
-    while (curr_class->name != No_class) {
+    while (true) {
         for(auto& f: curr_class->features) {
             if (f->featuretype == FeatureType::ATTRIBUT) {
                 total++;
             }
         }
-        curr_class = class_table_ptr->get(curr_class->superClass.lexeme);
+        Token parent = curr_class->superClass; 
+        if (parent == No_class)
+            break;
+        curr_class = class_table_ptr->get(parent.lexeme);
     }
     
     return total;
 }
 
 void Cgen::emit_obj_attributes(Class* class_) {
-    if (class_->name == No_class)
-        return;
 
-    emit_obj_attributes(class_table_ptr->get(class_->superClass.lexeme));
+    std::stack<Class*> classes;
+    Class* curr_class = class_;
+    while(true) {
+        classes.push(curr_class);
+        Token parent = curr_class->superClass;
+        if (parent == No_class) 
+            break;
+        curr_class = class_table_ptr->get(parent.lexeme);
+    }
 
-    for (auto& f: class_->features)
-        if (f->featuretype == FeatureType::ATTRIBUT)
-            os << WORD << "0" << std::endl;
+    while (!classes.empty()) {
+        curr_class = classes.top();
+
+        for (auto& f: curr_class->features)
+            if (f->featuretype == FeatureType::ATTRIBUT)
+                os << WORD << "0" << std::endl;
+        classes.pop();
+    }
 }
 
 
 void Cgen::code_prototype_objects() {
-    int classtag = 8;    // to avoid it being equal to basic class values
-    for (auto& class_: g.get_graph()) {
+    int classtag = 8;    // to avoid clash with basic class values
+    for (auto& class_: g->get_graph()) {
 
         if (class_.first == No_class) 
             return;
@@ -389,11 +406,20 @@ void Cgen::visitProgramStmt(Program* stmt) {
     code_constants();
 
     std::cout << "Real code actually starting here.\n\n";
-    for(auto& p: g.get_graph()) {
+    for(auto& p: g->get_graph()) {
         auto class_ = class_table_ptr->get(p.first.lexeme);
         os << class_->name.lexeme << DISPTAB_SUFFIX << LABEL;
         code_dispatch_table(class_);
     }
+
+    code_prototype_objects();
+
+    os << ".text\n";
+
+    for (auto& class_: stmt->classes) {
+        class_->accept(this);
+    }
+
     std::cout << "fin code generation\n\n";
 }
 

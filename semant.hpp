@@ -787,7 +787,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             auto Bool_class_ = std::make_unique<Class>(
                 Bool,
                 Object,
-                std::move(int_feats)
+                std::move(bool_feats)
             );
             Bool_class = std::move(Bool_class_);
 
