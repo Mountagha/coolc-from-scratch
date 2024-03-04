@@ -190,6 +190,21 @@ void Cgen::emit_move(const char* dest, const char* src) {
     os << MOVE << dest << ", $" << src << std::endl;
 }
 
+
+void Cgen::emit_push(int num_words) {
+    emit_addiu(SP, SP, WORD_SIZE * -num_words);
+}
+
+void Cgen::emit_pop(int num_words) {
+    emit_addiu(SP, SP, WORD_SIZE * num_words);
+}
+
+
+void Cgen::emit_push(const char* reg) {
+    emit_sw(reg, 0, SP);
+    emit_addiu(SP, SP, -4);
+}
+
 void Cgen::emit_ascii(const std::string& s) {
     os << "\t.ascii\t\"" << s << "\"\n";
 }
@@ -424,7 +439,47 @@ void Cgen::visitProgramStmt(Program* stmt) {
 }
 
 
-void Cgen::visitClassStmt(Class* stmt) {}
+void Cgen::visitClassStmt(Class* stmt) {
+
+    Token classname = stmt->name;
+    os << classname.lexeme + CLASSINIT_SUFFIX << LABEL;
+
+    // reserve space for AR (old frame pointer + self object + return adress)
+    emit_push(AR_BASE_SIZE);
+
+    // standard registers that are saved to the stack
+    emit_sw(FP, 12, SP);
+    emit_sw(SELF, 8, SP);
+    emit_sw(RA, 4, SP);
+    emit_addiu(FP, SP, 4);
+    emit_move(SELF, ACC);
+
+
+    // if the class is anything other than the object class, call
+    // base class init method
+    if (classname != Object)
+        emit_jal(stmt->superClass.lexeme + CLASSINIT_SUFFIX);
+
+    // emit code for attributes
+    for (auto& attrib: stmt->features) {
+        if (attrib->featuretype == FeatureType::ATTRIBUT)
+            attrib->accept(this);
+    }
+
+    // restore registers
+    emit_move(ACC, SELF);
+    emit_lw(FP, 12, SP);
+    emit_lw(SELF, 8, SP);
+    emit_lw(RA, 4, SP);
+    emit_pop(AR_BASE_SIZE);
+    emit_jr(RA);
+
+    curr_attr_count = 0;
+    for (auto& method: stmt->features) {
+        if (method->featuretype == FeatureType::METHOD)
+            method->accept(this);
+    }
+}
 
 void Cgen::visitFeatureExpr(Feature* expr) {}
 void Cgen::visitFormalExpr(Formal* expr) {}

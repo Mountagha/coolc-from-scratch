@@ -15,7 +15,7 @@ class Cgen: public StmtVisitor, public ExprVisitor {
 
     public:
         Cgen(InheritanceGraph* g_, SymbolTable<std::string, Class>* ctable_ptr, std::ostream& out=std::cout): 
-            os{out}, class_table_ptr(ctable_ptr), g(g_) {}
+            os{out}, class_table_ptr(ctable_ptr), g(g_), curr_attr_count{0} {}
 
         void cgen(std::unique_ptr<Expr>& expr) {
             expr->accept(this);
@@ -60,6 +60,10 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         // table of class attributes used to detemine valid names 
         // that are in scope
         std::map<std::string, std::map<std::string, int>> attr_table;       
+
+        // Used to keep track of current attributes counts for a specific
+        // class when generating code for class_init methods.
+        std::size_t curr_attr_count;
 
         /*
             Class tags for some basic classes
@@ -163,6 +167,9 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         // not that these functions take the number of 32-bit words to push
         void emit_push(int);
         void emit_pop(int);
+
+        // push the content of a register onto the stack
+        void emit_push(const char*);
 
         void emit_protobj_ref(const char*);
 
