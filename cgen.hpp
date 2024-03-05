@@ -52,6 +52,7 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         std::ostream& os;
         InheritanceGraph* g; // from semantic analyzer. 
         SymbolTable<std::string, Class>* class_table_ptr;
+        Class* curr_class;
 
         // contains mapping of [class_name][method_name] -> offset in 
         // dispatch table used to implement dispatch.
@@ -187,6 +188,10 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         void emit_obj_attributes(Class* );
 
         void code_global_data();
+
+        void cgen_method(Feature* );
+
+        void cgen_attribut(Feature* );
 
 
 };

@@ -432,6 +432,7 @@ void Cgen::visitProgramStmt(Program* stmt) {
     os << ".text\n";
 
     for (auto& class_: stmt->classes) {
+        curr_class = class_.get();
         class_->accept(this);
     }
 
@@ -479,6 +480,17 @@ void Cgen::visitClassStmt(Class* stmt) {
         if (method->featuretype == FeatureType::METHOD)
             method->accept(this);
     }
+}
+
+void Cgen::cgen_attribut(Feature* attr) {
+    attr->expr->accept(this);
+
+    ++curr_attr_count;
+    attr_table[]
+}
+
+void Cgen::cgen_method(Feature* method) {
+
 }
 
 void Cgen::visitFeatureExpr(Feature* expr) {}
