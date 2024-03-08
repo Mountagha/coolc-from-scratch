@@ -486,10 +486,34 @@ void Cgen::cgen_attribut(Feature* attr) {
     attr->expr->accept(this);
 
     ++curr_attr_count;
-    attr_table[]
+    attr_table[curr_class->name.lexeme][attr->id.lexeme] = curr_attr_count;
+
+    // PRIM_SLOT refers to an attribute of a primitive type (eg. Bool, String, Int)
+    // the current attribute counter is incremented by 2 since the starting offset
+    // for an attribute in the object layout if offset 3 (offset 0-2 being the headesr)
+    // and then multiplied by 4 since there are 4 bytes in a word.
+    if (attr->type_ != prim_slot) 
+        emit_sw(ACC, WORD_SIZE * (curr_attr_count + 2), SELF);
+
 }
 
 void Cgen::cgen_method(Feature* method) {
+    if (is_base_class(curr_class))
+        return;
+    var_env.enterScope();
+    emit_label(curr_class->name.lexeme + METHOD_SEP + method->id.lexeme);
+
+    emit_sw(RA, 4, SP);
+
+    int curr_offset = 1;
+    for(auto& f: method->formals) {
+        var_env.insert(f->id.lexeme, curr_offset++);
+    }
+
+    method->expr->accept(this);
+
+    // refer to stack frame layout in header file
+
 
 }
 

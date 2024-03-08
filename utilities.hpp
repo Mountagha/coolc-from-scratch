@@ -41,5 +41,9 @@ class InheritanceGraph {
         std::map<Token, Token>& get_graph() { return graph; }
 };
 
+bool is_base_class(Class* class_) {
+    return class_->name == Object || class_->name == Bool || class_->name == Int ||
+            class_->name == Str || class_->name == IO;
+}
 
 } // namespace cool

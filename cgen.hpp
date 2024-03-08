@@ -66,6 +66,11 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         // class when generating code for class_init methods.
         std::size_t curr_attr_count;
 
+        // The variable environment that maps variable names to offsets
+        // in the current AR relative to the fp. this allows for easier
+        // addressing. eg. the first parameter is in 4($fp), next is 8($fp)... n($fp)
+        SymbolTable<std::string, int> var_env;
+
         /*
             Class tags for some basic classes
             Note that there are no pre-defined class tags for class Object
