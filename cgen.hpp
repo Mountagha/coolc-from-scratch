@@ -14,7 +14,7 @@ namespace cool {
 class Cgen: public StmtVisitor, public ExprVisitor {
 
     public:
-        Cgen(InheritanceGraph* g_, SymbolTable<std::string, Class>* ctable_ptr, std::ostream& out=std::cout): 
+        Cgen(InheritanceGraph* g_, SymbolTable<std::string, Class* >* ctable_ptr, std::ostream& out=std::cout): 
             os{out}, class_table_ptr(ctable_ptr), g(g_), curr_attr_count{0} {}
 
         void cgen(std::unique_ptr<Expr>& expr) {
@@ -51,7 +51,7 @@ class Cgen: public StmtVisitor, public ExprVisitor {
     private:
         std::ostream& os;
         InheritanceGraph* g; // from semantic analyzer. 
-        SymbolTable<std::string, Class>* class_table_ptr;
+        SymbolTable<std::string, Class* >* class_table_ptr;
         Class* curr_class;
 
         // contains mapping of [class_name][method_name] -> offset in 

@@ -78,7 +78,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 throw std::runtime_error("Can't use the keyword 'SELF_TYPE'. Preserved.");
             }
             expr->expr_type = expr->type_;
-            symboltable.insert(expr->id.lexeme, &expr->expr_type);
+            symboltable.insert(expr->id.lexeme, expr->expr_type);
         }
 
         virtual void visitAssignExpr(Assign* expr) {
@@ -389,9 +389,9 @@ class Semant : public StmtVisitor, public ExprVisitor {
                     let_expr->accept(this);
                     if (let_expr->expr_type != No_type && !conform(formal->type_, let_expr->expr_type))
                         throw std::runtime_error("Type error in let assign");
-                    symboltable.insert(formal->id.lexeme, &let_expr->expr_type);
+                    symboltable.insert(formal->id.lexeme, let_expr->expr_type);
                 } else {
-                    symboltable.insert(formal->id.lexeme, &formal->type_); // !TODO: doubt on pointer here.
+                    symboltable.insert(formal->id.lexeme, formal->type_); // !TODO: doubt on pointer here.
                 }
             }
 
@@ -420,7 +420,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
                     throw std::runtime_error("Duplicated branch in case statement.");
                 }
 
-                casetable.insert(formal->type_.lexeme, &formal->type_);
+                casetable.insert(formal->type_.lexeme, formal->type_);
 
                 formal->accept(this);
 
@@ -483,7 +483,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             } else {
                 expr->expr_type = expr->type_;
             }
-            symboltable.insert(expr->id.lexeme, &expr->expr_type);
+            symboltable.insert(expr->id.lexeme, expr->expr_type);
 
         }
 
@@ -576,12 +576,12 @@ class Semant : public StmtVisitor, public ExprVisitor {
         }
 
         // some getters
-        SymbolTable<std::string, Class>* get_classtable() { return &classTable; }
+        SymbolTable<std::string, Class* >* get_classtable() { return &classTable; }
         InheritanceGraph* get_inheritancegraph() { return &g; }
 
 
     private:
-        SymbolTable<std::string, Class> classTable;
+        SymbolTable<std::string, Class*> classTable;
         SymbolTable<std::string, Token> symboltable;
         SymbolTable<std::string, Token> earger_features; // allow use before declarations.
         // the base classes.
@@ -669,7 +669,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             for (auto& class_: stmt->classes) {
                 for (auto& feat: class_->features) {
-                    earger_features.insert(feat->id.lexeme, &feat->type_);                           
+                    earger_features.insert(feat->id.lexeme, feat->type_);                           
                 }
             }
 

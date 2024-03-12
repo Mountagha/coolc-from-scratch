@@ -73,5 +73,10 @@ Token InheritanceGraph::lca(Token a, Token b) {
     return temp_a;
 }
 
+bool is_base_class(Class* class_) {
+    return class_->name == Object || class_->name == Bool || class_->name == Int ||
+            class_->name == Str || class_->name == IO;
+}
+
 
 }

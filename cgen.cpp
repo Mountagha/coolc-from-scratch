@@ -217,6 +217,10 @@ void Cgen::emit_protobj_ref(const char* s) {
     os << s << PROTOBJ_SUFFIX;
 }
 
+void Cgen::emit_label(const std::string& label) {
+    os << label << ":\n";
+}
+
 
 //********************************************************
 //
@@ -513,11 +517,29 @@ void Cgen::cgen_method(Feature* method) {
     method->expr->accept(this);
 
     // refer to stack frame layout in header file
+    std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
+    emit_lw(FP, ar_size * WORD_SIZE, SP);
+    emit_lw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
+    emit_lw(RA, 4, SP);
+    emit_pop(AR_BASE_SIZE + method->formals.size());
+    emit_jr(RA);
 
+    var_env.exitScope();
 
 }
 
-void Cgen::visitFeatureExpr(Feature* expr) {}
+void Cgen::visitFeatureExpr(Feature* expr) {
+    switch (expr->featuretype) {
+        case FeatureType::ATTRIBUT:
+            cgen_attribut(expr);
+            break;
+        case FeatureType::METHOD:
+            cgen_method(expr);
+            break;
+    }
+}
+
+
 void Cgen::visitFormalExpr(Formal* expr) {}
 void Cgen::visitAssignExpr(Assign* expr) {}
 void Cgen::visitIfExpr(If* expr) {}
