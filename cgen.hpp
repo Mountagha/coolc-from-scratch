@@ -15,7 +15,7 @@ class Cgen: public StmtVisitor, public ExprVisitor {
 
     public:
         Cgen(InheritanceGraph* g_, SymbolTable<std::string, Class* >* ctable_ptr, std::ostream& out=std::cout): 
-            os{out}, class_table_ptr(ctable_ptr), g(g_), curr_attr_count{0} {}
+            os{out}, class_table_ptr(ctable_ptr), g(g_), curr_attr_count{0}, ifcount{0} {}
 
         void cgen(std::unique_ptr<Expr>& expr) {
             expr->accept(this);
@@ -65,6 +65,12 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         // Used to keep track of current attributes counts for a specific
         // class when generating code for class_init methods.
         std::size_t curr_attr_count;
+
+        // Used to generate labels for ifs
+        std::size_t ifcount;
+
+        // Used to generate labels for whiles
+        std::size_t while_count;
 
         // The variable environment that maps variable names to offsets
         // in the current AR relative to the fp. this allows for easier

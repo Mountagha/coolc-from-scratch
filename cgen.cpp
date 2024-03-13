@@ -276,13 +276,13 @@ void Cgen::code_constants() {
     }
 
     // code gen for bools
-    os << BOOLCONST_PREFIX << "0" << LABEL; // false
+    os << BOOLCONST_FALSE << LABEL; // false
     os << WORD << BOOL_CLASS_TAG << std::endl;
     os << WORD << (DEFAULT_OBJFIELDS + BOOL_SLOTS) << std::endl; 
     os << WORD << "Bool" << DISPTAB_SUFFIX << std::endl;
     os << WORD << "0" << std::endl;
 
-    os << BOOLCONST_PREFIX << "1" << LABEL; // true
+    os << BOOLCONST_TRUE << LABEL; // true
     os << WORD << BOOL_CLASS_TAG << std::endl;
     os << WORD << (DEFAULT_OBJFIELDS + BOOL_SLOTS) << std::endl; 
     os << WORD << "Bool" << DISPTAB_SUFFIX << std::endl;
@@ -540,11 +540,78 @@ void Cgen::visitFeatureExpr(Feature* expr) {
 }
 
 
-void Cgen::visitFormalExpr(Formal* expr) {}
-void Cgen::visitAssignExpr(Assign* expr) {}
-void Cgen::visitIfExpr(If* expr) {}
-void Cgen::visitWhileExpr(While* expr) {}
-void Cgen::visitBinaryExpr(Binary* expr) {}
+void Cgen::visitFormalExpr(Formal* expr) {
+    // nothing to do here.
+}
+
+void Cgen::visitAssignExpr(Assign* expr) {
+    expr->expr->accept(this);
+    int *offset = var_env.get(expr->id.lexeme);
+
+    // result of evaluating rhs of assignment 
+    // is expected to be in the register ACC
+    // also check that offset is not checked for 
+    // null because the semantic analyzer should've 
+    // caught any variable misuse by this point
+    emit_sw(ACC, *offset, FP);
+
+}
+
+void Cgen::visitIfExpr(If* expr) {
+
+    ifcount++;
+    std::string label_suffix = std::to_string(ifcount);
+    expr->cond->accept(this);
+    // emit_push(ACC);
+
+    emit_la(T1, BOOLCONST_TRUE); // bool_const1
+    emit_beq(T1, ACC, "iftrue_branch" + label_suffix);
+    emit_label("iffalse_branch" + label_suffix);
+    expr->elseBranch->accept(this);
+    emit_b("end_if" + label_suffix);   
+    emit_label("iftrue_branch" + label_suffix);
+    expr->thenBranch->accept(this);
+    emit_label("end_if" + label_suffix);   
+
+}
+
+void Cgen::visitWhileExpr(While* expr) {
+
+    while_count++;
+    std::string label_suffix = std::to_string(while_count);
+    emit_label("while_branch" + label_suffix);
+    expr->cond->accept(this);
+
+    emit_la(T1, BOOLCONST_TRUE); // bool_const1
+    emit_bne(T1, ACC, "end_while_branch" + label_suffix);
+
+    expr->expr->accept(this);
+
+    emit_b("while_branch" + label_suffix);
+    emit_label("end_while_branch" + label_suffix);
+    emit_li(ACC, 0); // a while always returns null.
+
+}
+
+void Cgen::visitBinaryExpr(Binary* expr) {
+    switch (expr->op) {
+        case PLUS:
+            break;
+        case MINUS:
+            break;
+        case STAR:
+            break;
+        case SLASH:
+            break;
+        case LESS:
+            break;
+        case LESS_EQUAL:
+            break;
+        case EQUAL:
+            break;
+    }
+}
+
 void Cgen::visitUnaryExpr(Unary* expr) {}
 void Cgen::visitVariableExpr(Variable* expr) {}
 void Cgen::visitNewExpr(New* expr) {}
