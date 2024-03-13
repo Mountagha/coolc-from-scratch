@@ -594,6 +594,9 @@ void Cgen::visitWhileExpr(While* expr) {
 }
 
 void Cgen::visitBinaryExpr(Binary* expr) {
+
+    expr->lhs->accept(this);
+
     switch (expr->op) {
         case PLUS:
             break;
