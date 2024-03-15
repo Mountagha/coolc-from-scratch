@@ -597,15 +597,43 @@ void Cgen::visitBinaryExpr(Binary* expr) {
 
     expr->lhs->accept(this);
 
-    switch (expr->op) {
+    switch (expr->op.token_type) {
         case PLUS:
+
+            emit_push(ACC);
+            expr->rhs->accept(this);
+            emit_lw(T1, 4, SP);
+            emit_add(ACC, T1, ACC);
+            emit_pop(1);
             break;
+
         case MINUS:
+
+            emit_push(ACC);
+            expr->rhs->accept(this);
+            emit_lw(T1, 4, SP);
+            emit_sub(ACC, T1, ACC);
+            emit_pop(1);
             break;
+
         case STAR:
+
+            emit_push(ACC);
+            expr->rhs->accept(this);
+            emit_lw(T1, 4, SP);
+            emit_mul(ACC, T1, ACC);
+            emit_pop(1);
             break;
+
         case SLASH:
+
+            emit_push(ACC);
+            expr->rhs->accept(this);
+            emit_lw(T1, 4, SP);
+            emit_div(ACC, T1, ACC);
+            emit_pop(1);
             break;
+
         case LESS:
             break;
         case LESS_EQUAL:
