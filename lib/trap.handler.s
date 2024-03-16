@@ -2488,3 +2488,13 @@ _NoGC_Collect_loop:
 	b	_NoGC_Collect_loop		# loop
 _NoGC_Collect_ok:
 	jr	$ra				# return
+
+
+########################################################
+# Helper functions for code generation added by        #
+# Mountagha.                                           #
+########################################################
+
+    .globl less 
+less:
+    
