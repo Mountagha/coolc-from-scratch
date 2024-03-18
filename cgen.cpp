@@ -657,7 +657,10 @@ void Cgen::visitBinaryExpr(Binary* expr) {
     }
 }
 
-void Cgen::visitUnaryExpr(Unary* expr) {}
+void Cgen::visitUnaryExpr(Unary* expr) {
+    
+}
+
 void Cgen::visitVariableExpr(Variable* expr) {}
 void Cgen::visitNewExpr(New* expr) {}
 void Cgen::visitBlockExpr(Block* expr) {}
