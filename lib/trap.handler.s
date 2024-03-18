@@ -2496,5 +2496,51 @@ _NoGC_Collect_ok:
 ########################################################
 
     .globl less 
-less:
+less:   
+    lw $t1, 12($a0) # 12 is the offset where attributes start
+    lw $t2, 12($a1)
+    blt $a1, $a0, __less    # the args here are switched since a1=lhs, a0=rhs 
+    la $a0 bool_const0
+    jr $ra
+__less:
+    la $a0 bool_const1
+    jr $ra
+
+less_eq:   
+    lw $t1, 12($a0) # 12 is the offset where attributes start
+    lw $t2, 12($a1)
+    ble $a1, $a0, __less    # the args here are switched since a1=lhs, a0=rhs 
+    la $a0 bool_const0
+    jr $ra
+__less_eq:
+    la $a0 bool_const1
+    jr $ra
+
+
+    .globl eq
+eq:
+    beq $a0, $a1, __eq 
+    lw $t1, 0($a0)      # Object header tag
+    lw $t2, _int_tag
+    beq $t1, $t2, __int_bool_eq
+    lw $t2, _bool_tag
+    beq $t1, $t2, __int_bool_eq
+__str_eq:
+    lw $t1, 16($a0)     # 16 is the offset where the actual sequence of ascii chars starts
+    lw $t2, 16($a1)
+    beq $t1, $t2, __eq
+    b __not_eq
+__int_bool_eq:
+    lw $t1, 12($a0)
+    lw $t2, 12($a1)
+    beq $t1, $t2, __eq
+    b __not_eq
+__eq:
+    la $a0, bool_const1
+    jr $ra
+__not_eq:
+    la $a0, bool_const0
+    jr $ra
+
+
     

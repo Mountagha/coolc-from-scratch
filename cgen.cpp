@@ -635,10 +635,24 @@ void Cgen::visitBinaryExpr(Binary* expr) {
             break;
 
         case LESS:
+
+            emit_move(A1, ACC),
+            expr->rhs->accept(this);
+            emit_jal("less");
             break;
+
         case LESS_EQUAL:
+
+            emit_move(A1, ACC);
+            expr->rhs->accept(this);
+            emit_jal("less_eq");
             break;
+
         case EQUAL:
+
+            emit_move(A1, ACC);
+            expr->rhs->accept(this);
+            emit_jal("eq");
             break;
     }
 }
