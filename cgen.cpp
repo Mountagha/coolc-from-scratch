@@ -487,7 +487,8 @@ void Cgen::visitClassStmt(Class* stmt) {
 }
 
 void Cgen::cgen_attribut(Feature* attr) {
-    attr->expr->accept(this);
+    if (attr->expr)
+        attr->expr->accept(this);
 
     ++curr_attr_count;
     attr_table[curr_class->name.lexeme][attr->id.lexeme] = curr_attr_count;
@@ -658,10 +659,34 @@ void Cgen::visitBinaryExpr(Binary* expr) {
 }
 
 void Cgen::visitUnaryExpr(Unary* expr) {
+    expr->expr->accept(this);
+
+    switch (expr->op.token_type) {
+        case TILDE:
+            // ~ is used on integer only hence the offset 12 to get 
+            // the value.
+            emit_lw(T1, 12, ACC);
+            emit_not(T1, T1),
+            emit_sw(T1, 12, ACC);
+            break;
+
+        case NOT:
+
+            emit_jal("lnot");
+            break;
+
+        case ISVOID:
+
+            emit_jal("isvoid");
+            break;
+    }
     
 }
 
-void Cgen::visitVariableExpr(Variable* expr) {}
+void Cgen::visitVariableExpr(Variable* expr) {
+    std::cout << "here: " << expr->name << "\n";
+}
+
 void Cgen::visitNewExpr(New* expr) {}
 void Cgen::visitBlockExpr(Block* expr) {}
 void Cgen::visitGroupingExpr(Grouping* expr) {}

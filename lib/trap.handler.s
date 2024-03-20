@@ -2543,4 +2543,24 @@ __not_eq:
     jr $ra
 
 
+    .globl lnot
+lnot:
+    la $t1, bool_const0
+    beq $a0, $t1, __false
+    la $a0, bool_const0
+    jr $ra
+__false:
+    la $a0, bool_const1
+    jr $ra
+
+    .globl isvoid
+isvoid:
+    la $t1, bool_const0
+    beq $a0, $t1, __isovoid
+    la $a0, bool_const0
+    jr $ra
+__isovoid:
+    la $a0, bool_const1
+    jr $ra
     
+
