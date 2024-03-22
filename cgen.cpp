@@ -495,7 +495,7 @@ void Cgen::cgen_attribut(Feature* attr) {
 
     // PRIM_SLOT refers to an attribute of a primitive type (eg. Bool, String, Int)
     // the current attribute counter is incremented by 2 since the starting offset
-    // for an attribute in the object layout if offset 3 (offset 0-2 being the headesr)
+    // for an attribute in the object layout if offset 3 (offset 0-2 being the headers)
     // and then multiplied by 4 since there are 4 bytes in a word.
     if (attr->type_ != prim_slot) 
         emit_sw(ACC, WORD_SIZE * (curr_attr_count + 2), SELF);
@@ -684,18 +684,71 @@ void Cgen::visitUnaryExpr(Unary* expr) {
 }
 
 void Cgen::visitVariableExpr(Variable* expr) {
-    std::cout << "here: " << expr->name << "\n";
+    if (expr->name == self) {
+        emit_move(ACC, SELF);
+    } else {
+
+        // if the variable name is not in the current local scope
+        // check if it's an attribute of the current class.
+        int *offset = var_env.get(expr->name.lexeme);
+        if (offset)
+            emit_lw(ACC, *offset, FP);
+        else 
+            emit_lw(ACC, WORD_SIZE * (attr_table[curr_class->name.lexeme][expr->name.lexeme] + 2), SELF);
+    }
 }
 
-void Cgen::visitNewExpr(New* expr) {}
-void Cgen::visitBlockExpr(Block* expr) {}
-void Cgen::visitGroupingExpr(Grouping* expr) {}
+void Cgen::visitNewExpr(New* expr) {
+    emit_la(ACC, expr->expr_type.lexeme + PROTOBJ_SUFFIX);
+    emit_jal("Object.copy");
+    emit_jal(expr->expr_type.lexeme + CLASSINIT_SUFFIX);
+}
+
+void Cgen::visitBlockExpr(Block* expr) {
+    for(auto& e: expr->exprs) {
+        e->accept(this);
+    }
+}
+
+void Cgen::visitGroupingExpr(Grouping* expr) {
+    expr->expr->accept(this);
+}
+
 void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {}
 void Cgen::visitDispatchExpr(Dispatch* expr) {}
-void Cgen::visitLiteralExpr(Literal* expr) {}
-void Cgen::visitLetExpr(Let* expr) {}
-void Cgen::visitCaseExpr(Case* expr) {}
+void Cgen::visitLiteralExpr(Literal* expr) {
+
+    switch (expr->object.type()) {
+        case CoolType::Bool_t:
+            if (expr->object.bool_value())
+                emit_la(ACC, BOOLCONST_TRUE);
+            else 
+                emit_la(ACC, BOOLCONST_FALSE);
+            break;
+        case CoolType::Number_t:
 
 
+    }
+}
+
+void Cgen::visitLetExpr(Let* expr) {
+
+    for (auto& let: expr->vecAssigns) {
+        // codegen all the expressions in the let init if exists.
+        Expr* let_expr = std::get<1>(let).get();
+        if (let_expr)
+            let_expr->accept(this);
+    }
+    expr->body->accept(this);
+}
+
+void Cgen::visitCaseExpr(Case* expr) {
+
+    expr->expr->accept(this);
+    for (auto& match: expr->matches) {
+        // codegen every match expression.
+        std::get<1>(match).get()->accept(this);
+    }
+}
 
 }

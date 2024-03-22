@@ -19,6 +19,9 @@ class CoolObject{
         explicit CoolObject(std::string s): coolType{CoolType::String_t}, string{s} {}
         std::string to_string();
         CoolType type() const {return coolType; }
+        bool bool_value() const { return boolean; }
+        int int_value() const { return number; }
+        std::string string_value() const { return string; }
 
     private:
         CoolType coolType;

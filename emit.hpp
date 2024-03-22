@@ -35,7 +35,7 @@
 #define STRCONST_PREFIX      "str_const"
 #define BOOLCONST_PREFIX     "bool_const"
 #define BOOLCONST_TRUE       "bool_const1"
-#define BOOLCONST_FALSE     "bool_const0"
+#define BOOLCONST_FALSE      "bool_const0"
 
 
 #define EMPTYSLOT            0
