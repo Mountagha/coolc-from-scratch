@@ -182,8 +182,8 @@ void Cgen::emit_sb(const char* dest, const char* addr) {
     os << SB << dest << ", " << addr << std::endl;
 }
 
-void Cgen::emit_sw(const char* dest, int offset, const char* src) {
-    os << SW << dest << ", " << offset << "($" << src << ")" << std::endl;
+void Cgen::emit_sw(const char* src, int offset, const char* dest) {
+    os << SW << src << ", " << offset << "($" << dest << ")" << std::endl;
 }
 
 void Cgen::emit_move(const char* dest, const char* src) {
@@ -249,29 +249,25 @@ void Cgen::code_constants() {
     // value of a newly allocated string.
     stringtable().insert({"", Token{TokenType::_NULL, ""}});
 
-    int index = 1;
     for (auto& elt: stringtable()) {
         
-        os << INTCONST_PREFIX << index << LABEL;                                                // label
+        os << STRCONST_PREFIX << UNDERSCORE << elt.first.c_str() << LABEL;                                                // label
         os << WORD << STRING_CLASS_TAG << std::endl;                                            // tag 
         os << WORD << (DEFAULT_OBJFIELDS + STRING_SLOTS + (elt.first.size()/4)) << std::endl;   // size
         os << WORD << "String" << DISPTAB_SUFFIX << std::endl;
         os << WORD << elt.first.size() << std::endl;
         os << ASCIIZ << "\"" << elt.first.c_str() << "\"\n";
         os << ALIGN;
-        index++;
 
     }
 
-    index = 1;
     for (auto& elt: inttable()) {
 
-        os << INTCONST_PREFIX << index << LABEL;                                                // label
+        os << INTCONST_PREFIX << UNDERSCORE << elt.first.c_str() << LABEL;                                                // label
         os << WORD << INT_CLASS_TAG << std::endl;
         os << WORD << (DEFAULT_OBJFIELDS + INT_SLOTS) << std::endl;
         os << WORD << "Int" << DISPTAB_SUFFIX << std::endl;
-        os << WORD << elt.first << std::endl;
-        index++;
+        os << WORD << elt.first.c_str() << std::endl;
 
     }
 
@@ -291,11 +287,18 @@ void Cgen::code_constants() {
 }
 
 void Cgen::code_dispatch_table(Class* class_) {
-    std::map<Token, Token>  mnames;
+    std::map<Token, Token>  mnames; // maps of all methods names
+    // the methods in the dispatch table must be ordered
+    // starting from the top of the hierarchy down to the class
+    // class_node is pointing to
     std::stack<Class*> class_ordering;
 
     Class* curr_class = class_;
-    
+
+    // go up the inheritance tree and for each class, push it to the stack
+    // (so class Object will be on the top of the stack after this loop) and
+    // all the method names in mnames.
+    // this is used to check later if a method was overriden. 
     while (true) {
         class_ordering.push(curr_class);
         for(auto& m: curr_class->features) {
@@ -311,8 +314,15 @@ void Cgen::code_dispatch_table(Class* class_) {
 
     int dispoffset = 0; 
 
+    // go through the stack (goes down the inheritance tree starting from Object)
+
     while (!class_ordering.empty()) {
         curr_class = class_ordering.top();
+
+        // for each method in the current class, if the method is still in the mnames
+        // table (not overriden), add it to the method table with the offset then
+        // remove the method so there won't be any duplication if a method
+        // is overriden by a derived class
 
         for (auto& m: curr_class->features) {
             if (mnames.find(m->id) != mnames.end()) {
@@ -396,12 +406,11 @@ void Cgen::code_global_data() {
     os << ".data\n" << ALIGN;
 
     // The following global names should be defined first.
-    
-    os << GLOBAL; emit_protobj_ref("Main"); os << std::endl; 
-    os << GLOBAL; emit_protobj_ref("Int"); os << std::endl; 
-    os << GLOBAL; emit_protobj_ref("String"); os << std::endl; 
-    os << GLOBAL; os << "bool_const0" << std::endl; 
-    os << GLOBAL; os << "bool_const1" << std::endl; 
+    os << GLOBAL; emit_protobj_ref(STRINGNAME); os << std::endl; 
+    os << GLOBAL; emit_protobj_ref(INTNAME); os << std::endl; 
+    os << GLOBAL; emit_protobj_ref(MAINNAME); os << std::endl; 
+    os << GLOBAL; os << BOOLCONST_FALSE << std::endl; 
+    os << GLOBAL; os << BOOLCONST_FALSE << std::endl; 
     os << GLOBAL << INTTAG << std::endl;
     os << GLOBAL << BOOLTAG << std::endl;
     os << GLOBAL << STRINGTAG << std::endl;
@@ -446,6 +455,10 @@ void Cgen::visitProgramStmt(Program* stmt) {
 
 void Cgen::visitClassStmt(Class* stmt) {
 
+    // as each class node is traversed, its _init method (akin to constructor)
+    // is also generated.
+
+    var_env.enterScope();
     Token classname = stmt->name;
     os << classname.lexeme + CLASSINIT_SUFFIX << LABEL;
 
@@ -484,6 +497,8 @@ void Cgen::visitClassStmt(Class* stmt) {
         if (method->featuretype == FeatureType::METHOD)
             method->accept(this);
     }
+
+    var_env.exitScope();
 }
 
 void Cgen::cgen_attribut(Feature* attr) {
@@ -554,7 +569,13 @@ void Cgen::visitAssignExpr(Assign* expr) {
     // also check that offset is not checked for 
     // null because the semantic analyzer should've 
     // caught any variable misuse by this point
-    emit_sw(ACC, *offset, FP);
+
+    // !TODO not sure here cause different from 
+    // (inspired repo file astnodecodegenerator.cpp:663)
+    if (offset) // local var
+        emit_sw(ACC, *offset, FP);
+    else // attribute
+        emit_sw(ACC, WORD_SIZE * ( attr_table[curr_class->name.lexeme][expr->id.lexeme] + 2 ), SELF);
 
 }
 
@@ -726,7 +747,11 @@ void Cgen::visitLiteralExpr(Literal* expr) {
                 emit_la(ACC, BOOLCONST_FALSE);
             break;
         case CoolType::Number_t:
-
+            break;
+        case CoolType::String_t:
+            break;
+        case CoolType::Void_t:
+            break;
 
     }
 }

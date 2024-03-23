@@ -27,6 +27,7 @@
 
 // Naming conventions
 #define DISPTAB_SUFFIX       "_dispTab"
+#define UNDERSCORE           "_"
 #define METHOD_SEP           "."
 #define CLASSINIT_SUFFIX     "_init"
 #define PROTOBJ_SUFFIX       "_protObj"
