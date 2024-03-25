@@ -747,10 +747,13 @@ void Cgen::visitLiteralExpr(Literal* expr) {
                 emit_la(ACC, BOOLCONST_FALSE);
             break;
         case CoolType::Number_t:
+            emit_la(ACC, std::string(INTCONST_PREFIX) + std::string(UNDERSCORE) + std::to_string(expr->object.int_value()));
             break;
         case CoolType::String_t:
+            emit_la(ACC, std::string(STRCONST_PREFIX) + std::string(UNDERSCORE) + expr->object.string_value());
             break;
         case CoolType::Void_t:
+            emit_la(ACC, ZERO);
             break;
 
     }
