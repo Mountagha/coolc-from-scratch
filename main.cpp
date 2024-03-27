@@ -30,6 +30,12 @@ int main(int argc, char* argv[]) {
 
     Scanner s{source};
 
+    std::ofstream out{"out.s"};
+    if (!out.is_open()) {
+        std::cerr << "Cannot open out.s for writing.";
+        exit(EXIT_FAILURE); // !TODO: better this later.
+    }
+
     std::vector<Token> tokens;
     tokens = s.scanTokens();
     for (auto& token : tokens) {
@@ -47,7 +53,7 @@ int main(int argc, char* argv[]) {
         semanter.semant(program);
         std::cout << "Printing AST after semant analysis...\n";
         ASTPrinter{}.print(program);
-        Cgen{semanter.get_inheritancegraph(), semanter.get_classtable()}.cgen(program);
+        Cgen{semanter.get_inheritancegraph(), semanter.get_classtable(), out}.cgen(program);
     }
         
 }
