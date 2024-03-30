@@ -7,10 +7,10 @@
 namespace cool {
 
 // Used by the Garbage collector.
-static char *gc_init_namesp[] = 
-{ "_NoGC_Init", "_GenGC_Init", "_ScnGC_Init" };
-static char *gc_collect_names[] = 
-{ "_NoGC_Collect", "_GenGC_Collect", "_ScnGC_Collect" };
+//static char *gc_init_namesp[] = 
+//{ "_NoGC_Init", "_GenGC_Init", "_ScnGC_Init" };
+//static char *gc_collect_names[] = 
+//{ "_NoGC_Collect", "_GenGC_Collect", "_ScnGC_Collect" };
 
 
 
@@ -438,9 +438,9 @@ void Cgen::code_global_data() {
 void Cgen::code_select_gc() {
     
     // Generate GC choice constants (pointers to GC functions)
-    os << GLOBAL << "_MemMgr_INITIALIZER" << std::endl;
-    os << "_MemMgr_INITIALIZER:" << std::endl;
-    os << WORD << 
+    //os << GLOBAL << "_MemMgr_INITIALIZER" << std::endl;
+    //os << "_MemMgr_INITIALIZER:" << std::endl;
+    //os << WORD <<  gc_init_namesp[cgen] 
 }
 
 // Cgen for Exprs and Stmts
@@ -461,6 +461,15 @@ void Cgen::visitProgramStmt(Program* stmt) {
 
     os << ".text\n";
 
+    // Codegen the basic classes first.
+    std::vector<std::string> basic_classes = 
+            {"Object", "IO", "String", "Int", "Bool"};
+    for (auto& cname: basic_classes) {
+        curr_class = class_table_ptr->get(cname);
+        class_table_ptr->get(cname)->accept(this);
+    }
+
+    // Then codegen class declared by user.
     for (auto& class_: stmt->classes) {
         curr_class = class_.get();
         class_->accept(this);

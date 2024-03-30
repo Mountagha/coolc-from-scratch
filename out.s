@@ -1,5 +1,6 @@
 .data
 	.align	2
+	.globl	class_nameTab
 	.globl	String_protObj
 	.globl	Int_protObj
 	.globl	Main_protObj
@@ -13,7 +14,7 @@ _int_tag:
 _bool_tag:
 	.word	5
 _string_tag:
-	.word	5
+	.word	7
 str_const_:
 	.word	7
 	.word	4
@@ -146,6 +147,76 @@ String_protObj:
 	.word	String_dispTab
 	.word	0
 .text
+Object_init:
+	addiu	$sp, $sp, -12
+	sw	$fp, 12($sp)
+	sw	$s0, 8($sp)
+	sw	$ra, 4($sp)
+	addiu	$fp, $sp, 4
+	move	$s0, $a0
+	move	$a0, $s0
+	lw	$fp, 12($sp)
+	lw	$s0, 8($sp)
+	lw	$ra, 4($sp)
+	addiu	$sp, $sp, 12
+	jr	$ra
+IO_init:
+	addiu	$sp, $sp, -12
+	sw	$fp, 12($sp)
+	sw	$s0, 8($sp)
+	sw	$ra, 4($sp)
+	addiu	$fp, $sp, 4
+	move	$s0, $a0
+	jal	Object_init
+	move	$a0, $s0
+	lw	$fp, 12($sp)
+	lw	$s0, 8($sp)
+	lw	$ra, 4($sp)
+	addiu	$sp, $sp, 12
+	jr	$ra
+String_init:
+	addiu	$sp, $sp, -12
+	sw	$fp, 12($sp)
+	sw	$s0, 8($sp)
+	sw	$ra, 4($sp)
+	addiu	$fp, $sp, 4
+	move	$s0, $a0
+	jal	Object_init
+	sw	$a0, 12($s0)
+	move	$a0, $s0
+	lw	$fp, 12($sp)
+	lw	$s0, 8($sp)
+	lw	$ra, 4($sp)
+	addiu	$sp, $sp, 12
+	jr	$ra
+Int_init:
+	addiu	$sp, $sp, -12
+	sw	$fp, 12($sp)
+	sw	$s0, 8($sp)
+	sw	$ra, 4($sp)
+	addiu	$fp, $sp, 4
+	move	$s0, $a0
+	jal	Object_init
+	move	$a0, $s0
+	lw	$fp, 12($sp)
+	lw	$s0, 8($sp)
+	lw	$ra, 4($sp)
+	addiu	$sp, $sp, 12
+	jr	$ra
+Bool_init:
+	addiu	$sp, $sp, -12
+	sw	$fp, 12($sp)
+	sw	$s0, 8($sp)
+	sw	$ra, 4($sp)
+	addiu	$fp, $sp, 4
+	move	$s0, $a0
+	jal	Object_init
+	move	$a0, $s0
+	lw	$fp, 12($sp)
+	lw	$s0, 8($sp)
+	lw	$ra, 4($sp)
+	addiu	$sp, $sp, 12
+	jr	$ra
 Main_init:
 	addiu	$sp, $sp, -12
 	sw	$fp, 12($sp)
