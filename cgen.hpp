@@ -198,6 +198,10 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         // emit code for the prototype objects attributes
         void emit_obj_attributes(Class* );
 
+        // emit code for Garbage collector functions choice.
+        void code_select_gc();
+
+        // emit code to declare global names.
         void code_global_data();
 
         void cgen_method(Feature* );

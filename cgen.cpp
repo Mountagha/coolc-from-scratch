@@ -6,6 +6,14 @@
 
 namespace cool {
 
+// Used by the Garbage collector.
+static char *gc_init_namesp[] = 
+{ "_NoGC_Init", "_GenGC_Init", "_ScnGC_Init" };
+static char *gc_collect_names[] = 
+{ "_NoGC_Collect", "_GenGC_Collect", "_ScnGC_Collect" };
+
+
+
 void Cgen::emit_add(const char* dest, const char* src1, const char* src2) {
     os << ADD << dest << ", $" << src1 << ", $" << src2 << std::endl; 
 }
@@ -406,6 +414,7 @@ void Cgen::code_global_data() {
     os << ".data\n" << ALIGN;
 
     // The following global names should be defined first.
+    os << GLOBAL << CLASSNAMETAB << std::endl;
     os << GLOBAL; emit_protobj_ref(STRINGNAME); os << std::endl; 
     os << GLOBAL; emit_protobj_ref(INTNAME); os << std::endl; 
     os << GLOBAL; emit_protobj_ref(MAINNAME); os << std::endl; 
@@ -423,7 +432,15 @@ void Cgen::code_global_data() {
     os << BOOLTAG << LABEL
        << WORD << BOOL_CLASS_TAG << std::endl;
     os << STRINGTAG << LABEL
-       << WORD << BOOL_CLASS_TAG << std::endl;
+       << WORD << STRING_CLASS_TAG << std::endl;
+}
+
+void Cgen::code_select_gc() {
+    
+    // Generate GC choice constants (pointers to GC functions)
+    os << GLOBAL << "_MemMgr_INITIALIZER" << std::endl;
+    os << "_MemMgr_INITIALIZER:" << std::endl;
+    os << WORD << 
 }
 
 // Cgen for Exprs and Stmts
