@@ -7,10 +7,10 @@
 namespace cool {
 
 // Used by the Garbage collector.
-//static char *gc_init_namesp[] = 
-//{ "_NoGC_Init", "_GenGC_Init", "_ScnGC_Init" };
-//static char *gc_collect_names[] = 
-//{ "_NoGC_Collect", "_GenGC_Collect", "_ScnGC_Collect" };
+static std::vector<std::string> gc_init_names = 
+{ "_NoGC_Init", "_GenGC_Init", "_ScnGC_Init" };
+static std::vector<std::string> gc_collect_names = 
+{ "_NoGC_Collect", "_GenGC_Collect", "_ScnGC_Collect" };
 
 
 
@@ -437,12 +437,13 @@ void Cgen::code_global_data() {
        << WORD << BOOL_CLASS_TAG << std::endl;
     os << STRINGTAG << LABEL
        << WORD << STRING_CLASS_TAG << std::endl;
+
+    if (CGEN_DEBUG) code_select_gc();
 }
 
 void Cgen::code_global_text() {
     os << GLOBAL << HEAP_START << std::endl;
-    os << HEAP_START << LABEL
-       << WORD << 0 << std::endl;
+    os << HEAP_START << LABEL << WORD << 0 << std::endl;
     os << "\t.text" << std::endl;
 
     os << GLOBAL; emit_init_ref(MAINNAME); os << std::endl;
@@ -455,9 +456,15 @@ void Cgen::code_global_text() {
 void Cgen::code_select_gc() {
     
     // Generate GC choice constants (pointers to GC functions)
-    //os << GLOBAL << "_MemMgr_INITIALIZER" << std::endl;
-    //os << "_MemMgr_INITIALIZER:" << std::endl;
-    //os << WORD <<  gc_init_namesp[cgen] 
+    os << GLOBAL << "_MemMgr_INITIALIZER" << std::endl;
+    os << "_MemMgr_INITIALIZER:" << std::endl;
+    os << WORD <<  gc_init_names[cgen_Memmgr]  << std::endl;
+    os << GLOBAL << "_MemMgr_COLLECTOR" << std::endl;
+    os << "_MemMgr_COLLECTOR:" << std::endl;
+    os << WORD <<  gc_collect_names[cgen_Memmgr]  << std::endl;
+    os << GLOBAL << "_MemMgr_TEST" << std::endl;
+    os << "_MemMgr_TEST:" << std::endl;
+    os << WORD <<  (cgen_Memmgr_Test == GC_TEST)  << std::endl;
 }
 
 // Cgen for Exprs and Stmts

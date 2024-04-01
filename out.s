@@ -15,6 +15,15 @@ _bool_tag:
 	.word	5
 _string_tag:
 	.word	7
+	.globl	_MemMgr_INITIALIZER
+_MemMgr_INITIALIZER:
+	.word	_NoGC_Init
+	.globl	_MemMgr_COLLECTOR
+_MemMgr_COLLECTOR:
+	.word	_NoGC_Collect
+	.globl	_MemMgr_TEST
+_MemMgr_TEST:
+	.word	0
 str_const_:
 	.word	7
 	.word	4
@@ -63,13 +72,6 @@ str_const_Bool:
 	.word	String_dispTab
 	.word	4
 	.ascii	"Bool"
-	.align	2
-str_const_<basic class>:
-	.word	7
-	.word	7
-	.word	String_dispTab
-	.word	13
-	.ascii	"<basic class>"
 	.align	2
 int_const_1:
 	.word	6
@@ -146,7 +148,15 @@ String_protObj:
 	.word	4
 	.word	String_dispTab
 	.word	0
-.text
+	.globl	heap_start
+heap_start:
+	.word	0
+	.text
+	.globl	Main_init
+	.globl	Int_init
+	.globl	String_init
+	.globl	Bool_init
+	.globl	Main.main
 Object_init:
 	addiu	$sp, $sp, -12
 	sw	$fp, 12($sp)

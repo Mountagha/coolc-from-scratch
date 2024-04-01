@@ -13,6 +13,12 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
+// Garbage collector management.
+#define cgen_Memmgr 0
+#define cgen_Memmgr_Test 0
+#define GC_TEST 1
+#define CGEN_DEBUG 1
+
 #define MAXINT  100000000    
 #define WORD_SIZE    4
 #define LOG_WORD_SIZE 2     // for logical shifts
