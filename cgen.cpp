@@ -225,6 +225,10 @@ void Cgen::emit_protobj_ref(const char* s) {
     os << s << PROTOBJ_SUFFIX;
 }
 
+void Cgen::emit_init_ref(const char* s) {
+    os << s << CLASSINIT_SUFFIX;
+}
+
 void Cgen::emit_label(const std::string& label) {
     os << label << ":\n";
 }
@@ -435,6 +439,19 @@ void Cgen::code_global_data() {
        << WORD << STRING_CLASS_TAG << std::endl;
 }
 
+void Cgen::code_global_text() {
+    os << GLOBAL << HEAP_START << std::endl;
+    os << HEAP_START << LABEL
+       << WORD << 0 << std::endl;
+    os << "\t.text" << std::endl;
+
+    os << GLOBAL; emit_init_ref(MAINNAME); os << std::endl;
+    os << GLOBAL; emit_init_ref(INTNAME); os << std::endl;
+    os << GLOBAL; emit_init_ref(STRINGNAME); os << std::endl;
+    os << GLOBAL; emit_init_ref(BOOLNAME); os << std::endl;
+    os << GLOBAL << MAINNAME << METHOD_SEP << "main" << std::endl;
+}
+
 void Cgen::code_select_gc() {
     
     // Generate GC choice constants (pointers to GC functions)
@@ -459,7 +476,7 @@ void Cgen::visitProgramStmt(Program* stmt) {
 
     code_prototype_objects();
 
-    os << ".text\n";
+    code_global_text(); 
 
     // Codegen the basic classes first.
     std::vector<std::string> basic_classes = 
@@ -548,6 +565,10 @@ void Cgen::cgen_method(Feature* method) {
         return;
     var_env.enterScope();
     emit_label(curr_class->name.lexeme + METHOD_SEP + method->id.lexeme);
+    std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
+    emit_push(ar_size);
+    emit_sw(FP, ar_size * WORD_SIZE, SP),
+    emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
 
     emit_sw(RA, 4, SP);
 
@@ -559,7 +580,6 @@ void Cgen::cgen_method(Feature* method) {
     method->expr->accept(this);
 
     // refer to stack frame layout in header file
-    std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
     emit_lw(FP, ar_size * WORD_SIZE, SP);
     emit_lw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
     emit_lw(RA, 4, SP);

@@ -184,6 +184,7 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         void emit_push(const char*);
 
         void emit_protobj_ref(const char*);
+        void emit_init_ref(const char*);
 
         // emit code for each object's dispatch table
         void code_dispatch_table(Class*);
@@ -200,6 +201,10 @@ class Cgen: public StmtVisitor, public ExprVisitor {
 
         // emit code for Garbage collector functions choice.
         void code_select_gc();
+
+        // emit code to start the .text segment and to 
+        // declare the global names.
+        void code_global_text();
 
         // emit code to declare global names.
         void code_global_data();

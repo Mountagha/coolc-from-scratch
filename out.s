@@ -232,6 +232,9 @@ Main_init:
 	addiu	$sp, $sp, 12
 	jr	$ra
 Main.main:
+	addiu	$sp, $sp, -12
+	sw	$fp, 12($sp)
+	sw	$s0, 8($sp)
 	sw	$ra, 4($sp)
 	la	$a0, int_const_1
 	lw	$fp, 12($sp)
