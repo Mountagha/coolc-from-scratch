@@ -813,7 +813,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             std::vector<std::unique_ptr<Feature>> str_features;
             str_features.push_back(std::make_unique<Feature>(val, std::move(val_formals), Int, nullptr, FeatureType::ATTRIBUT));
-            str_features.push_back(std::make_unique<Feature>(str_field, std::move(str_field_formals), prim_slot, nullptr, FeatureType::METHOD));
+            str_features.push_back(std::make_unique<Feature>(str_field, std::move(str_field_formals), prim_slot, nullptr, FeatureType::ATTRIBUT));
             str_features.push_back(std::make_unique<Feature>(length, std::move(length_formals), Int, nullptr, FeatureType::METHOD));
             str_features.push_back(std::make_unique<Feature>(concat, std::move(concat_formals), Str, nullptr, FeatureType::METHOD));
             str_features.push_back(std::make_unique<Feature>(substr, std::move(substr_formals), Str, nullptr, FeatureType::METHOD));

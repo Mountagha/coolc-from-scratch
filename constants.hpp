@@ -37,7 +37,7 @@ static Token
     self{TokenType::IDENTIFIER, "self"},
     SELF_TYPE{TokenType::IDENTIFIER, "SELF_TYPE"},
     Str{TokenType::IDENTIFIER, "String"},
-    str_field{TokenType::IDENTIFIER, "str_field"},
+    str_field{TokenType::IDENTIFIER, "_str_field"},
     substr{TokenType::IDENTIFIER, "substr"},
     type_name{TokenType::IDENTIFIER, "type_name"},
     val{TokenType::IDENTIFIER, "_val"};

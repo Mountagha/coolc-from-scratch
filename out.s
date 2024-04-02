@@ -88,6 +88,13 @@ bool_const1:
 	.word	4
 	.word	Bool_dispTab
 	.word	1
+class_nameTab:
+	.word	str_const_Bool
+	.word	str_const_IO
+	.word	str_const_Int
+	.word	str_const_Main
+	.word	str_const_Object
+	.word	str_const_String
 Bool_dispTab:
 	.word	Object.abort
 	.word	Object.type_name
@@ -117,7 +124,6 @@ String_dispTab:
 	.word	Object.abort
 	.word	Object.type_name
 	.word	Object.copy
-	.word	String.str_field
 	.word	String.length
 	.word	String.concat
 	.word	String.substr
@@ -145,8 +151,9 @@ Object_protObj:
 	.word	Object_dispTab
 String_protObj:
 	.word	7
-	.word	4
+	.word	5
 	.word	String_dispTab
+	.word	0
 	.word	0
 	.globl	heap_start
 heap_start:

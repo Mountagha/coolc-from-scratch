@@ -296,6 +296,17 @@ void Cgen::code_constants() {
     os << WORD << "Bool" << DISPTAB_SUFFIX << std::endl;
     os << WORD << "1" << std::endl;
 
+    
+
+}
+
+void Cgen::class_name_table() {
+    
+    // class_name table
+    os << CLASSNAMETAB << LABEL;
+    for (auto& class_: g->get_graph()) {
+        os << WORD << STRCONST_PREFIX << UNDERSCORE << class_.first.lexeme.c_str() << std::endl;
+    }
 }
 
 void Cgen::code_dispatch_table(Class* class_) {
@@ -473,6 +484,7 @@ void Cgen::visitProgramStmt(Program* stmt) {
 
     code_global_data();
     code_constants();
+    class_name_table();
 
     std::cout << "Real code actually starting here.\n\n";
     for(auto& p: g->get_graph()) {

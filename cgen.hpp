@@ -209,6 +209,8 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         // emit code to declare global names.
         void code_global_data();
 
+        void class_name_table();
+
         void cgen_method(Feature* );
 
         void cgen_attribut(Feature* );
