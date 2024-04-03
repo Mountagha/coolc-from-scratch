@@ -254,16 +254,17 @@ void Cgen::code_constants() {
     //
     // add class names to string constants.
     for (auto& class_: g->get_graph()) {
-        stringtable().insert({class_.first.lexeme, class_.first});
+        stringtable().insert(class_.first.lexeme, class_.first);
     }
     
     // add empty string to string const table since it's the default value 
     // value of a newly allocated string.
-    stringtable().insert({"", Token{TokenType::_NULL, ""}});
+    stringtable().insert("", Token{TokenType::_NULL, ""});
 
-    for (auto& elt: stringtable()) {
+    for (auto& elt: stringtable().get_elements()) {
         
-        os << STRCONST_PREFIX << UNDERSCORE << elt.first.c_str() << LABEL;                                                // label
+        int idx = stringtable().get_index(elt.first);
+        os << STRCONST_PREFIX << idx << LABEL;                                                // label
         os << WORD << STRING_CLASS_TAG << std::endl;                                            // tag 
         os << WORD << (DEFAULT_OBJFIELDS + STRING_SLOTS + (elt.first.size()/4)) << std::endl;   // size
         os << WORD << "String" << DISPTAB_SUFFIX << std::endl;
@@ -273,9 +274,10 @@ void Cgen::code_constants() {
 
     }
 
-    for (auto& elt: inttable()) {
+    for (auto& elt: inttable().get_elements()) {
 
-        os << INTCONST_PREFIX << UNDERSCORE << elt.first.c_str() << LABEL;                                                // label
+        int idx = inttable().get_index(elt.first);
+        os << INTCONST_PREFIX << idx << LABEL;                                                // label
         os << WORD << INT_CLASS_TAG << std::endl;
         os << WORD << (DEFAULT_OBJFIELDS + INT_SLOTS) << std::endl;
         os << WORD << "Int" << DISPTAB_SUFFIX << std::endl;
@@ -305,7 +307,8 @@ void Cgen::class_name_table() {
     // class_name table
     os << CLASSNAMETAB << LABEL;
     for (auto& class_: g->get_graph()) {
-        os << WORD << STRCONST_PREFIX << UNDERSCORE << class_.first.lexeme.c_str() << std::endl;
+        int idx = stringtable().get_index(class_.first.lexeme); // we sure to get an index since classes are added previously
+        os << WORD << STRCONST_PREFIX << idx << std::endl;
     }
 }
 
@@ -848,10 +851,10 @@ void Cgen::visitLiteralExpr(Literal* expr) {
                 emit_la(ACC, BOOLCONST_FALSE);
             break;
         case CoolType::Number_t:
-            emit_la(ACC, std::string(INTCONST_PREFIX) + std::string(UNDERSCORE) + std::to_string(expr->object.int_value()));
+            emit_la(ACC, std::string(INTCONST_PREFIX) + std::to_string(inttable().get_index(std::to_string(expr->object.int_value()))));
             break;
         case CoolType::String_t:
-            emit_la(ACC, std::string(STRCONST_PREFIX) + std::string(UNDERSCORE) + expr->object.string_value());
+            emit_la(ACC, std::string(STRCONST_PREFIX) + std::to_string(stringtable().get_index(expr->object.string_value())));
             break;
         case CoolType::Void_t:
             emit_la(ACC, ZERO);

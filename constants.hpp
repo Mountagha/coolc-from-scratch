@@ -43,36 +43,36 @@ static Token
     val{TokenType::IDENTIFIER, "_val"};
 
 static void initialize_constants() {
-    idtable().insert({"arg", arg});
-    idtable().insert({"arg2", arg2});
-    idtable().insert({"Bool", Bool});
-    idtable().insert({"concat", concat});
-    idtable().insert({"abort", cool_abort});
-    idtable().insert({"copy", copy});
-    idtable().insert({"Int", Int});
-    idtable().insert({"in_int", in_int});
-    idtable().insert({"in_string", in_string});
-    idtable().insert({"IO", IO});
-    idtable().insert({"length", length});
-    idtable().insert({"Main", Main});
-    idtable().insert({"main", main_meth});
+    idtable().insert("arg", arg);
+    idtable().insert("arg2", arg2);
+    idtable().insert("Bool", Bool);
+    idtable().insert("concat", concat);
+    idtable().insert("abort", cool_abort);
+    idtable().insert("copy", copy);
+    idtable().insert("Int", Int);
+    idtable().insert("in_int", in_int);
+    idtable().insert("in_string", in_string);
+    idtable().insert("IO", IO);
+    idtable().insert("length", length);
+    idtable().insert("Main", Main);
+    idtable().insert("main", main_meth);
 
     //  _no_class is a symbol that can't be the name of
     // any user_defined class.
 
-    idtable().insert({"_no_class", No_class});
-    idtable().insert({"_no_type", No_type});
-    idtable().insert({"Object", Object});
-    idtable().insert({"out_int", out_int});
-    idtable().insert({"out_string", out_string});
-    idtable().insert({"_prim_slot", prim_slot});
-    idtable().insert({"self", self});
-    idtable().insert({"SELF_TYPE", SELF_TYPE});
-    idtable().insert({"String", Str});
-    idtable().insert({"_str_field", str_field});
-    idtable().insert({"substr", substr});
-    idtable().insert({"type_name", type_name});
-    idtable().insert({"_val", val});
+    idtable().insert("_no_class", No_class);
+    idtable().insert("_no_type", No_type);
+    idtable().insert("Object", Object);
+    idtable().insert("out_int", out_int);
+    idtable().insert("out_string", out_string);
+    idtable().insert("_prim_slot", prim_slot);
+    idtable().insert("self", self);
+    idtable().insert("SELF_TYPE", SELF_TYPE);
+    idtable().insert("String", Str);
+    idtable().insert("_str_field", str_field);
+    idtable().insert("substr", substr);
+    idtable().insert("type_name", type_name);
+    idtable().insert("_val", val);
 
 }
 

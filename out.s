@@ -73,11 +73,13 @@ str_const_Bool:
 	.word	4
 	.ascii	"Bool"
 	.align	2
-int_const_1:
-	.word	6
-	.word	4
-	.word	Int_dispTab
-	.word	1
+str_const_Hello, World.\n:
+	.word	7
+	.word	7
+	.word	String_dispTab
+	.word	15
+	.ascii	"Hello, World.\n"
+	.align	2
 bool_const0:
 	.word	5
 	.word	4
@@ -115,6 +117,10 @@ Main_dispTab:
 	.word	Object.abort
 	.word	Object.type_name
 	.word	Object.copy
+	.word	IO.out_string
+	.word	IO.out_int
+	.word	IO.in_string
+	.word	IO.in_int
 	.word	Main.main
 Object_dispTab:
 	.word	Object.abort
@@ -241,7 +247,7 @@ Main_init:
 	sw	$ra, 4($sp)
 	addiu	$fp, $sp, 4
 	move	$s0, $a0
-	jal	Object_init
+	jal	IO_init
 	move	$a0, $s0
 	lw	$fp, 12($sp)
 	lw	$s0, 8($sp)
@@ -253,7 +259,17 @@ Main.main:
 	sw	$fp, 12($sp)
 	sw	$s0, 8($sp)
 	sw	$ra, 4($sp)
-	la	$a0, int_const_1
+	sw	$fp, 0($sp)
+	addiu	$sp, $sp, -4
+	sw	$s0, 0($sp)
+	addiu	$sp, $sp, -4
+	la	$a0, str_const_Hello, World.\n
+	sw	$a0, 0($sp)
+	addiu	$sp, $sp, -4
+	move	$a0, $s0
+	lw	$t1, 8($a0)
+	lw	$t1, 0($t1)
+	jalr	$t1
 	lw	$fp, 12($sp)
 	lw	$s0, 8($sp)
 	lw	$ra, 4($sp)

@@ -191,7 +191,7 @@ class Scanner {
             advance();
             std::string lexeme = source.substr(start+1, current-start-2);
             addToken(STRING, lexeme, line);
-            stringtable().insert({lexeme, Token{STRING, lexeme, line}});
+            stringtable().insert(lexeme, Token{STRING, lexeme, line});
         }
 
         void number() {
@@ -200,7 +200,7 @@ class Scanner {
             }
             std::string lexeme = source.substr(start, current-start);
             addToken(NUMBER, lexeme, line);
-            inttable().insert({lexeme, Token{NUMBER, lexeme, line}});
+            inttable().insert(lexeme, Token{NUMBER, lexeme, line});
         }
 
         void identifierOrKeyword() {
@@ -212,7 +212,7 @@ class Scanner {
                 addToken(keywordsMap.at(strTolower(lexeme)), lexeme, line);
             else
                 addToken(IDENTIFIER, lexeme, line);
-                idtable().insert({lexeme, Token{IDENTIFIER, lexeme, line}});
+                idtable().insert(lexeme, Token{IDENTIFIER, lexeme, line});
         }
 
         std::string strTolower(const std::string& s) {

@@ -1,7 +1,10 @@
 #pragma once
 
-#include "token.hpp"
 #include <string>
+#include <utility>
+#include <map>
+
+#include "token.hpp"
 
 namespace cool {
 
@@ -11,9 +14,21 @@ namespace cool {
     This will facilitate code generation.
 */
 
-using IdTable = std::unordered_map<std::string, Token>;
-using StringTable = std::unordered_map<std::string, Token>;
-using IntTable = std::unordered_map<std::string, Token>;
+class TokenTable {
+    private:
+        std::map<std::string, Token> table_elements{};
+        std::map<std::string, size_t> table_idx{}; 
+        int idx;
+    public:
+        TokenTable();
+        void insert(std::string id, Token token);
+        int get_index(const std::string& id);
+        std::map<std::string, Token>& get_elements();
+};
+
+class IdTable : public TokenTable {};
+class StringTable : public TokenTable {};
+class IntTable : public TokenTable {};
 
 inline IdTable& idtable() {
     static IdTable idtable;
@@ -30,4 +45,4 @@ inline IntTable& inttable() {
     return inttable;
 }
 
-}
+}; // namespace cool
