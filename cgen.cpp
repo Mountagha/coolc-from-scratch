@@ -585,7 +585,9 @@ void Cgen::cgen_attribut(Feature* attr) {
 void Cgen::cgen_method(Feature* method) {
     if (is_base_class(curr_class))
         return;
+
     var_env.enterScope();
+
     emit_label(curr_class->name.lexeme + METHOD_SEP + method->id.lexeme);
     std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
     emit_push(ar_size);

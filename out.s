@@ -24,61 +24,61 @@ _MemMgr_COLLECTOR:
 	.globl	_MemMgr_TEST
 _MemMgr_TEST:
 	.word	0
-str_const_:
+str_const8:
 	.word	7
 	.word	4
 	.word	String_dispTab
 	.word	0
 	.ascii	""
 	.align	2
-str_const_String:
-	.word	7
-	.word	5
-	.word	String_dispTab
-	.word	6
-	.ascii	"String"
-	.align	2
-str_const_Main:
-	.word	7
-	.word	5
-	.word	String_dispTab
-	.word	4
-	.ascii	"Main"
-	.align	2
-str_const_Object:
-	.word	7
-	.word	5
-	.word	String_dispTab
-	.word	6
-	.ascii	"Object"
-	.align	2
-str_const_Int:
-	.word	7
-	.word	4
-	.word	String_dispTab
-	.word	3
-	.ascii	"Int"
-	.align	2
-str_const_IO:
-	.word	7
-	.word	4
-	.word	String_dispTab
-	.word	2
-	.ascii	"IO"
-	.align	2
-str_const_Bool:
+str_const2:
 	.word	7
 	.word	5
 	.word	String_dispTab
 	.word	4
 	.ascii	"Bool"
 	.align	2
-str_const_Hello, World.\n:
+str_const1:
 	.word	7
 	.word	7
 	.word	String_dispTab
 	.word	15
 	.ascii	"Hello, World.\n"
+	.align	2
+str_const3:
+	.word	7
+	.word	4
+	.word	String_dispTab
+	.word	2
+	.ascii	"IO"
+	.align	2
+str_const4:
+	.word	7
+	.word	4
+	.word	String_dispTab
+	.word	3
+	.ascii	"Int"
+	.align	2
+str_const5:
+	.word	7
+	.word	5
+	.word	String_dispTab
+	.word	4
+	.ascii	"Main"
+	.align	2
+str_const6:
+	.word	7
+	.word	5
+	.word	String_dispTab
+	.word	6
+	.ascii	"Object"
+	.align	2
+str_const7:
+	.word	7
+	.word	5
+	.word	String_dispTab
+	.word	6
+	.ascii	"String"
 	.align	2
 bool_const0:
 	.word	5
@@ -91,12 +91,12 @@ bool_const1:
 	.word	Bool_dispTab
 	.word	1
 class_nameTab:
-	.word	str_const_Bool
-	.word	str_const_IO
-	.word	str_const_Int
-	.word	str_const_Main
-	.word	str_const_Object
-	.word	str_const_String
+	.word	str_const2
+	.word	str_const3
+	.word	str_const4
+	.word	str_const5
+	.word	str_const6
+	.word	str_const7
 Bool_dispTab:
 	.word	Object.abort
 	.word	Object.type_name
@@ -263,7 +263,7 @@ Main.main:
 	addiu	$sp, $sp, -4
 	sw	$s0, 0($sp)
 	addiu	$sp, $sp, -4
-	la	$a0, str_const_Hello, World.\n
+	la	$a0, str_const1
 	sw	$a0, 0($sp)
 	addiu	$sp, $sp, -4
 	move	$a0, $s0
