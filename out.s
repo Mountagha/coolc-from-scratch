@@ -255,5 +255,19 @@ Main_init:
 	addiu	$sp, $sp, 12
 	jr	$ra
 Main.main:
+	addiu	$sp, $sp, -12
+	sw	$fp, 12($sp)
+	sw	$s0, 8($sp)
 	sw	$ra, 4($sp)
-	addiu	$sp, $sp, -16
+	la	$a0, str_const1
+	sw	$a0, 8($sp)
+	addiu	$fp, $sp, 4
+	move	$a0, $s0
+	lw	$t1, 8($a0)
+	lw	$t1, 0($t1)
+	jalr	$t1
+	lw	$fp, 12($sp)
+	lw	$s0, 8($sp)
+	lw	$ra, 4($sp)
+	addiu	$sp, $sp, 12
+	jr	$ra

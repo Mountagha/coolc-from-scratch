@@ -589,10 +589,10 @@ void Cgen::cgen_method(Feature* method) {
     var_env.enterScope();
 
     emit_label(curr_class->name.lexeme + METHOD_SEP + method->id.lexeme);
-    //std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
-    //emit_push(ar_size);
-    //emit_sw(FP, ar_size * WORD_SIZE, SP),
-    //emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
+    std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
+    emit_push(ar_size);
+    emit_sw(FP, ar_size * WORD_SIZE, SP),
+    emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
 
     emit_sw(RA, 4, SP);
 
@@ -604,7 +604,7 @@ void Cgen::cgen_method(Feature* method) {
     method->expr->accept(this);
 
     // refer to stack frame layout in header file
-    std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
+    //std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
     emit_lw(FP, ar_size * WORD_SIZE, SP);
     emit_lw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
     emit_lw(RA, 4, SP);
@@ -808,11 +808,11 @@ void Cgen::visitGroupingExpr(Grouping* expr) {
 
 void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
 
-    std::size_t ar_size = AR_BASE_SIZE + expr->args.size();
+    //std::size_t ar_size = AR_BASE_SIZE + expr->args.size();
 
-    emit_push(ar_size);
-    emit_sw(FP, ar_size * WORD_SIZE, SP);
-    emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
+    //emit_push(ar_size);
+    //emit_sw(FP, ar_size * WORD_SIZE, SP);
+    //emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
     //emit_push(FP);
     //emit_push(SELF);
 
@@ -823,7 +823,8 @@ void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
         formal_offset += WORD_SIZE;
         //emit_push(ACC);
     }
-     emit_addiu(FP, SP, 4);
+
+    emit_addiu(FP, SP, 4);
 
     emit_la(T1, expr->class_.lexeme + std::string(PROTOBJ_SUFFIX));
     emit_lw(T1, 8, T1); // to get the dispatch table pointer.
@@ -833,11 +834,11 @@ void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
 
 void Cgen::visitDispatchExpr(Dispatch* expr) {
     
-    std::size_t ar_size = AR_BASE_SIZE + expr->args.size();
+    //std::size_t ar_size = AR_BASE_SIZE + expr->args.size();
 
-    emit_push(ar_size);
-    emit_sw(FP, ar_size * WORD_SIZE, SP);
-    emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
+    //emit_push(ar_size);
+    //emit_sw(FP, ar_size * WORD_SIZE, SP);
+    //emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
 
     
     //emit_push(FP);
