@@ -763,12 +763,10 @@ void Cgen::visitUnaryExpr(Unary* expr) {
             break;
 
         case NOT:
-
             emit_jal("lnot");
             break;
 
         case ISVOID:
-
             emit_jal("isvoid");
             break;
     }
