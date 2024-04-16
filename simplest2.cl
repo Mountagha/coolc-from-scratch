@@ -1,9 +1,10 @@
 class Main {
-	foo(b: Int, c: Bool): Int {
+	l: Int;
+	foo(): Int {
 		{
-			l : Int <- 2;
-			l
-		};
+			l <- 2;
+			l;
+		}
 	};
-	main(): Int { 1 };
+	main(): Int { foo() };
 };
