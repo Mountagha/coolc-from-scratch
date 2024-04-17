@@ -352,8 +352,8 @@ void Cgen::code_dispatch_table(Class* class_) {
 
         for (auto& m: curr_class->features) {
             if (mnames.find(m->id) != mnames.end()) {
-                method_table[curr_class->name.lexeme][m->id.lexeme] = dispoffset++;
-                os << WORD << curr_class->name.lexeme << METHOD_SEP << m->id.lexeme << std::endl;
+                method_table[class_->name.lexeme][m->id.lexeme] = dispoffset++;
+                os << WORD << mnames[m->id].lexeme << METHOD_SEP << m->id.lexeme << std::endl;
                 mnames.erase(m->id);
             }
         }
@@ -843,7 +843,7 @@ void Cgen::visitDispatchExpr(Dispatch* expr) {
 
     expr->expr->accept(this);
     emit_lw(T1, 8, ACC); // to get the dispatch table pointer.
-    emit_lw(T1, method_table[expr->expr_type.lexeme][expr->callee_name.lexeme] * WORD_SIZE, T1);
+    emit_lw(T1, method_table[expr->expr->expr_type.lexeme][expr->callee_name.lexeme] * WORD_SIZE, T1);
     emit_jalr(T1);
 }
 
