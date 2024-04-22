@@ -675,17 +675,29 @@ Object.type_name:
 #	$a0 is preserved!
 #
 
-	.globl	IO.out_string
+#	.globl	IO.out_string
+#IO.out_string:
+#	addiu	$sp $sp -4
+#	sw	$a0 4($sp)	# save self
+#	lw	$a0 8($sp)	# get arg
+#	addiu	$a0 $a0 str_field	# Adjust to beginning of str
+#	li	$v0 4		# print_str
+#	syscall
+#	lw	$a0 4($sp)	# return self
+#	addiu	$sp $sp 8	# pop argument
+#	jr	$ra
+
+.globl IO.out_string
 IO.out_string:
-	addiu	$sp $sp -4
-	sw	$a0 4($sp)	# save self
-	lw	$a0 8($sp)	# get arg
-	addiu	$a0 $a0 str_field	# Adjust to beginning of str
-	li	$v0 4		# print_str
-	syscall
-	lw	$a0 4($sp)	# return self
-	addiu	$sp $sp 8	# pop argument
-	jr	$ra
+    lw $a0, 4($fp)
+    la $a0, 16($a0) # 16 is STR_CONST_OFFSET
+    li $v0, 4
+    syscall
+    lw $fp, 16($sp)
+    lw $s0, 12($sp)
+    addiu $sp $sp 16
+    jr $ra
+
 
 #
 #
@@ -697,17 +709,29 @@ IO.out_string:
 #	$a0 is preserved!
 #
 
-	.globl	IO.out_int
+#	.globl	IO.out_int
+#IO.out_int:
+#	addiu	$sp $sp -4
+#	sw	$a0 4($sp)	# save self
+#	lw	$a0 8($sp)	# get arg
+#	lw	$a0 int_slot($a0)	# Fetch int
+#	li	$v0 1		# print_int
+#	syscall	
+#	lw	$a0 4($sp)	# return self
+#	addiu	$sp $sp 8	# pop argument
+#	jr	$ra
+
+
+    .globl IO.out_int
 IO.out_int:
-	addiu	$sp $sp -4
-	sw	$a0 4($sp)	# save self
-	lw	$a0 8($sp)	# get arg
-	lw	$a0 int_slot($a0)	# Fetch int
-	li	$v0 1		# print_int
-	syscall	
-	lw	$a0 4($sp)	# return self
-	addiu	$sp $sp 8	# pop argument
-	jr	$ra
+    lw $a0, 4($fp)
+    lw $a0, 12($a0) #  12 is the INT_CONST_OFFSET
+    li $v0, 1
+    syscall
+    lw $fp, 16($sp)
+    lw $s0, 12($sp)
+    addiu $sp $sp 16
+    jr $ra
 
 #
 #
