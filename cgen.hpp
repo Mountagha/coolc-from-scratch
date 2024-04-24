@@ -215,6 +215,8 @@ class Cgen: public StmtVisitor, public ExprVisitor {
 
         void cgen_attribut(Feature* );
 
+        void codegen_inherited_attribute(Token& );
+
 
 };
 

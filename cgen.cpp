@@ -566,12 +566,40 @@ void Cgen::visitClassStmt(Class* stmt) {
     var_env.exitScope();
 }
 
+void Cgen::codegen_inherited_attribute(Token& attr_name) {
+    // Get a variable used in a class but defined in an inherited class
+    // somewhere in the inheritance hierarchy.
+    Class* class_ = curr_class;
+    while (true) {
+        Token parent = class_->superClass;
+        if (parent == No_class)
+            break;
+        class_ = class_table_ptr->get(parent.lexeme);
+        for(auto& curr_attr: class_->features) {
+            if (curr_attr->featuretype == FeatureType::ATTRIBUT) {
+                if (curr_attr->id == attr_name) {
+                    // get the offset of the attr in its class.
+                    int offset = attr_table[class_->name.lexeme][curr_attr->id.lexeme];
+                    // load the obj_prototype.
+                    emit_la(ACC, class_->name.lexeme + PROTOBJ_SUFFIX);
+                    // Get the actual attribute in the object.
+                    //emit_lw(ACC, WORD_SIZE * (offset + 2), ACC);
+                    emit_addiu(ACC, ACC, offset + 2);
+                    return;
+                }
+
+            }
+        }
+    }
+}
+
 void Cgen::cgen_attribut(Feature* attr) {
     if (attr->expr)
         attr->expr->accept(this);
 
     ++curr_attr_count;
     attr_table[curr_class->name.lexeme][attr->id.lexeme] = curr_attr_count;
+    //add_inherited_attributes(curr_class);
 
     // PRIM_SLOT refers to an attribute of a primitive type (eg. Bool, String, Int)
     // the current attribute counter is incremented by 2 since the starting offset
@@ -596,7 +624,7 @@ void Cgen::cgen_method(Feature* method) {
         var_env.insert(f->id.lexeme, curr_offset);
         curr_offset++;
     }
-
+    emit_move(SELF, ACC);
     method->expr->accept(this);
 
     // refer to stack frame layout in header file
@@ -604,6 +632,7 @@ void Cgen::cgen_method(Feature* method) {
     emit_lw(FP, ar_size * WORD_SIZE, SP);
     emit_lw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
     emit_lw(RA, 4, SP);
+    emit_move(ACC, SELF);
     emit_pop(AR_BASE_SIZE + method->formals.size());
     emit_jr(RA);
 
@@ -779,8 +808,17 @@ void Cgen::visitVariableExpr(Variable* expr) {
         int *offset = var_env.get(expr->name.lexeme);
         if (offset)
             emit_lw(ACC, *offset, FP);
-        else 
-            emit_lw(ACC, WORD_SIZE * (attr_table[curr_class->name.lexeme][expr->name.lexeme] + 2), SELF);
+        else {
+            if (attr_table[curr_class->name.lexeme].find(expr->name.lexeme) != 
+                attr_table[curr_class->name.lexeme].end()) {
+                // local attribute.
+                emit_lw(ACC, WORD_SIZE * (attr_table[curr_class->name.lexeme][expr->name.lexeme] + 2), SELF);
+            } else {
+                // inherited attribute
+                codegen_inherited_attribute(expr->name);
+            }
+
+        } 
     }
 }
 
