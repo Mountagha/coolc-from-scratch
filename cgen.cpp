@@ -584,7 +584,7 @@ void Cgen::codegen_inherited_attribute(Token& attr_name) {
                     emit_la(ACC, class_->name.lexeme + PROTOBJ_SUFFIX);
                     // Get the actual attribute in the object.
                     //emit_lw(ACC, WORD_SIZE * (offset + 2), ACC);
-                    emit_addiu(ACC, ACC, offset + 2);
+                    //emit_addiu(ACC, ACC, offset + 2);
                     return;
                 }
 
@@ -599,7 +599,6 @@ void Cgen::cgen_attribut(Feature* attr) {
 
     ++curr_attr_count;
     attr_table[curr_class->name.lexeme][attr->id.lexeme] = curr_attr_count;
-    //add_inherited_attributes(curr_class);
 
     // PRIM_SLOT refers to an attribute of a primitive type (eg. Bool, String, Int)
     // the current attribute counter is incremented by 2 since the starting offset
@@ -880,6 +879,9 @@ void Cgen::visitDispatchExpr(Dispatch* expr) {
     emit_addiu(FP, SP, 4);
 
     expr->expr->accept(this);
+    // !TODO
+    // if the attribute that is being dispatched on is inherited
+    // I need to handle the method table differently. 
     emit_lw(T1, 8, ACC); // to get the dispatch table pointer.
     emit_lw(T1, method_table[expr->expr->expr_type.lexeme][expr->callee_name.lexeme] * WORD_SIZE, T1);
     emit_jalr(T1);
