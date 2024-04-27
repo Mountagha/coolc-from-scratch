@@ -570,39 +570,9 @@ void Cgen::visitClassStmt(Class* stmt) {
     var_env.exitScope();
 }
 
-void Cgen::codegen_inherited_attribute(Token& attr_name) {
-    // Get a variable used in a class but defined in an inherited class
-    // somewhere in the inheritance hierarchy.
-    Class* class_ = curr_class;
-    while (true) {
-        Token parent = class_->superClass;
-        if (parent == No_class)
-            break;
-        class_ = class_table_ptr->get(parent.lexeme);
-        for(auto& curr_attr: class_->features) {
-            if (curr_attr->featuretype == FeatureType::ATTRIBUT) {
-                if (curr_attr->id == attr_name) {
-                    // get the offset of the attr in its class.
-                    int offset = attr_table[class_->name.lexeme][curr_attr->id.lexeme];
-                    // load the obj_prototype.
-                    emit_la(ACC, class_->name.lexeme + PROTOBJ_SUFFIX);
-                    // Get the actual attribute in the object.
-                    //emit_lw(ACC, WORD_SIZE * (offset + 2), ACC);
-                    //emit_addiu(ACC, ACC, offset + 2);
-                    return;
-                }
-
-            }
-        }
-    }
-}
-
 void Cgen::cgen_attribut(Feature* attr) {
     if (attr->expr)
         attr->expr->accept(this);
-
-    //++curr_attr_count;
-    //attr_table[curr_class->name.lexeme][attr->id.lexeme] = curr_attr_count;
 
     // PRIM_SLOT refers to an attribute of a primitive type (eg. Bool, String, Int)
     // the current attribute counter is incremented by 2 since the starting offset
@@ -724,8 +694,12 @@ void Cgen::visitBinaryExpr(Binary* expr) {
 
             emit_push(ACC);
             expr->rhs->accept(this);
+            emit_jal("Object.copy");
             emit_lw(T1, 4, SP);
-            emit_add(ACC, T1, ACC);
+            emit_lw(T1, 12, T1);
+            emit_lw(T2, 12, ACC);
+            emit_add(T1, T1, T2);
+            emit_sw(T1, 12, ACC);
             emit_pop(1);
             break;
 
@@ -733,8 +707,12 @@ void Cgen::visitBinaryExpr(Binary* expr) {
 
             emit_push(ACC);
             expr->rhs->accept(this);
+            emit_jal("Object.copy");
             emit_lw(T1, 4, SP);
-            emit_sub(ACC, T1, ACC);
+            emit_lw(T1, 12, T1);
+            emit_lw(T2, 12, ACC);
+            emit_sub(T1, T1, T2);
+            emit_sw(T1, 12, ACC);
             emit_pop(1);
             break;
 
@@ -742,8 +720,12 @@ void Cgen::visitBinaryExpr(Binary* expr) {
 
             emit_push(ACC);
             expr->rhs->accept(this);
+            emit_jal("Object.copy");
             emit_lw(T1, 4, SP);
-            emit_mul(ACC, T1, ACC);
+            emit_lw(T1, 12, T1);
+            emit_lw(T2, 12, ACC);
+            emit_mul(T1, T1, T2);
+            emit_sw(T1, 12, ACC);
             emit_pop(1);
             break;
 
@@ -752,7 +734,10 @@ void Cgen::visitBinaryExpr(Binary* expr) {
             emit_push(ACC);
             expr->rhs->accept(this);
             emit_lw(T1, 4, SP);
-            emit_div(ACC, T1, ACC);
+            emit_lw(T1, 12, T1);
+            emit_lw(T2, 12, ACC);
+            emit_div(T1, T1, T2);
+            emit_sw(T1, 12, ACC);
             emit_pop(1);
             break;
 
@@ -813,15 +798,7 @@ void Cgen::visitVariableExpr(Variable* expr) {
         if (offset)
             emit_lw(ACC, *offset, FP);
         else {
-            //if (attr_table[curr_class->name.lexeme].find(expr->name.lexeme) != 
-            //    attr_table[curr_class->name.lexeme].end()) {
-                // local attribute.
-                emit_lw(ACC, WORD_SIZE * (attr_table[curr_class->name.lexeme][expr->name.lexeme] + 2), SELF);
-            //} else {
-                // inherited attribute
-            //    codegen_inherited_attribute(expr->name);
-            //}
-
+            emit_lw(ACC, WORD_SIZE * (attr_table[curr_class->name.lexeme][expr->name.lexeme] + 2), SELF);
         } 
     }
 }
@@ -884,9 +861,6 @@ void Cgen::visitDispatchExpr(Dispatch* expr) {
     emit_addiu(FP, SP, 4);
 
     expr->expr->accept(this);
-    // !TODO
-    // t sif the attribute that is being dispatched on is inherited
-    // I need to handle the method table differently. 
     emit_lw(T1, 8, ACC); // to get the dispatch table pointer.
     emit_lw(T1, method_table[expr->expr->expr_type.lexeme][expr->callee_name.lexeme] * WORD_SIZE, T1);
     emit_jalr(T1);
