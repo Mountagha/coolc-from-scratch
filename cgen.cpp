@@ -392,12 +392,16 @@ void Cgen::emit_obj_attributes(Class* class_) {
         curr_class = class_table_ptr->get(parent.lexeme);
     }
 
+    int current_attribut_offset = 0;
+
     while (!classes.empty()) {
         curr_class = classes.top();
 
         for (auto& f: curr_class->features)
-            if (f->featuretype == FeatureType::ATTRIBUT)
+            if (f->featuretype == FeatureType::ATTRIBUT) {
                 os << WORD << "0" << std::endl;
+                attr_table[class_->name.lexeme][f->id.lexeme] = ++current_attribut_offset;
+            }
         classes.pop();
     }
 }
@@ -597,15 +601,16 @@ void Cgen::cgen_attribut(Feature* attr) {
     if (attr->expr)
         attr->expr->accept(this);
 
-    ++curr_attr_count;
-    attr_table[curr_class->name.lexeme][attr->id.lexeme] = curr_attr_count;
+    //++curr_attr_count;
+    //attr_table[curr_class->name.lexeme][attr->id.lexeme] = curr_attr_count;
 
     // PRIM_SLOT refers to an attribute of a primitive type (eg. Bool, String, Int)
     // the current attribute counter is incremented by 2 since the starting offset
     // for an attribute in the object layout if offset 3 (offset 0-2 being the headers)
     // and then multiplied by 4 since there are 4 bytes in a word.
+    int offset = attr_table[curr_class->name.lexeme][attr->id.lexeme];
     if (attr->type_ != prim_slot) 
-        emit_sw(ACC, WORD_SIZE * (curr_attr_count + 2), SELF);
+        emit_sw(ACC, WORD_SIZE * (offset + 2), SELF);
 
 }
 
@@ -808,14 +813,14 @@ void Cgen::visitVariableExpr(Variable* expr) {
         if (offset)
             emit_lw(ACC, *offset, FP);
         else {
-            if (attr_table[curr_class->name.lexeme].find(expr->name.lexeme) != 
-                attr_table[curr_class->name.lexeme].end()) {
+            //if (attr_table[curr_class->name.lexeme].find(expr->name.lexeme) != 
+            //    attr_table[curr_class->name.lexeme].end()) {
                 // local attribute.
                 emit_lw(ACC, WORD_SIZE * (attr_table[curr_class->name.lexeme][expr->name.lexeme] + 2), SELF);
-            } else {
+            //} else {
                 // inherited attribute
-                codegen_inherited_attribute(expr->name);
-            }
+            //    codegen_inherited_attribute(expr->name);
+            //}
 
         } 
     }
@@ -880,7 +885,7 @@ void Cgen::visitDispatchExpr(Dispatch* expr) {
 
     expr->expr->accept(this);
     // !TODO
-    // if the attribute that is being dispatched on is inherited
+    // t sif the attribute that is being dispatched on is inherited
     // I need to handle the method table differently. 
     emit_lw(T1, 8, ACC); // to get the dispatch table pointer.
     emit_lw(T1, method_table[expr->expr->expr_type.lexeme][expr->callee_name.lexeme] * WORD_SIZE, T1);
