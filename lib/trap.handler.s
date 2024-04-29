@@ -2526,7 +2526,7 @@ _NoGC_Collect_ok:
 less:   
     lw $t1, 12($a0) # 12 is the offset where attributes start
     lw $t2, 12($a1)
-    blt $a1, $a0, __less    # the args here are switched since a1=lhs, a0=rhs 
+    blt $t2, $t1, __less    # the args here are switched since a1=lhs, a0=rhs 
     la $a0 bool_const0
     jr $ra
 __less:
@@ -2536,7 +2536,7 @@ __less:
 less_eq:   
     lw $t1, 12($a0) # 12 is the offset where attributes start
     lw $t2, 12($a1)
-    ble $a1, $a0, __less    # the args here are switched since a1=lhs, a0=rhs 
+    ble $t2, $t1, __less    # the args here are switched since a1=lhs, a0=rhs 
     la $a0 bool_const0
     jr $ra
 __less_eq:
