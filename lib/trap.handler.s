@@ -724,13 +724,16 @@ IO.out_string:
 
     .globl IO.out_int
 IO.out_int:
+	addiu $sp, $sp, -4
+	sw $a0, 4($sp) # Save self
     lw $a0, 4($fp)
     lw $a0, 12($a0) #  12 is the INT_CONST_OFFSET
     li $v0, 1
     syscall
-    lw $fp, 16($sp)
-    lw $s0, 12($sp)
-    addiu $sp $sp 16
+    lw $fp, 20($sp)
+    lw $s0, 16($sp)
+	lw $a0, 4($sp) # restore self
+    addiu $sp $sp 20
     jr $ra
 
 #

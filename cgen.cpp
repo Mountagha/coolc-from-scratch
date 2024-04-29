@@ -593,10 +593,11 @@ void Cgen::cgen_method(Feature* method) {
     emit_label(curr_class->name.lexeme + METHOD_SEP + method->id.lexeme);
     emit_sw(RA, 4, SP);
 
-    int curr_offset = 1;
+    //int curr_offset = 1; !TODO double check later
+    fp_offset = 1;
     for(auto& f: method->formals) {
-        var_env.insert(f->id.lexeme, curr_offset);
-        curr_offset++;
+        var_env.insert(f->id.lexeme, fp_offset);
+        fp_offset++;
     }
     emit_move(SELF, ACC);
     method->expr->accept(this);

@@ -72,6 +72,9 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         // Used to generate labels for whiles
         std::size_t while_count;
 
+        // Used to track frame pointer offset for local variables.
+        std::size_t fp_offset;
+
         // The variable environment that maps variable names to offsets
         // in the current AR relative to the fp. this allows for easier
         // addressing. eg. the first parameter is in 4($fp), next is 8($fp)... n($fp)

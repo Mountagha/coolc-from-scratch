@@ -1,21 +1,12 @@
 
 class Main inherits IO {
     i : Int <- 0;
-    main(): SELF_TYPE {
+    main(): Object {
         {
-            if i = 0 then
-                {
-                    out_string("\n");
-                    i <- i + 5;
-                    out_int(i);
-                }
-            else  
-                {
-                    out_string("\n");
-                    i <- i / 2;
-                    out_int(i);
-                }
-            fi
+            (let c : Int <- 1, d <- 2, i: String, j: Int  in {
+                -- c <- "Mountagha";
+                out_int(100);
+            });
         }
     };
 };
