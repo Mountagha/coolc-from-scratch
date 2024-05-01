@@ -369,6 +369,7 @@ __start:
 	addiu	$sp $sp -4
 	sw	$a0 4($sp)		# save the Main object on the stack
 	move	$s0 $a0			# set $s0 to point to self
+	addiu $fp $sp 4
 	jal	Main_init		# initialize the Main object
 	addiu $sp $sp -12
 	sw $fp 12($sp)

@@ -644,7 +644,7 @@ void Cgen::visitAssignExpr(Assign* expr) {
     // !TODO not sure here cause different from 
     // (inspired repo file astnodecodegenerator.cpp:663)
     if (offset) // local var
-        emit_sw(ACC, *offset, FP);
+        emit_sw(ACC, (*offset) * WORD_SIZE, FP);
     else // attribute
         emit_sw(ACC, WORD_SIZE * ( attr_table[curr_class->name.lexeme][expr->id.lexeme] + 2 ), SELF);
 
@@ -797,7 +797,7 @@ void Cgen::visitVariableExpr(Variable* expr) {
         // check if it's an attribute of the current class.
         int *offset = var_env.get(expr->name.lexeme);
         if (offset)
-            emit_lw(ACC, *offset, FP);
+            emit_lw(ACC, (*offset) * WORD_SIZE, FP);
         else {
             emit_lw(ACC, WORD_SIZE * (attr_table[curr_class->name.lexeme][expr->name.lexeme] + 2), SELF);
         } 
@@ -895,15 +895,16 @@ void Cgen::visitLetExpr(Let* expr) {
     for (auto& let: expr->vecAssigns) {
         // codegen all the expressions in the let init if exists.
         Expr* let_expr = std::get<1>(let).get();
-        Token id = std::get<0>(let).get()->id;
+        Token let_id = std::get<0>(let).get()->id;
+        Token let_type = std::get<0>(let).get()->type_; 
         if (let_expr) {
             let_expr->accept(this);
         } else { // use default initialization.
-            emit_jal(id.lexeme + CLASSINIT_SUFFIX);
+            emit_jal(let_type.lexeme + CLASSINIT_SUFFIX);
         }
+        emit_sw(ACC, fp_offset * WORD_SIZE, FP);
+        var_env.insert(let_id.lexeme, fp_offset);
         fp_offset++;
-        emit_sw(ACC, fp_offset, FP);
-        var_env.insert(id.lexeme, fp_offset);
     }
     expr->body->accept(this);
     var_env.exitScope();
