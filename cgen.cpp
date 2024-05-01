@@ -485,6 +485,18 @@ void Cgen::code_select_gc() {
     os << WORD <<  (cgen_Memmgr_Test == GC_TEST)  << std::endl;
 }
 
+void Cgen::cgen_init_formal(Token& formal_type) {
+    // switch case could be nicer but hey restrictions on switch case with tokenType
+    if (formal_type == Int) 
+        emit_la(ACC, std::string(INTCONST_PREFIX) + "0");
+    else if (formal_type == Str)
+        emit_la(ACC, std::string(STRCONST_PREFIX) + "");
+    else if (formal_type == Bool)
+        emit_la(ACC, BOOLCONST_FALSE);
+    else  
+        emit_la(ACC, ZERO);
+}
+
 // Cgen for Exprs and Stmts
 void Cgen::visitProgramStmt(Program* stmt) {
     std::cout << "debut code generation\n\n";
@@ -900,7 +912,7 @@ void Cgen::visitLetExpr(Let* expr) {
         if (let_expr) {
             let_expr->accept(this);
         } else { // use default initialization.
-            emit_jal(let_type.lexeme + CLASSINIT_SUFFIX);
+            cgen_init_formal(let_type);
         }
         emit_sw(ACC, fp_offset * WORD_SIZE, FP);
         var_env.insert(let_id.lexeme, fp_offset);
