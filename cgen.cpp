@@ -891,13 +891,22 @@ void Cgen::visitLiteralExpr(Literal* expr) {
 
 void Cgen::visitLetExpr(Let* expr) {
 
+    var_env.enterScope();
     for (auto& let: expr->vecAssigns) {
         // codegen all the expressions in the let init if exists.
         Expr* let_expr = std::get<1>(let).get();
-        if (let_expr)
+        Token id = std::get<0>(let).get()->id;
+        if (let_expr) {
             let_expr->accept(this);
+        } else { // use default initialization.
+            emit_jal(id.lexeme + CLASSINIT_SUFFIX);
+        }
+        fp_offset++;
+        emit_sw(ACC, fp_offset, FP);
+        var_env.insert(id.lexeme, fp_offset);
     }
     expr->body->accept(this);
+    var_env.exitScope();
 }
 
 void Cgen::visitCaseExpr(Case* expr) {
