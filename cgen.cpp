@@ -488,9 +488,9 @@ void Cgen::code_select_gc() {
 void Cgen::cgen_init_formal(Token& formal_type) {
     // switch case could be nicer but hey restrictions on switch case with tokenType
     if (formal_type == Int) 
-        emit_la(ACC, std::string(INTCONST_PREFIX) + "0");
+        emit_la(ACC, std::string(INTCONST_PREFIX) + std::to_string(inttable().get_index("0")));
     else if (formal_type == Str)
-        emit_la(ACC, std::string(STRCONST_PREFIX) + "");
+        emit_la(ACC, std::string(STRCONST_PREFIX) + std::to_string(stringtable().get_index("")));
     else if (formal_type == Bool)
         emit_la(ACC, BOOLCONST_FALSE);
     else  
