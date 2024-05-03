@@ -131,7 +131,7 @@ class Parser {
                     std::move(expr))
                 );
             }while(match({COMMA}) && !isAtEnd());
-            consume(IN, "Expect in after let assigns.");
+            consume(IN, "Expect `in` keyword after let assigns.");
             PExpr body = parseExpression();
             return std::make_unique<Let>(std::move(vecAssigns), std::move(body));
         }
