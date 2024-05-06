@@ -15,7 +15,12 @@ class Cgen: public StmtVisitor, public ExprVisitor {
 
     public:
         Cgen(InheritanceGraph* g_, SymbolTable<std::string, Class* >* ctable_ptr, std::ostream& out=std::cout): 
-            os{out}, class_table_ptr(ctable_ptr), g(g_), curr_attr_count{0}, ifcount{0}, while_count{0} {}
+            os{out}, class_table_ptr(ctable_ptr), g(g_), curr_attr_count{0}, ifcount{0}, while_count{0}, casecount{0} {
+                
+            classtag_map.insert({"Bool", BOOL_CLASS_TAG});
+            classtag_map.insert({"String", STRING_CLASS_TAG});
+            classtag_map.insert({"Int", INT_CLASS_TAG});
+        }
 
         void cgen(std::unique_ptr<Expr>& expr) {
             expr->accept(this);
@@ -75,6 +80,11 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         // Used to track frame pointer offset for local variables.
         std::size_t fp_offset;
 
+        // Used to track case branches.
+        std::size_t casecount;
+
+        std::unordered_map<std::string, int> classtag_map{};
+
         // The variable environment that maps variable names to offsets
         // in the current AR relative to the fp. this allows for easier
         // addressing. eg. the first parameter is in 4($fp), next is 8($fp)... n($fp)
@@ -89,9 +99,9 @@ class Cgen: public StmtVisitor, public ExprVisitor {
             goes for Int and Bool.
         */
 
-        static const int BOOL_CLASS_TAG = 5;
-        static const int INT_CLASS_TAG = 6;
-        static const int STRING_CLASS_TAG = 7;
+        const int BOOL_CLASS_TAG = 5;
+        const int INT_CLASS_TAG = 6;
+        const int STRING_CLASS_TAG = 7;
 
         //////////////////////////////////////////////////////////////////////////////
         //

@@ -422,8 +422,10 @@ void Cgen::code_prototype_objects() {
             os << WORD << INT_CLASS_TAG << std::endl;
         else if (class_.first == Bool)
             os << WORD << BOOL_CLASS_TAG << std::endl;
-        else 
+        else {
+            classtag_map.insert({class_.first.lexeme, classtag});
             os << WORD << classtag++ << std::endl;
+        }
 
         os << WORD << (DEFAULT_OBJFIELDS + calc_obj_size(class_table_ptr->get(class_.first.lexeme))) << std::endl;
         os << WORD << class_.first.lexeme << DISPTAB_SUFFIX << std::endl;
@@ -925,10 +927,22 @@ void Cgen::visitLetExpr(Let* expr) {
 void Cgen::visitCaseExpr(Case* expr) {
 
     expr->expr->accept(this);
+    emit_lw(T2, TAG_OFFSET, ACC);
+    int tagCaseEnd = casecount++;
     for (auto& match: expr->matches) {
         // codegen every match expression.
-        std::get<1>(match).get()->accept(this);
+        auto formal = std::get<0>(match).get();
+        Expr* match_expr = std::get<1>(match).get();
+        emit_label("CaseLabel" + std::to_string(casecount++));
+        emit_bne(T2, classtag_map[formal->type_.lexeme], "CaseLabel" + std::to_string(casecount));
+        match_expr->accept(this); 
+        emit_b("CaseLabel" + std::to_string(tagCaseEnd));
     }
+    // Not found corresponding case.
+    emit_label("CaseLabel" + std::to_string(casecount));
+    emit_jal("_case_abort");
+    // code after the switch case.
+    emit_label("CaseLabel" + std::to_string(tagCaseEnd));
 }
 
 }

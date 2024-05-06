@@ -1,12 +1,18 @@
-
+class A {};
+class B inherits A {};
 class Main inherits IO {
-    i : Int <- 0;
-    main(): Object {
+    i : Object;
+    j : Int <- 5; 
+    io: IO <- new IO;
+    main(): String {
         {
-            (let c : Int <- 1, d <- 2, i: String, j: Int  in {
-                -- c <- "Mountagha";
-                out_int(100);
-            });
+            i <- case j of 
+               -- c : Object => 7; -- out_string(b); 6;)
+               b : A => 1; -- out_string(b); 6;)
+               a : Object => io.out_int(10);  
+              	a : IO => io.out_string("Int taken\n");
+	    esac;
+	    "return";
         }
     };
 };

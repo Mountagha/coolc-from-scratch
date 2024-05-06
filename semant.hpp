@@ -111,7 +111,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 throw std::runtime_error("type error in object class");
             }
             if (!conform(assign_type, id_type)) {
-                throw std::runtime_error("type error in assign construct.");
+                throw std::runtime_error("Declared type `" + id_type.lexeme + "` of " + expr->id.lexeme + " does not confom to infered type `" 
+                    + assign_type.lexeme + "`.");
             }
             expr->expr_type = assign_type;
         }
