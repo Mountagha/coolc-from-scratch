@@ -128,6 +128,15 @@ void Cgen::emit_b(const std::string& label) {
     os << B << label << std::endl;
 }
 
+void Cgen::emit_bgt(const char* src1, int imm, const std::string& label) {
+    os << BGT << src1 << ", " << imm << ", " << label << std::endl;
+}
+
+void Cgen::emit_blt(const char* src1, int imm, const std::string& label) {
+    os << BLT << src1 << ", " << imm << ", " << label << std::endl;
+}
+
+
 void Cgen::emit_beq(const char* src1, const char* src2, const std::string& label) {
     os << BEQ << src1 << ", $" << src2 << ", " << label << std::endl;
 }
@@ -926,6 +935,17 @@ void Cgen::visitLetExpr(Let* expr) {
 
 void Cgen::visitCaseExpr(Case* expr) {
 
+    // a lambda to find the child class with the highest tag of a certain
+    // class
+    auto max_inherited_class_tag = [this](std::string& class_name) -> int {
+        int max_tag = this->classtag_map[class_name]; // the lowest.
+        for(auto& r: this->g->get_graph()) {
+            if (r.first.lexeme == class_name) 
+                if (this->classtag_map[r.second.lexeme] > max_tag)
+                    max_tag = this->classtag_map[r.second.lexeme];
+        }
+        return max_tag;
+    };
     expr->expr->accept(this);
     emit_lw(T2, TAG_OFFSET, ACC);
     int tagCaseEnd = casecount++;
@@ -933,11 +953,15 @@ void Cgen::visitCaseExpr(Case* expr) {
         // codegen every match expression.
         auto formal = std::get<0>(match).get();
         Expr* match_expr = std::get<1>(match).get();
+        if (formal->type_ == Object) 
+            continue; // handle Object branch later.
         emit_label("CaseLabel" + std::to_string(casecount++));
-        emit_bne(T2, classtag_map[formal->type_.lexeme], "CaseLabel" + std::to_string(casecount));
+        emit_blt(T2, classtag_map[formal->type_.lexeme], "CaseLabel" + std::to_string(casecount));
+        emit_bgt(T2, classtag_map[formal->type_.lexeme], "CaseLabel" + std::to_string(casecount));
         match_expr->accept(this); 
         emit_b("CaseLabel" + std::to_string(tagCaseEnd));
     }
+    
     // Not found corresponding case.
     emit_label("CaseLabel" + std::to_string(casecount));
     emit_jal("_case_abort");

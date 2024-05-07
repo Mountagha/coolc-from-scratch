@@ -163,6 +163,8 @@ class Cgen: public StmtVisitor, public ExprVisitor {
 
         // branch and jump instructions
         void emit_b(const std::string&);
+        void emit_bgt(const char*, int, const std::string&);
+        void emit_blt(const char*, int, const std::string&);
         void emit_beq(const char*, const char*, const std::string&);
         void emit_beq(const char*, int, const std::string&);
         void emit_bge(const char*, const char*, const std::string&);
