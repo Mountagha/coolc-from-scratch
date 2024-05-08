@@ -7,6 +7,8 @@
 #include <set>
 #include <string>
 #include <memory>
+#include <vector>
+#include <stack>
 
 #include "ast.hpp"
 #include "token.hpp"
@@ -38,6 +40,10 @@ class InheritanceGraph {
         bool conform(Token a, Token b); // a is conform to b
         Token lca(Token a, Token b);    // common lowest ancestor of a and b
         bool isDGA();                  // whether the graph is acyclic or not.
+        std::vector<Token> get_adjacents(Token& ) const ; // for every class get classes that inherits from it.
+        std::vector<Token> DFS(Token&) const ; // Get a Depth Fist Search of the Inheritance Graph class. 
+        bool is_leaf_class(Token&) const ;
+        Token& lowest_child(Token& ) const; // return the lowest child (leaf) of a given node in the inheritance tree.
         std::map<Token, Token>& get_graph() { return graph; }
 };
 

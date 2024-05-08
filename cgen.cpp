@@ -418,27 +418,30 @@ void Cgen::emit_obj_attributes(Class* class_) {
 
 void Cgen::code_prototype_objects() {
     int classtag = 8;    // to avoid clash with basic class values
-    for (auto& class_: g->get_graph()) {
+    for (auto& class_: g->DFS(Object)) {
+        std::cout << class_.lexeme << std::endl;
+    }
+    for (auto& class_: g->DFS(Object)) {
 
-        if (class_.first == No_class) 
-            return;
+        if (class_ == No_class) 
+            continue;
         
-        os << class_.first.lexeme << PROTOBJ_SUFFIX << LABEL;
+        os << class_.lexeme << PROTOBJ_SUFFIX << LABEL;
 
-        if (class_.first == Str)
+        if (class_ == Str)
             os << WORD << STRING_CLASS_TAG << std::endl;
-        else if (class_.first == Int)
+        else if (class_ == Int)
             os << WORD << INT_CLASS_TAG << std::endl;
-        else if (class_.first == Bool)
+        else if (class_ == Bool)
             os << WORD << BOOL_CLASS_TAG << std::endl;
         else {
-            classtag_map.insert({class_.first.lexeme, classtag});
+            classtag_map.insert({class_.lexeme, classtag});
             os << WORD << classtag++ << std::endl;
         }
 
-        os << WORD << (DEFAULT_OBJFIELDS + calc_obj_size(class_table_ptr->get(class_.first.lexeme))) << std::endl;
-        os << WORD << class_.first.lexeme << DISPTAB_SUFFIX << std::endl;
-        emit_obj_attributes(class_table_ptr->get(class_.first.lexeme));
+        os << WORD << (DEFAULT_OBJFIELDS + calc_obj_size(class_table_ptr->get(class_.lexeme))) << std::endl;
+        os << WORD << class_.lexeme << DISPTAB_SUFFIX << std::endl;
+        emit_obj_attributes(class_table_ptr->get(class_.lexeme));
     }
 }
 

@@ -73,6 +73,37 @@ Token InheritanceGraph::lca(Token a, Token b) {
     return temp_a;
 }
 
+std::vector<Token> InheritanceGraph::get_adjacents(Token& class_) const {
+    std::vector<Token> adjacents{};
+    for (auto& elt: graph) {
+        if (elt.second == class_) {
+            adjacents.push_back(elt.first);
+        }
+    }
+    return adjacents;
+}
+
+bool InheritanceGraph::is_leaf_class(Token& token) const {
+    return get_adjacents(token).size() == 0;
+}
+
+
+std::vector<Token> InheritanceGraph::DFS(Token& root) const  {
+    std::vector<Token> classes_dfs;
+    std::stack<Token> to_visits{};
+
+    to_visits.push(root);
+    while (!to_visits.empty()) {
+        classes_dfs.push_back(to_visits.top());
+        auto v = get_adjacents(to_visits.top());
+        to_visits.pop();
+        for (auto elt: v) {
+            to_visits.push(elt);
+        }
+    }
+    return classes_dfs; 
+}
+
 bool is_base_class(Class* class_) {
     return class_->name == Object || class_->name == Bool || class_->name == Int ||
             class_->name == Str || class_->name == IO;
