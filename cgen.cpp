@@ -418,7 +418,7 @@ void Cgen::emit_obj_attributes(Class* class_) {
 
 void Cgen::code_prototype_objects() {
     int classtag = 8;    // to avoid clash with basic class values
-    for (auto& class_: g->DFS(Object)) {
+    for (auto& class_: g->DFS(IO)) {
         std::cout << class_.lexeme << std::endl;
     }
     for (auto& class_: g->DFS(Object)) {
@@ -434,6 +434,8 @@ void Cgen::code_prototype_objects() {
             os << WORD << INT_CLASS_TAG << std::endl;
         else if (class_ == Bool)
             os << WORD << BOOL_CLASS_TAG << std::endl;
+        else if (class_ == Object) 
+            os << WORD << OBJECT_CLASS_TAG << std::endl;
         else {
             classtag_map.insert({class_.lexeme, classtag});
             os << WORD << classtag++ << std::endl;
@@ -940,28 +942,47 @@ void Cgen::visitCaseExpr(Case* expr) {
 
     // a lambda to find the child class with the highest tag of a certain
     // class
-    auto max_inherited_class_tag = [this](std::string& class_name) -> int {
-        int max_tag = this->classtag_map[class_name]; // the lowest.
-        for(auto& r: this->g->get_graph()) {
-            if (r.first.lexeme == class_name) 
-                if (this->classtag_map[r.second.lexeme] > max_tag)
-                    max_tag = this->classtag_map[r.second.lexeme];
+    auto max_inherited_class_tag = [this](Token& class_name) -> int {
+        int max_tag = this->classtag_map[class_name.lexeme]; // the lowest.
+        for(auto& class_: this->g->DFS(class_name)) {
+            if (this->classtag_map[class_.lexeme] > max_tag)
+                    max_tag = this->classtag_map[class_.lexeme];
         }
         return max_tag;
     };
     expr->expr->accept(this);
     emit_lw(T2, TAG_OFFSET, ACC);
     int tagCaseEnd = casecount++;
+    emit_bne(ACC, ZERO, "CaseLabel" + std::to_string(casecount));
+     
+
+    // Object case branch is to be handled last if present.
+    bool there_is_object = false;
+    Formal* object_formal;
+    Expr* obj_expr;
+
     for (auto& match: expr->matches) {
         // codegen every match expression.
         auto formal = std::get<0>(match).get();
         Expr* match_expr = std::get<1>(match).get();
-        if (formal->type_ == Object) 
+        if (formal->type_ == Object) {
+            there_is_object = true;
+            object_formal = formal;
+            obj_expr = match_expr;
             continue; // handle Object branch later.
+        }
         emit_label("CaseLabel" + std::to_string(casecount++));
         emit_blt(T2, classtag_map[formal->type_.lexeme], "CaseLabel" + std::to_string(casecount));
-        emit_bgt(T2, classtag_map[formal->type_.lexeme], "CaseLabel" + std::to_string(casecount));
+        emit_bgt(T2, max_inherited_class_tag(formal->type_), "CaseLabel" + std::to_string(casecount));
         match_expr->accept(this); 
+        emit_b("CaseLabel" + std::to_string(tagCaseEnd));
+    }
+
+    if (there_is_object) {
+        emit_label("CaseLabel" + std::to_string(casecount++));
+        emit_blt(T2, classtag_map[object_formal->type_.lexeme], "CaseLabel" + std::to_string(casecount));
+        emit_bgt(T2, max_inherited_class_tag(object_formal->type_), "CaseLabel" + std::to_string(casecount));
+        obj_expr->accept(this); 
         emit_b("CaseLabel" + std::to_string(tagCaseEnd));
     }
     

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string>
 
 #include "scanner.hpp"
 #include "parser.hpp"
@@ -10,12 +11,19 @@
 
 using namespace cool;
 
+// Used by the error handling in both lexer and parser and the
+// codegen as well.
+std::string cool::curr_filename;
+
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         std::cerr << "Usage coolc [filename.cool...]\n";
         exit(64);
     }
     std::string source;
+    curr_filename = std::string(argv[1]);   // handle later for multiple files.
+    curr_filename = curr_filename.substr(curr_filename.find_last_of('/') + 1);
+    std::cout << curr_filename << std::endl;
     for (int i = 1; i < argc; i++) {
         std::ifstream f{argv[i]};
         if (!f) {
@@ -28,13 +36,14 @@ int main(int argc, char* argv[]) {
         source += file_source;
     }
 
-    Scanner s{source};
 
     std::ofstream out{"out.s"};
     if (!out.is_open()) {
         std::cerr << "Cannot open out.s for writing.";
         exit(EXIT_FAILURE); // !TODO: better this later.
     }
+    
+    Scanner s{source};
 
     std::vector<Token> tokens;
     tokens = s.scanTokens();

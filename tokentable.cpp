@@ -2,7 +2,7 @@
 
 namespace cool {
 
-TokenTable::TokenTable(): idx{1} {}
+TokenTable::TokenTable(): idx{0} {}
 
 void TokenTable::insert(std::string id, Token token) {
     if (table_idx.find(id) != table_idx.end()) {

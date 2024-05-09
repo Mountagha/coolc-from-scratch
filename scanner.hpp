@@ -33,6 +33,8 @@ static const std::unordered_map<std::string, TokenType> keywordsMap = {
     {"true", TRUE},
 };
 
+extern std::string curr_filename;
+
 
 class Scanner {
     public:
@@ -48,6 +50,9 @@ class Scanner {
         inline bool const isAtEnd() { return current > source.length(); }
 
         void scanToken() {
+            // !TODO adding filename to string table now. later add
+            // that info to the debugging info.
+            stringtable().insert(curr_filename, Token{_NULL, curr_filename, 0});
             char c = advance();
             switch(c) {
                 // single char token

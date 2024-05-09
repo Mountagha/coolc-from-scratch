@@ -99,6 +99,7 @@ class Cgen: public StmtVisitor, public ExprVisitor {
             goes for Int and Bool.
         */
 
+        const int OBJECT_CLASS_TAG = 4; // lowest class Tag. The choices here are completely random.
         const int BOOL_CLASS_TAG = 5;
         const int INT_CLASS_TAG = 6;
         const int STRING_CLASS_TAG = 7;
