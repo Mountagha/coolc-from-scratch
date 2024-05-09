@@ -22,6 +22,7 @@
 #define MAXINT  100000000    
 #define WORD_SIZE    4
 #define LOG_WORD_SIZE 2     // for logical shifts
+#define FILENAME "str_const0"
 
 // Global names
 #define CLASSNAMETAB         "class_nameTab"

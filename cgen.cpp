@@ -951,17 +951,20 @@ void Cgen::visitCaseExpr(Case* expr) {
         return max_tag;
     };
     expr->expr->accept(this);
-    emit_lw(T2, TAG_OFFSET, ACC);
     int tagCaseEnd = casecount++;
     emit_bne(ACC, ZERO, "CaseLabel" + std::to_string(casecount));
-     
+    emit_la(ACC, FILENAME);
+    emit_li(T1, 1);
+    emit_jal("_case_abort2");
+
 
     // Object case branch is to be handled last if present.
-    bool there_is_object = false;
+    bool there_is_object = false, first_iter=true;
     Formal* object_formal;
     Expr* obj_expr;
 
     for (auto& match: expr->matches) {
+
         // codegen every match expression.
         auto formal = std::get<0>(match).get();
         Expr* match_expr = std::get<1>(match).get();
@@ -972,6 +975,10 @@ void Cgen::visitCaseExpr(Case* expr) {
             continue; // handle Object branch later.
         }
         emit_label("CaseLabel" + std::to_string(casecount++));
+        if (first_iter) {
+            emit_lw(T2, TAG_OFFSET, ACC);
+            first_iter = false;
+        }
         emit_blt(T2, classtag_map[formal->type_.lexeme], "CaseLabel" + std::to_string(casecount));
         emit_bgt(T2, max_inherited_class_tag(formal->type_), "CaseLabel" + std::to_string(casecount));
         match_expr->accept(this); 
