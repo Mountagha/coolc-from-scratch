@@ -15,7 +15,7 @@ class Cgen: public StmtVisitor, public ExprVisitor {
 
     public:
         Cgen(InheritanceGraph* g_, SymbolTable<std::string, Class* >* ctable_ptr, std::ostream& out=std::cout): 
-            os{out}, class_table_ptr(ctable_ptr), g(g_), curr_attr_count{0}, ifcount{0}, while_count{0}, casecount{0} {
+            os{out}, class_table_ptr(ctable_ptr), g(g_), curr_attr_count{0}, ifcount{0}, while_count{0}, casecount{0}, dispatch_count{0} {
                 
             classtag_map.insert({"Bool", BOOL_CLASS_TAG});
             classtag_map.insert({"String", STRING_CLASS_TAG});
@@ -82,6 +82,9 @@ class Cgen: public StmtVisitor, public ExprVisitor {
 
         // Used to track case branches.
         std::size_t casecount;
+
+        // Used to track dispatch labels
+        std::size_t dispatch_count;
 
         std::unordered_map<std::string, int> classtag_map{};
 

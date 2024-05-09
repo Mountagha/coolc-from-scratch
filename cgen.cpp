@@ -268,7 +268,9 @@ void Cgen::code_constants() {
     
     // add empty string to string const table since it's the default value 
     // value of a newly allocated string.
+    // add 0 to the int entry [in case it isn't present] for the same reason.
     stringtable().insert("", Token{TokenType::_NULL, ""});
+    inttable().insert("0", Token{TokenType::_NULL, ""});
 
     for (auto& elt: stringtable().get_elements()) {
         
@@ -510,7 +512,7 @@ void Cgen::cgen_init_formal(Token& formal_type) {
     else if (formal_type == Bool)
         emit_la(ACC, BOOLCONST_FALSE);
     else  
-        emit_la(ACC, ZERO);
+        emit_move(ACC, ZERO);
 }
 
 // Cgen for Exprs and Stmts
@@ -601,6 +603,9 @@ void Cgen::visitClassStmt(Class* stmt) {
 void Cgen::cgen_attribut(Feature* attr) {
     if (attr->expr)
         attr->expr->accept(this);
+    else // init the attr with the default value type
+        if (attr->type_ != prim_slot)
+            cgen_init_formal(attr->type_);
 
     // PRIM_SLOT refers to an attribute of a primitive type (eg. Bool, String, Int)
     // the current attribute counter is incremented by 2 since the starting offset
@@ -862,9 +867,17 @@ void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
         emit_sw(ACC, formal_offset, SP);
         formal_offset += WORD_SIZE;
     }
-
     emit_addiu(FP, SP, 4);
-
+    
+    expr->expr->accept(this);
+    // dispatch error on void
+    emit_bne(ACC, ZERO, "DispatchLabel" + std::to_string(dispatch_count));
+    emit_la(ACC, FILENAME);
+    emit_li(T1, 1);
+    emit_jal("_dispatch_abort");
+    emit_label("DispatchLabel" + std::to_string(dispatch_count)); 
+    dispatch_count++;
+    // code for dispatch
     emit_la(T1, expr->class_.lexeme + std::string(PROTOBJ_SUFFIX));
     emit_lw(T1, 8, T1); // to get the dispatch table pointer.
     emit_lw(T1, method_table[expr->class_.lexeme][expr->callee_name.lexeme] * WORD_SIZE, T1);
@@ -890,6 +903,15 @@ void Cgen::visitDispatchExpr(Dispatch* expr) {
     emit_addiu(FP, SP, 4);
 
     expr->expr->accept(this);
+
+    // dispatch error on void
+    emit_bne(ACC, ZERO, "DispatchLabel" + std::to_string(dispatch_count));
+    emit_la(ACC, FILENAME);
+    emit_li(T1, 1);
+    emit_jal("_dispatch_abort");
+    // code for dispatch
+    emit_label("DispatchLabel" + std::to_string(dispatch_count));
+    dispatch_count++;
     emit_lw(T1, 8, ACC); // to get the dispatch table pointer.
     emit_lw(T1, method_table[expr->expr->expr_type.lexeme][expr->callee_name.lexeme] * WORD_SIZE, T1);
     emit_jalr(T1);
@@ -911,7 +933,7 @@ void Cgen::visitLiteralExpr(Literal* expr) {
             emit_la(ACC, std::string(STRCONST_PREFIX) + std::to_string(stringtable().get_index(expr->object.string_value())));
             break;
         case CoolType::Void_t:
-            emit_la(ACC, ZERO);
+            emit_move(ACC, ZERO);
             break;
 
     }

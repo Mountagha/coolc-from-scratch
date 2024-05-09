@@ -108,7 +108,7 @@ class Semant : public StmtVisitor, public ExprVisitor {
             }
             // if still no id_type_ptr also meaning did not find the attribute.
             if (!id_type_ptr) {
-                throw std::runtime_error("type error in object class");
+                throw std::runtime_error("type error in assignement construct");
             }
             if (!conform(assign_type, id_type)) {
                 throw std::runtime_error("Declared type `" + id_type.lexeme + "` of " + expr->id.lexeme + " does not confom to infered type `" 
