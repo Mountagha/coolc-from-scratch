@@ -146,6 +146,7 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         void emit_neg(const char*, const char*);
         void emit_nor(const char*, const char*, const char*);
         void emit_not(const char*, const char*);
+        void emit_not(const char* );
         void emit_or(const char*, const char*, const char*);
         void emit_xor(const char*, const char*, const char*);
 

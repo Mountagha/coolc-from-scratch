@@ -61,8 +61,13 @@ void Cgen::emit_nor(const char* dest, const char* src1, const char* src2) {
 }
 
 void Cgen::emit_not(const char* dest, const char* src) {
-    os << NOT << dest << ", $" << src << std::endl;
+    os << NOR << dest << ", $" << src << std::endl;
 }
+
+void Cgen::emit_not(const char* reg) {
+    os << NOR << reg << ", $" << reg << std::endl;
+}
+
 
 void Cgen::emit_or(const char* dest, const char* src1, const char* src2) {
     os << OR << dest << ", $" << src1 << ", $" << src2 << std::endl;
