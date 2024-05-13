@@ -53,6 +53,7 @@ class Scanner {
             // !TODO adding filename to string table now. later add
             // that info to the debugging info.
             stringtable().insert(curr_filename, Token{_NULL, curr_filename, 0});
+            inttable().insert(std::to_string(curr_filename.size()), Token{NUMBER, std::to_string(curr_filename.size()), 0});
             char c = advance();
             switch(c) {
                 // single char token
@@ -197,6 +198,7 @@ class Scanner {
             std::string lexeme = source.substr(start+1, current-start-2);
             addToken(STRING, lexeme, line);
             stringtable().insert(lexeme, Token{STRING, lexeme, line});
+            inttable().insert(std::to_string(lexeme.size()), Token{NUMBER, std::to_string(lexeme.size()), line});
         }
 
         void number() {
@@ -218,6 +220,7 @@ class Scanner {
             else
                 addToken(IDENTIFIER, lexeme, line);
                 idtable().insert(lexeme, Token{IDENTIFIER, lexeme, line});
+                inttable().insert(std::to_string(lexeme.size()), Token{NUMBER, std::to_string(lexeme.size()), line});
         }
 
         std::string strTolower(const std::string& s) {

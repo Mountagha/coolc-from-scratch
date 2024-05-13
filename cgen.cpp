@@ -284,7 +284,7 @@ void Cgen::code_constants() {
         os << WORD << STRING_CLASS_TAG << std::endl;                                            // tag 
         os << WORD << (DEFAULT_OBJFIELDS + STRING_SLOTS + (elt.first.size()/4)) << std::endl;   // size
         os << WORD << "String" << DISPTAB_SUFFIX << std::endl;
-        os << WORD << elt.first.size() << std::endl;
+        os << WORD << INTCONST_PREFIX << inttable().get_index(std::to_string(elt.first.size())) << std::endl;
         os << ASCIIZ << "\"" << elt.first.c_str() << "\"\n";
         os << ALIGN;
 

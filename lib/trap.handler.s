@@ -334,6 +334,7 @@ bool_slot=12
 str_size=12	# This is a pointer to an Int object!!!
 str_field=16	# The beginning of the ascii sequence
 str_maxsize=1026	# the maximum string length
+ar_base_size=12
 
 #
 # The REG mask tells the garbage collector which register(s) it
@@ -868,6 +869,8 @@ _instr_nonl:
 	.globl	String.length
 String.length:
 	lw	$a0 str_size($a0)	# fetch attr
+	lw $fp,	ar_base_size($sp) # restore the $fp even though it does not change it. [due to how dispatch is designed.]
+	addiu $sp $sp ar_base_size
 	jr	$ra	# Return
 
 #
@@ -982,7 +985,7 @@ String.substr:
 
 	lw	$a0 12($sp)
 	lw	$v0 obj_size($a0)
-        la      $a0 Int_protObj		# ask if enough room to allocate
+    la      $a0 Int_protObj		# ask if enough room to allocate
 	lw	$a0 obj_size($a0)	#   a string object, an int object,
 	add	$a0 $a0 $v0		#   and the string data
 	addiu	$a0 $a0 2		# include 2 eyecatchers
