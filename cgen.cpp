@@ -60,12 +60,12 @@ void Cgen::emit_nor(const char* dest, const char* src1, const char* src2) {
     os << NOR << dest << ", $" << src1 << ", $" << src2 << std::endl;
 }
 
-void Cgen::emit_not(const char* dest, const char* src) {
-    os << NOR << dest << ", $" << src << std::endl;
+void Cgen::emit_not(const char* dest, const char* src) { // dest = ~src
+    os << NOR << dest << ", $" << src << ", $" << src << std::endl;
 }
 
-void Cgen::emit_not(const char* reg) {
-    os << NOR << reg << ", $" << reg << std::endl;
+void Cgen::emit_not(const char* reg) { // src = ~src
+    os << NOR << reg << ", $" << reg << ", $" << reg << std::endl;
 }
 
 
@@ -772,6 +772,7 @@ void Cgen::visitBinaryExpr(Binary* expr) {
 
             emit_push(ACC);
             expr->rhs->accept(this);
+            emit_jal("Object.copy");
             emit_lw(T1, 4, SP);
             emit_lw(T1, 12, T1);
             emit_lw(T2, 12, ACC);
@@ -811,8 +812,8 @@ void Cgen::visitUnaryExpr(Unary* expr) {
             // ~ is used on integer only hence the offset 12 to get 
             // the value.
             emit_lw(T1, 12, ACC);
-            emit_not(T1, T1),
-            emit_sw(T1, 12, ACC);
+            emit_not(T2, T1),
+            emit_sw(T2, 12, ACC);
             break;
 
         case NOT:
@@ -905,9 +906,9 @@ void Cgen::visitDispatchExpr(Dispatch* expr) {
         formal_offset += WORD_SIZE;
     }
 
-    emit_addiu(FP, SP, 4);
 
     expr->expr->accept(this);
+    emit_addiu(FP, SP, 4);
 
     // dispatch error on void
     emit_bne(ACC, ZERO, "DispatchLabel" + std::to_string(dispatch_count));
