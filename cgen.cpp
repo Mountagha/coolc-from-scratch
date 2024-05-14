@@ -645,7 +645,6 @@ void Cgen::cgen_method(Feature* method) {
     emit_lw(FP, ar_size * WORD_SIZE, SP);
     emit_lw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
     emit_lw(RA, 4, SP);
-    emit_move(ACC, SELF);
     emit_pop(AR_BASE_SIZE + method->formals.size());
     emit_jr(RA);
 
@@ -783,21 +782,21 @@ void Cgen::visitBinaryExpr(Binary* expr) {
 
         case LESS:
 
-            emit_move(A1, ACC),
+            emit_move(S1, ACC),
             expr->rhs->accept(this);
             emit_jal("less");
             break;
 
         case LESS_EQUAL:
 
-            emit_move(A1, ACC);
+            emit_move(S1, ACC);
             expr->rhs->accept(this);
             emit_jal("less_eq");
             break;
 
         case EQUAL:
 
-            emit_move(A1, ACC);
+            emit_move(S1, ACC);
             expr->rhs->accept(this);
             emit_jal("eq");
             break;
