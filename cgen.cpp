@@ -811,6 +811,7 @@ void Cgen::visitUnaryExpr(Unary* expr) {
         case TILDE:
             // ~ is used on integer only hence the offset 12 to get 
             // the value.
+            emit_jal("Object.copy");
             emit_lw(T1, 12, ACC);
             emit_not(T2, T1),
             emit_sw(T2, 12, ACC);

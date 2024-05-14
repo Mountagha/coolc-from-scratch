@@ -976,14 +976,16 @@ _strcat_argempty:
 
 	.globl	String.substr
 String.substr:
-	addiu	$sp $sp -12		# frame
 	sw	$ra 4($sp)		# save return
+	addiu	$sp $sp -12		# frame
 	sw	$a0 12($sp)		# save self
-	sw	$0 8($sp)		# init GC area
+	sw $a1 8($sp) # save a1
+	sw	$0 4($sp)		# init GC area
 
 	jal	_MemMgr_Test		# test GC area
 
-	lw	$a0 12($sp)
+
+	addiu	$sp $sp 4
 	lw	$v0 obj_size($a0)
     la      $a0 Int_protObj		# ask if enough room to allocate
 	lw	$a0 obj_size($a0)	#   a string object, an int object,
@@ -997,15 +999,16 @@ _ss_ok:
 	la	$a0 Int_protObj
 	jal	_quick_copy
 	jal	Int_init
-	sw	$a0 8($sp)	# save new length obj
+	sw	$a0 0($sp)	# save new length obj
+	addiu $sp $sp -4
 	la	$a0 String_protObj
 	jal	_quick_copy
 	jal	String_init	# new obj ptr in $a0
 	move	$a2 $a0		# use a2 to make copy
 	addiu	$gp $gp -4	# backup alloc ptr
 	lw	$a1 12($sp)	# load orig
-	lw	$t1 20($sp)	# index obj
-	lw	$t2 16($sp)	# length obj
+	lw	$t1 4($fp)	# index obj
+	lw	$t2 8($fp)	# length obj
 	lw	$t0 str_size($a1)
 	lw	$v1 int_slot($t1) # index
 	lw	$v0 int_slot($t0) # size of orig
@@ -1015,7 +1018,8 @@ _ss_ok:
 	add	$v1 $v1 $t3	# index+sublength
 	bgt	$v1 $v0 _ss_abort3
 	bltz	$t3 _ss_abort4
-	lw	$t4 8($sp)	# load new length obj
+	lw	$t4 4($sp)	# load new length obj
+	addiu $sp $sp 4 # restore $sp since we got the object saved.
 	sw	$t3 int_slot($t4) # save new size
 	sw	$t4 str_size($a0) # store size in string
 	lw	$v1 int_slot($t1) # index
@@ -1041,8 +1045,11 @@ _ss_end:
 	srl	$t0 $t0 2	# div by 4
 	sw	$t0 obj_size($a0)
 
-	lw	$ra 4($sp)
-	addiu	$sp $sp 20	# pop arguments
+	lw $fp 28($sp) # restore old frame pointer
+	lw $s0 24($sp) # restore self
+	lw	$ra 12($sp) # restore return address
+	lw $a1 4($sp) # restore a1
+	addiu	$sp $sp 28	# pop arguments
 	jr	$ra
 
 _ss_abort1:
