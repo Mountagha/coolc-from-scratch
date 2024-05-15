@@ -677,28 +677,31 @@ Object.type_name:
 #	$a0 is preserved!
 #
 
-#	.globl	IO.out_string
-#IO.out_string:
-#	addiu	$sp $sp -4
-#	sw	$a0 4($sp)	# save self
-#	lw	$a0 8($sp)	# get arg
-#	addiu	$a0 $a0 str_field	# Adjust to beginning of str
-#	li	$v0 4		# print_str
-#	syscall
-#	lw	$a0 4($sp)	# return self
-#	addiu	$sp $sp 8	# pop argument
-#	jr	$ra
-
-.globl IO.out_string
+	.globl	IO.out_string
 IO.out_string:
-    lw $a0, 4($fp)
-    la $a0, 16($a0) # 16 is STR_CONST_OFFSET
-    li $v0, 4
-    syscall
-    lw $fp, 16($sp)
-    lw $s0, 12($sp)
-    addiu $sp $sp 16
-    jr $ra
+	addiu	$sp $sp -4
+	sw	$a0 4($sp)	# save self
+	lw	$a0 4($fp)	# get arg
+	addiu	$a0 $a0 str_field	# Adjust to beginning of str
+	li	$v0 4		# print_str
+	syscall
+	lw	$a0 16($sp)	# return self
+	lw $fp 20($sp)	
+	lw $s0 16($sp)	
+	addiu	$sp $sp 20	# pop argument
+	jr	$ra
+
+#.globl IO.out_string
+#IO.out_string:
+#    lw $a0, 4($fp)
+#    la $a0, 16($a0) # 16 is STR_CONST_OFFSET
+#    li $v0, 4
+#    syscall
+#	lw $a0 4($fp) # return self
+#    lw $fp, 16($sp)
+#    lw $s0, 12($sp)
+#    addiu $sp $sp 16
+#    jr $ra
 
 
 #
@@ -781,8 +784,8 @@ IO.in_int:
 
 	.globl	IO.in_string
 IO.in_string:
-	addiu	$sp $sp -8
-	sw	$ra 8($sp)			# save return address
+	sw	$ra 4($sp)			# save return address
+	addiu	$sp $sp -4
 	sw	$0 4($sp)			# init GC area
 
 	jal	_MemMgr_Test			# test GC area
@@ -853,8 +856,10 @@ _instr_nonl:
 	srl	$t0 $t0 2			# divide by 4
 	sw	$t0 obj_size($a0)		# set size field of obj
 
+	lw $fp 16($sp)
+	lw $s0 12($sp)
 	lw	$ra 8($sp)			# restore return address
-	addiu	$sp $sp 8
+	addiu	$sp $sp 16
 	jr	$ra				# return
 
 #
