@@ -750,12 +750,11 @@ IO.out_int:
 
 	.globl	IO.in_int
 IO.in_int:
-	addiu	$sp $sp -4
 	sw	$ra 4($sp)	# save return address
 
-        la      $a0 Int_protObj
-        jal     _quick_copy	# Call copy
-        jal     Int_init
+    la      $a0 Int_protObj
+    jal     _quick_copy	# Call copy
+    jal     Int_init
 
 	addiu	$sp $sp -4
 	sw	$a0 4($sp)	# save new object
@@ -764,12 +763,14 @@ IO.in_int:
 	syscall
 
 	lw	$a0 4($sp)
+
+
 	addiu	$sp $sp 4
-
-
 	sw	$v0 int_slot($a0)	# store int read into obj
+	lw $fp 12($sp)
+	lw $s0 8($sp)
 	lw	$ra 4($sp)
-	addiu	$sp $sp 4
+	addiu	$sp $sp 12
 	jr	$ra
 
 #
