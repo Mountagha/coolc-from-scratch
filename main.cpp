@@ -47,9 +47,9 @@ int main(int argc, char* argv[]) {
 
     std::vector<Token> tokens;
     tokens = s.scanTokens();
-    for (auto& token : tokens) {
-        std::cout << token << "\n";
-    }
+    //for (auto& token : tokens) {
+    //    std::cout << token << "\n";
+    //}
     Parser p{tokens};
     std::cout << "Parsing...\n";
     auto program = p.parse();
@@ -60,9 +60,11 @@ int main(int argc, char* argv[]) {
         auto semanter = Semant{};
         std::cout << "Semanting...\n";
         semanter.semant(program);
-        std::cout << "Printing AST after semant analysis...\n";
-        ASTPrinter{}.print(program);
-        Cgen{semanter.get_inheritancegraph(), semanter.get_classtable(), out}.cgen(program);
+        if (!semanter.hasError()) {
+            std::cout << "Printing AST after semant analysis...\n";
+            ASTPrinter{}.print(program);
+            Cgen{semanter.get_inheritancegraph(), semanter.get_classtable(), out}.cgen(program);
+        }
     }
         
 }

@@ -237,6 +237,11 @@ class Cgen: public StmtVisitor, public ExprVisitor {
 
         void cgen_init_formal(Token& );
 
+        // this method will attribute to each class a tag 
+        // which will be used to compare classes (case construct)
+        // and also do some indexing (classNameTab)
+        void construct_classtag_map();
+
 
 };
 

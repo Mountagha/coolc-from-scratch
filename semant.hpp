@@ -27,6 +27,10 @@ class Semant : public StmtVisitor, public ExprVisitor {
             expr->accept(this);
         }
 
+        inline bool hasError() const {
+            return semant_errors > 0;
+        }
+
         void visitProgramStmt(Program* stmt) {
 
             initialize_constants();
@@ -38,6 +42,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
             check_inheritance(stmt);
 
             gather_features(stmt);
+
+            multiple_definition_of_method_checks(stmt);
 
             // check every class in the program
             for (auto& class_ : stmt->classes) {
@@ -539,9 +545,6 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 }
             } 
 
-            // important to set method type before body semanting cause of recursion call.
-            //expr->expr_type = expr->type_;
-
             // check the body of the method.
             expr->expr->accept(this);
 
@@ -550,7 +553,6 @@ class Semant : public StmtVisitor, public ExprVisitor {
                 throw std::runtime_error("Types do not conform.");
             }
 
-            //expr->expr_type = expr->expr->expr_type;
             expr->expr_type = expr->type_;
             symboltable.exitScope();
             
@@ -676,6 +678,21 @@ class Semant : public StmtVisitor, public ExprVisitor {
 
             earger_features.exitScope();
         }
+
+        void multiple_definition_of_method_checks(Program *stmt) {
+
+            for (auto& class_: stmt->classes) {
+                std::vector<std::string> names{};
+                for (auto& feat: class_->features) {
+                    if (feat->featuretype == FeatureType::METHOD) {
+                        if (std::find(names.begin(), names.end(), feat->id.lexeme) != names.end())
+                            semant_error(feat->id, "Method " + feat->id.lexeme + " is multiply defined.");
+                    }
+                }
+            }
+
+        }
+
 
 
         void check_inheritance(Program* stmt) {

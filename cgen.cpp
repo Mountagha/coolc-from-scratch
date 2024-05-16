@@ -313,8 +313,27 @@ void Cgen::code_constants() {
     os << WORD << "Bool" << DISPTAB_SUFFIX << std::endl;
     os << WORD << "1" << std::endl;
 
-    
+}
 
+void Cgen::construct_classtag_map() {
+
+    int classtag = 8;    // to avoid clash with basic class values
+    classtag_map.insert({Object.lexeme, OBJECT_CLASS_TAG});
+    for (auto& class_: g->DFS(Object)) {
+
+        if (classtag_map.find(class_.lexeme) != classtag_map.end()) 
+            continue;
+        if (class_ == Str)
+            classtag_map.insert({class_.lexeme, STRING_CLASS_TAG});
+        else if (class_ == Int)
+            classtag_map.insert({class_.lexeme, INT_CLASS_TAG});
+        else if (class_ == Bool)
+            classtag_map.insert({class_.lexeme, BOOL_CLASS_TAG});
+        else {
+            classtag_map.insert({class_.lexeme, classtag});
+            classtag++;
+        }
+    }
 }
 
 void Cgen::class_name_table() {
@@ -329,7 +348,7 @@ void Cgen::class_name_table() {
         }
     );
     os << CLASSNAMETAB << LABEL;
-    os << SPACE << 4 * 4 << std::endl; // since the first class (Object) Index start at 4 
+    os << SPACE << 4 * 4 << std::endl; // since the first class (Object) Index start at 4 add a padding of 16 bytes 
     for (auto& v: class_tag_pairs) {
         int idx = stringtable().get_index(v.first); // we sure to get an index since classes are added previously
         os << WORD << STRCONST_PREFIX << idx << std::endl;
@@ -434,36 +453,13 @@ void Cgen::emit_obj_attributes(Class* class_) {
 void Cgen::code_prototype_objects() {
     int classtag = 8;    // to avoid clash with basic class values
 
-    // prototype Object first 
-    os << Object.lexeme << PROTOBJ_SUFFIX << LABEL;
-    os << WORD << OBJECT_CLASS_TAG << std::endl;
-    os << WORD << (DEFAULT_OBJFIELDS + calc_obj_size(class_table_ptr->get(Object.lexeme))) << std::endl;
-    os << WORD << Object.lexeme << DISPTAB_SUFFIX << std::endl;
-    emit_obj_attributes(class_table_ptr->get(Object.lexeme));
-    classtag_map.insert({Object.lexeme, OBJECT_CLASS_TAG});
+    for (auto& class_: classtag_map) {
 
-    // Prototype all children of Object.
-    for (auto& class_: g->DFS(Object)) {
-
-        if (class_ == No_class) 
-            continue;
-        
-        os << class_.lexeme << PROTOBJ_SUFFIX << LABEL;
-
-        if (class_ == Str)
-            os << WORD << STRING_CLASS_TAG << std::endl;
-        else if (class_ == Int)
-            os << WORD << INT_CLASS_TAG << std::endl;
-        else if (class_ == Bool)
-            os << WORD << BOOL_CLASS_TAG << std::endl;
-        else {
-            classtag_map.insert({class_.lexeme, classtag});
-            os << WORD << classtag++ << std::endl;
-        }
-
-        os << WORD << (DEFAULT_OBJFIELDS + calc_obj_size(class_table_ptr->get(class_.lexeme))) << std::endl;
-        os << WORD << class_.lexeme << DISPTAB_SUFFIX << std::endl;
-        emit_obj_attributes(class_table_ptr->get(class_.lexeme));
+        os << class_.first << PROTOBJ_SUFFIX << LABEL;
+        os << WORD << class_.second << std::endl;
+        os << WORD << (DEFAULT_OBJFIELDS + calc_obj_size(class_table_ptr->get(class_.first))) << std::endl;
+        os << WORD << class_.first << DISPTAB_SUFFIX << std::endl;
+        emit_obj_attributes(class_table_ptr->get(class_.first));
     }
 }
 
@@ -539,7 +535,11 @@ void Cgen::visitProgramStmt(Program* stmt) {
 
     code_global_data();
 
+    construct_classtag_map();
+
     code_constants();
+
+    class_name_table();
 
     std::cout << "Real code actually starting here.\n\n";
     for(auto& p: g->get_graph()) {
@@ -549,8 +549,6 @@ void Cgen::visitProgramStmt(Program* stmt) {
     }
 
     code_prototype_objects();
-
-    class_name_table();
 
     code_global_text(); 
 
