@@ -2559,6 +2559,7 @@ __less:
     la $a0 bool_const1
     jr $ra
 
+	.globl less_eq
 less_eq:   
     lw $t1, 12($a0) # 12 is the offset where attributes start
     lw $t2, 12($s1)

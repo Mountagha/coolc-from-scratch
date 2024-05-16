@@ -71,7 +71,9 @@
 #define ALIGN         "\t.align\t2\n"
 #define WORD          "\t.word\t"
 #define ASCII         "\t.ascii\t"
-#define ASCIIZ        "\t.ascii\t"
+#define ASCIIZ        "\t.asciiz\t"
+#define SPACE        "\t.space\t"
+#define BYTE        "\t.byte\t"
 
 //
 // register names
