@@ -894,8 +894,8 @@ String.length:
 	.globl	String.concat
 String.concat:
 
-	addiu	$sp $sp -16
-	sw	$ra 16($sp)			# save return address
+	sw	$ra 4($sp)			# save return address
+	addiu	$sp $sp -12
 	sw	$a0 12($sp)			# save self arg.
 	sw	$0 8($sp)			# init GC area
 	sw	$0 4($sp)			# init GC area
@@ -907,11 +907,11 @@ String.concat:
 	jal     _quick_copy			# Call copy
 	sw	$a0 8($sp)			# save new size object
 
-	lw	$t1 20($sp)			# load arg object
+	lw	$t1 4($fp)			# load arg object
 	lw	$t1 str_size($t1)		# get size object
 	lw	$t1 int_slot($t1)		# arg string size
 	blez	$t1 _strcat_argempty		# nothing to add
-	lw	$t0 12($sp)			# load self object
+	lw	$t0 12($sp)			# load self object [offset = 8 + 12]
 	lw	$t0 str_size($t0)		# get size object
 	lw	$t0 int_slot($t0)		# self string size
 	addu	$t0 $t0 $t1			# new size
@@ -944,7 +944,7 @@ String.concat:
 	lw	$t0 int_slot($t0)		# self string size
 	addiu	$t1 $a0 str_field		# points to start of string data
 	addu	$t1 $t1 $t0			# points to end: '\0'
-	lw	$t0 20($sp)			# load arg object
+	lw	$t0 4($fp)			# load arg object
 	addiu	$t2 $t0 str_field		# points to start of arg data
 	lw	$t0 str_size($t0)		# get arg size
 	lw	$t0 int_slot($t0)
@@ -958,14 +958,20 @@ _strcat_copy:
 	bne	$t2 $t0 _strcat_copy		# check limit
 	sb	$0 0($t1)			# add '\0'
 
-	lw	$ra 16($sp)			# restore return address
-	addiu	$sp $sp 20			# pop argument
+	addiu $sp $sp 12
+	lw $fp 16($sp)
+	lw $s0 12($sp) 
+	lw	$ra 4($sp)			# restore return address
+	addiu	$sp $sp 16			# pop argument
 	jr	$ra				# return
 
 _strcat_argempty:
 	lw	$a0 12($sp)			# load original self
-	lw	$ra 16($sp)			# restore return address
-	addiu	$sp $sp 20			# pop argument
+	addiu $sp $sp 12
+	lw $fp 16($sp)
+	lw $s0 12($sp)
+	lw	$ra 4($sp)			# restore return address
+	addiu	$sp $sp 16			# pop argument
 	jr	$ra				# return
 
 #
