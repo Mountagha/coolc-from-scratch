@@ -405,7 +405,7 @@ equality_test:			# ops in $t1 $t2
 				# true in A0, false in A1
 				# assume $t1, $t2 are not equal
 	beq	$t1 $zero _eq_false # $t2 can't also be void   
-	beq     $t2 $zero _eq_false # $t1 can't also be void   
+	beq $t2 $zero _eq_false # $t1 can't also be void   
 	lw	$v0 obj_tag($t1)	# get tags
 	lw	$v1 obj_tag($t2)
 	bne	$v1 $v0 _eq_false	# compare tags

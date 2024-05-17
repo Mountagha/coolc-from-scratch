@@ -220,6 +220,10 @@ void Cgen::emit_pop(int num_words) {
     emit_addiu(SP, SP, WORD_SIZE * num_words);
 }
 
+void Cgen::emit_pop(const char* reg) {
+    emit_lw(reg, WORD_SIZE, SP);
+    emit_pop(1);
+}
 
 void Cgen::emit_push(const char* reg) {
     emit_sw(reg, 0, SP);
@@ -795,22 +799,25 @@ void Cgen::visitBinaryExpr(Binary* expr) {
 
         case LESS:
 
-            emit_move(S1, ACC),
+            emit_push(ACC);
             expr->rhs->accept(this);
+            emit_pop(S1);
             emit_jal("less");
             break;
 
         case LESS_EQUAL:
 
-            emit_move(S1, ACC);
+            emit_push(ACC);
             expr->rhs->accept(this);
+            emit_pop(S1);
             emit_jal("less_eq");
             break;
 
         case EQUAL:
 
-            emit_move(S1, ACC);
+            emit_push(ACC);
             expr->rhs->accept(this);
+            emit_pop(S1);
             emit_jal("eq");
             break;
     }
@@ -886,10 +893,11 @@ void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
         emit_sw(ACC, formal_offset, SP);
         formal_offset += WORD_SIZE;
     }
-    emit_addiu(FP, SP, 4);
-    
+
     expr->expr->accept(this);
-    // dispatch error on void
+    expr->expr->accept(this);
+
+
     emit_bne(ACC, ZERO, "DispatchLabel" + std::to_string(dispatch_count));
     emit_la(ACC, FILENAME);
     emit_li(T1, 1);

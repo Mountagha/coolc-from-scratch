@@ -199,6 +199,7 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         // not that these functions take the number of 32-bit words to push
         void emit_push(int);
         void emit_pop(int);
+        void emit_pop(const char* );
 
         // push the content of a register onto the stack
         void emit_push(const char*);
