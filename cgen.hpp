@@ -220,6 +220,9 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         // emit code for the prototype objects attributes
         void emit_obj_attributes(Class* );
 
+        // debugging purposes
+        void emit_comment(const std::string& );
+
         // emit code for Garbage collector functions choice.
         void code_select_gc();
 

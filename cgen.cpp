@@ -250,6 +250,10 @@ void Cgen::emit_label(const std::string& label) {
     os << label << ":\n";
 }
 
+void Cgen::emit_comment(const std::string& s) {
+    os << "# " << s << std::endl;
+}
+
 
 //********************************************************
 //
@@ -337,6 +341,9 @@ void Cgen::construct_classtag_map() {
             classtag_map.insert({class_.lexeme, classtag});
             classtag++;
         }
+    }
+    for (auto& kv: classtag_map) {
+        std::cout << kv.first << " " << kv.second << std::endl;
     }
 }
 
@@ -644,9 +651,10 @@ void Cgen::cgen_method(Feature* method) {
         return;
 
     var_env.enterScope();
-
+    std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
     emit_label(curr_class->name.lexeme + METHOD_SEP + method->id.lexeme);
     emit_sw(RA, 4, SP);
+    emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
 
     //int curr_offset = 1; !TODO double check later
     fp_offset = 1;
@@ -658,10 +666,11 @@ void Cgen::cgen_method(Feature* method) {
     method->expr->accept(this);
 
     // refer to stack frame layout in header file
-    std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
+    //std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
     emit_lw(FP, ar_size * WORD_SIZE, SP);
     emit_lw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
     emit_lw(RA, 4, SP);
+    emit_lw(SELF, 8, SP);
     emit_pop(AR_BASE_SIZE + method->formals.size());
     emit_jr(RA);
 
@@ -885,7 +894,7 @@ void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
 
     emit_push(ar_size);
     emit_sw(FP, ar_size * WORD_SIZE, SP);
-    emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
+    // emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
 
     std::size_t formal_offset = 8;
     for (auto& arg: expr->args) {
@@ -895,7 +904,7 @@ void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
     }
 
     expr->expr->accept(this);
-    expr->expr->accept(this);
+    emit_addiu(FP, SP, 4);
 
 
     emit_bne(ACC, ZERO, "DispatchLabel" + std::to_string(dispatch_count));
@@ -917,7 +926,7 @@ void Cgen::visitDispatchExpr(Dispatch* expr) {
 
     emit_push(ar_size);
     emit_sw(FP, ar_size * WORD_SIZE, SP);
-    emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
+    // emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
 
     
     std::size_t formal_offset = 8;
@@ -984,6 +993,7 @@ void Cgen::visitLetExpr(Let* expr) {
         fp_offset++;
     }
     expr->body->accept(this);
+    emit_comment("Let ends here");
     var_env.exitScope();
 }
 
@@ -999,6 +1009,7 @@ void Cgen::visitCaseExpr(Case* expr) {
         }
         return max_tag;
     };
+    emit_comment("Label construct starts here.");
     expr->expr->accept(this);
     int tagCaseEnd = casecount++;
     emit_bne(ACC, ZERO, "CaseLabel" + std::to_string(casecount));
