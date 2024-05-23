@@ -651,10 +651,8 @@ void Cgen::cgen_method(Feature* method) {
         return;
 
     var_env.enterScope();
-    std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
     emit_label(curr_class->name.lexeme + METHOD_SEP + method->id.lexeme);
     emit_sw(RA, 4, SP);
-    emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
 
     //int curr_offset = 1; !TODO double check later
     fp_offset = 1;
@@ -662,15 +660,16 @@ void Cgen::cgen_method(Feature* method) {
         var_env.insert(f->id.lexeme, fp_offset);
         fp_offset++;
     }
+
     emit_move(SELF, ACC);
     method->expr->accept(this);
+    //emit_move(ACC, SELF);
 
     // refer to stack frame layout in header file
-    //std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
+    std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
     emit_lw(FP, ar_size * WORD_SIZE, SP);
     emit_lw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
     emit_lw(RA, 4, SP);
-    emit_lw(SELF, 8, SP);
     emit_pop(AR_BASE_SIZE + method->formals.size());
     emit_jr(RA);
 
@@ -890,11 +889,14 @@ void Cgen::visitGroupingExpr(Grouping* expr) {
 
 void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
 
+    
     std::size_t ar_size = AR_BASE_SIZE + expr->args.size();
-
+    
+    emit_push(SELF);
     emit_push(ar_size);
     emit_sw(FP, ar_size * WORD_SIZE, SP);
-    // emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
+    emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
+
 
     std::size_t formal_offset = 8;
     for (auto& arg: expr->args) {
@@ -902,6 +904,7 @@ void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
         emit_sw(ACC, formal_offset, SP);
         formal_offset += WORD_SIZE;
     }
+
 
     expr->expr->accept(this);
     emit_addiu(FP, SP, 4);
@@ -918,17 +921,19 @@ void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
     emit_lw(T1, 8, T1); // to get the dispatch table pointer.
     emit_lw(T1, method_table[expr->class_.lexeme][expr->callee_name.lexeme] * WORD_SIZE, T1);
     emit_jalr(T1);
+    emit_pop(SELF);
 }
 
 void Cgen::visitDispatchExpr(Dispatch* expr) {
     
     std::size_t ar_size = AR_BASE_SIZE + expr->args.size();
 
+    emit_push(SELF);
     emit_push(ar_size);
     emit_sw(FP, ar_size * WORD_SIZE, SP);
-    // emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
+    emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
 
-    
+
     std::size_t formal_offset = 8;
     for (auto& arg: expr->args) {
         arg->accept(this);
@@ -951,6 +956,7 @@ void Cgen::visitDispatchExpr(Dispatch* expr) {
     emit_lw(T1, 8, ACC); // to get the dispatch table pointer.
     emit_lw(T1, method_table[expr->expr->expr_type.lexeme][expr->callee_name.lexeme] * WORD_SIZE, T1);
     emit_jalr(T1);
+    emit_pop(SELF);
 }
 
 void Cgen::visitLiteralExpr(Literal* expr) {
