@@ -1028,7 +1028,6 @@ void Cgen::visitCaseExpr(Case* expr) {
 
     }
 
-
     // Object case branch is to be handled last if present.
     bool there_is_object = false, first_iter=true;
     Formal* object_formal;
