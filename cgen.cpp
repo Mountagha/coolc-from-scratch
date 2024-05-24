@@ -1023,11 +1023,24 @@ void Cgen::visitCaseExpr(Case* expr) {
     emit_li(T1, 1);
     emit_jal("_case_abort2");
 
+    std::vector<std::tuple<Token, int, Expr*>> {};
+    for (auto& match: expr->matches) {
+
+    }
+
 
     // Object case branch is to be handled last if present.
     bool there_is_object = false, first_iter=true;
     Formal* object_formal;
     Expr* obj_expr;
+
+    // we want the lowest classes (highest tags) in the hierarchy to get 
+    // the caseLabels first.
+    std::sort(expr->matches.begin(), expr->matches.end(), 
+    [this](letAssign& a, letAssign& b){
+        return this->classtag_map[std::get<0>(a).get()->type_.lexeme] >
+        this->classtag_map[std::get<0>(b).get()->type_.lexeme];
+    });
 
     for (auto& match: expr->matches) {
 
