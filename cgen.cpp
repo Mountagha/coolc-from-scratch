@@ -892,7 +892,7 @@ void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
     
     std::size_t ar_size = AR_BASE_SIZE + expr->args.size();
     
-    emit_push(SELF);
+    //emit_push(SELF);
     emit_push(ar_size);
     emit_sw(FP, ar_size * WORD_SIZE, SP);
     emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
@@ -905,10 +905,8 @@ void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
         formal_offset += WORD_SIZE;
     }
 
-
     expr->expr->accept(this);
     emit_addiu(FP, SP, 4);
-
 
     emit_bne(ACC, ZERO, "DispatchLabel" + std::to_string(dispatch_count));
     emit_la(ACC, FILENAME);
@@ -921,14 +919,14 @@ void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
     emit_lw(T1, 8, T1); // to get the dispatch table pointer.
     emit_lw(T1, method_table[expr->class_.lexeme][expr->callee_name.lexeme] * WORD_SIZE, T1);
     emit_jalr(T1);
-    emit_pop(SELF);
+    //emit_pop(SELF);
 }
 
 void Cgen::visitDispatchExpr(Dispatch* expr) {
     
     std::size_t ar_size = AR_BASE_SIZE + expr->args.size();
 
-    emit_push(SELF);
+    //emit_push(SELF);
     emit_push(ar_size);
     emit_sw(FP, ar_size * WORD_SIZE, SP);
     emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
@@ -940,7 +938,6 @@ void Cgen::visitDispatchExpr(Dispatch* expr) {
         emit_sw(ACC, formal_offset, SP);
         formal_offset += WORD_SIZE;
     }
-
 
     expr->expr->accept(this);
     emit_addiu(FP, SP, 4);
@@ -956,7 +953,7 @@ void Cgen::visitDispatchExpr(Dispatch* expr) {
     emit_lw(T1, 8, ACC); // to get the dispatch table pointer.
     emit_lw(T1, method_table[expr->expr->expr_type.lexeme][expr->callee_name.lexeme] * WORD_SIZE, T1);
     emit_jalr(T1);
-    emit_pop(SELF);
+    //emit_pop(SELF);
 }
 
 void Cgen::visitLiteralExpr(Literal* expr) {
@@ -994,9 +991,9 @@ void Cgen::visitLetExpr(Let* expr) {
         } else { // use default initialization.
             cgen_init_formal(let_type);
         }
-        emit_sw(ACC, fp_offset * WORD_SIZE, FP);
+        emit_sw(ACC, ++fp_offset * WORD_SIZE, FP);
         var_env.insert(let_id.lexeme, fp_offset);
-        fp_offset++;
+        //fp_offset++;
     }
     expr->body->accept(this);
     emit_comment("Let ends here");
