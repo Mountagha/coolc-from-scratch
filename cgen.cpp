@@ -287,13 +287,16 @@ void Cgen::code_constants() {
     for (auto& elt: stringtable().get_elements()) {
         
         int idx = stringtable().get_index(elt.first);
+        int string_obj_size = elt.first.size() % 4 == 0 ? elt.first.size() / 4 : elt.first.size() + 1;
         os << STRCONST_PREFIX << idx << LABEL;                                                // label
         os << WORD << STRING_CLASS_TAG << std::endl;                                            // tag 
-        os << WORD << (DEFAULT_OBJFIELDS + STRING_SLOTS + (elt.first.size()/4)) << std::endl;   // size
+        os << WORD << (DEFAULT_OBJFIELDS + STRING_SLOTS + string_obj_size) << std::endl;   // size
         os << WORD << "String" << DISPTAB_SUFFIX << std::endl;
         os << WORD << INTCONST_PREFIX << inttable().get_index(std::to_string(elt.first.size())) << std::endl;
         os << ASCIIZ << "\"" << elt.first.c_str() << "\"\n";
+        os << BYTE << 0 << std::endl;
         os << ALIGN;
+        os << WORD << -1 << std::endl;
 
     }
 
@@ -305,6 +308,7 @@ void Cgen::code_constants() {
         os << WORD << (DEFAULT_OBJFIELDS + INT_SLOTS) << std::endl;
         os << WORD << "Int" << DISPTAB_SUFFIX << std::endl;
         os << WORD << elt.first.c_str() << std::endl;
+        os << WORD << -1 << std::endl;
 
     }
 
@@ -993,7 +997,6 @@ void Cgen::visitLetExpr(Let* expr) {
         }
         emit_sw(ACC, ++fp_offset * WORD_SIZE, FP);
         var_env.insert(let_id.lexeme, fp_offset);
-        //fp_offset++;
     }
     expr->body->accept(this);
     emit_comment("Let ends here");

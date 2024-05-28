@@ -911,7 +911,7 @@ String.concat:
 	lw	$t1 str_size($t1)		# get size object
 	lw	$t1 int_slot($t1)		# arg string size
 	blez	$t1 _strcat_argempty		# nothing to add
-	lw	$t0 12($sp)			# load self object [offset = 8 + 12]
+	lw	$t0 12($sp)			# load self object
 	lw	$t0 str_size($t0)		# get size object
 	lw	$t0 int_slot($t0)		# self string size
 	addu	$t0 $t0 $t1			# new size
