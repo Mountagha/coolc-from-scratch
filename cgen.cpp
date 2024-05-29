@@ -226,8 +226,8 @@ void Cgen::emit_pop(const char* reg) {
 }
 
 void Cgen::emit_push(const char* reg) {
-    emit_sw(reg, 0, SP);
-    emit_addiu(SP, SP, -4);
+    emit_addiu(SP, SP, -WORD_SIZE);
+    emit_sw(reg, WORD_SIZE, SP);
 }
 
 void Cgen::emit_ascii(const std::string& s) {
@@ -721,7 +721,6 @@ void Cgen::visitIfExpr(If* expr) {
     ifcount++;
     std::string label_suffix = std::to_string(ifcount);
     expr->cond->accept(this);
-    // emit_push(ACC);
 
     emit_la(T1, BOOLCONST_TRUE); // bool_const1
     emit_beq(T1, ACC, "iftrue_branch" + label_suffix);
