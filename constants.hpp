@@ -27,7 +27,7 @@ static Token
     IO{TokenType::IDENTIFIER, "IO"},
     length{TokenType::IDENTIFIER, "length"},
     Main{TokenType::IDENTIFIER, "Main"},
-    main_meth{TokenType::IDENTIFIER, "main_meth"},
+    main_meth{TokenType::IDENTIFIER, "main"},
     No_class{TokenType::IDENTIFIER, "No_class"}, 
     No_type{TokenType::IDENTIFIER, "No_type"},
     Object{TokenType::IDENTIFIER, "Object"},

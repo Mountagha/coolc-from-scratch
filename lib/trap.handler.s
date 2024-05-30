@@ -372,9 +372,6 @@ __start:
 	move	$s0 $a0			# set $s0 to point to self
 	addiu $fp $sp 4
 	jal	Main_init		# initialize the Main object
-	addiu $sp $sp -12
-	sw $fp 12($sp)
-	sw $s0 8($sp)
 	jal	Main.main		# Invoke main method
 	addiu	$sp $sp 4		# restore the stack
 	la	$a0 _term_msg		# show terminal message
