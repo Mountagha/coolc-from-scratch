@@ -5,6 +5,7 @@
 
 #include "token.hpp"
 #include "utilities.hpp"
+#include "localsizer.hpp"
 #include "ast.hpp"
 #include "environment.hpp"
 #include "constants.hpp"
@@ -92,6 +93,9 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         // in the current AR relative to the fp. this allows for easier
         // addressing. eg. the first parameter is in 4($fp), next is 8($fp)... n($fp)
         SymbolTable<std::string, int> var_env;
+
+        // The localSizer is a pass that compute the size of locals in every function
+        LocalSizer localsizer{};
 
         /*
             Class tags for some basic classes

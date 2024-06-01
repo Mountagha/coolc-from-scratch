@@ -273,9 +273,10 @@ void Cgen::code_constants() {
     //
     // Add constants that are required by the code generator
     //
-    // add class names to string constants.
+    // add class names to string constants and their corresponding lengths to inttable. 
     for (auto& class_: g->get_graph()) {
         stringtable().insert(class_.first.lexeme, class_.first);
+        inttable().insert(std::to_string(class_.first.lexeme.size()), class_.first);
     }
     
     // add empty string to string const table since it's the default value 
@@ -556,6 +557,8 @@ void Cgen::visitProgramStmt(Program* stmt) {
 
     class_name_table();
 
+    localsizer.computeSize(stmt);
+
     std::cout << "Real code actually starting here.\n\n";
     for(auto& p: g->get_graph()) {
         auto class_ = class_table_ptr->get(p.first.lexeme);
@@ -654,8 +657,15 @@ void Cgen::cgen_method(Feature* method) {
     if (is_base_class(curr_class))
         return;
 
+    std::size_t ar_size = AR_BASE_SIZE + method->formals.size() + localsizer.getFuncLocalSize(method->id.lexeme);
     var_env.enterScope();
     emit_label(curr_class->name.lexeme + METHOD_SEP + method->id.lexeme);
+    if (method->id == main_meth) {
+        // No dispatch prior to main hence doing allocation inside and registers save here.
+        emit_push(ar_size);
+        emit_sw(FP, ar_size * WORD_SIZE, SP);
+        emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
+    }
     emit_sw(RA, 4, SP);
 
     //int curr_offset = 1; !TODO double check later
@@ -667,14 +677,12 @@ void Cgen::cgen_method(Feature* method) {
 
     emit_move(SELF, ACC);
     method->expr->accept(this);
-    //emit_move(ACC, SELF);
 
     // refer to stack frame layout in header file
-    std::size_t ar_size = AR_BASE_SIZE + method->formals.size();
     emit_lw(FP, ar_size * WORD_SIZE, SP);
     emit_lw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
     emit_lw(RA, 4, SP);
-    emit_pop(AR_BASE_SIZE + method->formals.size());
+    emit_pop(ar_size);
     emit_jr(RA);
 
     var_env.exitScope();
@@ -894,8 +902,9 @@ void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
 
     
     std::size_t ar_size = AR_BASE_SIZE + expr->args.size();
+    if (!is_base_function(expr->callee_name))
+        ar_size += localsizer.getFuncLocalSize(expr->callee_name.lexeme);
     
-    //emit_push(SELF);
     emit_push(ar_size);
     emit_sw(FP, ar_size * WORD_SIZE, SP);
     emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
@@ -922,14 +931,14 @@ void Cgen::visitStaticDispatchExpr(StaticDispatch* expr) {
     emit_lw(T1, 8, T1); // to get the dispatch table pointer.
     emit_lw(T1, method_table[expr->class_.lexeme][expr->callee_name.lexeme] * WORD_SIZE, T1);
     emit_jalr(T1);
-    //emit_pop(SELF);
 }
 
 void Cgen::visitDispatchExpr(Dispatch* expr) {
     
     std::size_t ar_size = AR_BASE_SIZE + expr->args.size();
+    if (!is_base_function(expr->callee_name))
+        ar_size += localsizer.getFuncLocalSize(expr->callee_name.lexeme);
 
-    //emit_push(SELF);
     emit_push(ar_size);
     emit_sw(FP, ar_size * WORD_SIZE, SP);
     emit_sw(SELF, ar_size * WORD_SIZE - WORD_SIZE, SP);
@@ -956,7 +965,6 @@ void Cgen::visitDispatchExpr(Dispatch* expr) {
     emit_lw(T1, 8, ACC); // to get the dispatch table pointer.
     emit_lw(T1, method_table[expr->expr->expr_type.lexeme][expr->callee_name.lexeme] * WORD_SIZE, T1);
     emit_jalr(T1);
-    //emit_pop(SELF);
 }
 
 void Cgen::visitLiteralExpr(Literal* expr) {
@@ -994,8 +1002,9 @@ void Cgen::visitLetExpr(Let* expr) {
         } else { // use default initialization.
             cgen_init_formal(let_type);
         }
-        emit_sw(ACC, ++fp_offset * WORD_SIZE, FP);
+        emit_sw(ACC, fp_offset * WORD_SIZE, FP);
         var_env.insert(let_id.lexeme, fp_offset);
+        fp_offset++;
     }
     expr->body->accept(this);
     emit_comment("Let ends here");

@@ -109,5 +109,11 @@ bool is_base_class(Class* class_) {
             class_->name == Str || class_->name == IO;
 }
 
+bool is_base_function(Token& func_name) {
+    return func_name == concat || func_name == cool_abort || func_name == copy ||
+        func_name == in_string || func_name == length || func_name == out_string ||
+        func_name == in_int || func_name == out_int || func_name == substr || 
+        func_name == type_name; 
+}
 
 }

@@ -48,5 +48,6 @@ class InheritanceGraph {
 };
 
 bool is_base_class(Class* class_);
+bool is_base_function(Token& func_name);
 
 } // namespace cool

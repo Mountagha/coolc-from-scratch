@@ -14,7 +14,7 @@ class Main inherits IO {
 
     main() : SELF_TYPE {
 	{
-            i <- ~1;
+        i <- ~1;
 	    out_string("enter a string\n");
 	    if pal(in_string())
 	    then out_string("that was a palindrome\n")
