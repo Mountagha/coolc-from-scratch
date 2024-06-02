@@ -288,7 +288,7 @@ void Cgen::code_constants() {
     for (auto& elt: stringtable().get_elements()) {
         
         int idx = stringtable().get_index(elt.first);
-        int string_obj_size = elt.first.size() % 4 == 0 ? elt.first.size() / 4 : elt.first.size() + 1;
+        int string_obj_size = elt.first.size() % 4 == 0 ? elt.first.size() / 4 : elt.first.size() / 4 + 1;
         os << STRCONST_PREFIX << idx << LABEL;                                                // label
         os << WORD << STRING_CLASS_TAG << std::endl;                                            // tag 
         os << WORD << (DEFAULT_OBJFIELDS + STRING_SLOTS + string_obj_size) << std::endl;   // size
