@@ -657,11 +657,17 @@ Object.abort:
 
 	.globl	Object.type_name
 Object.type_name:
+	sw $ra 4($sp)
 	la	$t1 class_nameTab
 	lw	$v0 obj_tag($a0)	# Get object tag
 	sll	$v0 $v0 2	# *4
 	addu	$t1 $t1 $v0	# index table
 	lw	$a0 0($t1)	# Load class name string obj.
+	# restore the stack
+	lw $fp 12($sp)
+	lw $s0 8($sp)
+	lw $ra 4($sp)
+	addiu $sp $sp 12
 	jr	$ra
 
 #
