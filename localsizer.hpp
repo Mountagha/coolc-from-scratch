@@ -22,28 +22,41 @@ class LocalSizer: public StmtVisitor, public ExprVisitor {
         }
 
         size_t getFuncLocalSize(std::string& funcName) {
-            if (sizes.find(funcName) != sizes.end())
-                return sizes[funcName];
+            if (local_func_sizes.find(funcName) != local_func_sizes.end())
+                return local_func_sizes[funcName];
             // !TODO better error handling
             throw std::runtime_error("Unable to compute Local size for unknown function " + funcName);
         }
+
+        size_t getClassLocalSize(std::string& className) {
+            if (local_class_sizes.find(className) != local_class_sizes.end())
+                return local_class_sizes[className];
+            // !TODO better error handling
+            throw std::runtime_error("Unable to compute Local size for unknown class " + className);
+        }
+
 
         
         void visitFeatureExpr(Feature* expr) {
             if (expr->featuretype == FeatureType::METHOD) {
                 current_func = expr->id.lexeme;
-                sizes.insert({current_func, 0});
+                local_func_sizes.insert({current_func, 0});
                 inside_func = true;
                 expr->expr->accept(this);
                 inside_func = false;
+            } else {    // attributes affect local class size
+                if (expr->expr)
+                    expr->expr->accept(this);
             }
         } 
 
         void visitLetExpr(Let* expr) {
             if (inside_func) {
-                sizes[current_func] += expr->vecAssigns.size();               
-                expr->body->accept(this);
+                local_func_sizes[current_func] += expr->vecAssigns.size();               
+            } else { // count towards class size.
+                local_class_sizes[current_class] += expr->vecAssigns.size();
             }
+            expr->body->accept(this);
         }
 
         void visitFormalExpr(Formal* expr)  { }
@@ -89,10 +102,22 @@ class LocalSizer: public StmtVisitor, public ExprVisitor {
         void visitLiteralExpr(Literal* expr) { }
 
         void visitCaseExpr(Case* expr) { 
+            if (inside_case)
+                curr_case_size += 1;
+            else 
+                curr_case_size = 1;
             expr->expr->accept(this);
             for (auto& case_: expr->matches) {
                 std::get<1>(case_).get()->accept(this);
             }
+            if (inside_func) {
+                local_func_sizes[current_func] = local_func_sizes[current_func] > curr_case_size ?
+                        local_func_sizes[current_func] : curr_case_size;
+            } else {
+                local_class_sizes[current_class] = local_class_sizes[current_class] > curr_case_size ?
+                        local_class_sizes[current_class] : curr_case_size;
+            }
+            inside_case = false;
         }
 
         void visitProgramStmt(Program* stmt) { 
@@ -102,15 +127,22 @@ class LocalSizer: public StmtVisitor, public ExprVisitor {
         }
 
         void visitClassStmt(Class* stmt) { 
+            current_class = stmt->name.lexeme;
+            local_class_sizes.insert({current_class, 0});
             for (auto& f: stmt->features) {
                 f->accept(this);
             }
         }
 
     private:
-        std::unordered_map<std::string, size_t> sizes{};
+        std::unordered_map<std::string, size_t> local_func_sizes{};
+        std::unordered_map<std::string, size_t> local_class_sizes{};
         std::string current_func;
+        std::string current_class;
         bool inside_func;
+        size_t curr_case_size{0};
+        bool inside_case{false}; // to handle nested cases construction.
+
 };
 
 }
