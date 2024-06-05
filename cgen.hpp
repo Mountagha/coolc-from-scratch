@@ -78,11 +78,17 @@ class Cgen: public StmtVisitor, public ExprVisitor {
         // Used to generate labels for whiles
         std::size_t while_count;
 
-        // Used to track frame pointer offset for local variables.
+        // Used to track frame pointer offset for local variables in functions.
         std::size_t fp_offset;
+
+        // Used to track frame pointer offset for local variables in Class(Init_functions of clases)
+        std::size_t class_fp_offset;
 
         // Used to track case branches.
         std::size_t casecount;
+
+        // Used to track in and out of functions
+        bool inside_function{false};
 
         // Used to track dispatch labels
         std::size_t dispatch_count;

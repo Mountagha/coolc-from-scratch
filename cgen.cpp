@@ -597,16 +597,20 @@ void Cgen::visitClassStmt(Class* stmt) {
     Token classname = stmt->name;
     os << classname.lexeme + CLASSINIT_SUFFIX << LABEL;
 
-    // reserve space for AR (old frame pointer + self object + return adress)
-    emit_push(AR_BASE_SIZE);
+    // reserve space for AR (old frame pointer + self object + return adress + potential local variables[cases, let])
+    size_t object_size = AR_BASE_SIZE;
+    if (!is_base_class(curr_class))
+        object_size += localsizer.getClassLocalSize(curr_class->name.lexeme);
+    emit_push(object_size);
 
     // standard registers that are saved to the stack
-    emit_sw(FP, 12, SP);
-    emit_sw(SELF, 8, SP);
+    emit_sw(FP, object_size * WORD_SIZE, SP);
+    emit_sw(SELF, object_size * WORD_SIZE - WORD_SIZE, SP);
     emit_sw(RA, 4, SP);
     emit_addiu(FP, SP, 4);
     emit_move(SELF, ACC);
 
+    class_fp_offset = 1;
 
     // if the class is anything other than the object class, call
     // base class init method
@@ -621,10 +625,10 @@ void Cgen::visitClassStmt(Class* stmt) {
 
     // restore registers
     emit_move(ACC, SELF);
-    emit_lw(FP, 12, SP);
-    emit_lw(SELF, 8, SP);
+    emit_lw(FP, object_size * WORD_SIZE, SP);
+    emit_lw(SELF, object_size * WORD_SIZE - WORD_SIZE, SP);
     emit_lw(RA, 4, SP);
-    emit_pop(AR_BASE_SIZE);
+    emit_pop(object_size);
     emit_jr(RA);
 
     curr_attr_count = 0;
@@ -657,6 +661,7 @@ void Cgen::cgen_method(Feature* method) {
     if (is_base_class(curr_class))
         return;
 
+    inside_function = true; 
     std::size_t ar_size = AR_BASE_SIZE + method->formals.size() + localsizer.getFuncLocalSize(method->id.lexeme);
     var_env.enterScope();
     emit_label(curr_class->name.lexeme + METHOD_SEP + method->id.lexeme);
@@ -686,6 +691,8 @@ void Cgen::cgen_method(Feature* method) {
     emit_jr(RA);
 
     var_env.exitScope();
+
+    inside_function = false;
 
 }
 
@@ -875,7 +882,7 @@ void Cgen::visitVariableExpr(Variable* expr) {
         // check if it's an attribute of the current class.
         int *offset = var_env.get(expr->name.lexeme);
         if (offset)
-            emit_lw(ACC, (*offset) * WORD_SIZE, FP);
+                emit_lw(ACC, (*offset) * WORD_SIZE, FP);
         else {
             emit_lw(ACC, WORD_SIZE * (attr_table[curr_class->name.lexeme][expr->name.lexeme] + 2), SELF);
         } 
@@ -1002,9 +1009,15 @@ void Cgen::visitLetExpr(Let* expr) {
         } else { // use default initialization.
             cgen_init_formal(let_type);
         }
-        emit_sw(ACC, fp_offset * WORD_SIZE, FP);
-        var_env.insert(let_id.lexeme, fp_offset);
-        fp_offset++;
+        if (inside_function) {
+            emit_sw(ACC, fp_offset * WORD_SIZE, FP);
+            var_env.insert(let_id.lexeme, fp_offset);
+            fp_offset++;
+        } else { // a let that initialize an attribute
+            emit_sw(ACC, class_fp_offset * WORD_SIZE, FP);
+            var_env.insert(let_id.lexeme, class_fp_offset);
+            class_fp_offset++;
+        }
     }
     expr->body->accept(this);
     emit_comment("Let ends here");
@@ -1014,7 +1027,7 @@ void Cgen::visitLetExpr(Let* expr) {
 void Cgen::visitCaseExpr(Case* expr) {
 
     // a lambda to find the child class with the highest tag of a certain
-    // class
+    // class hierarchy.
     auto max_inherited_class_tag = [this](Token& class_name) -> int {
         int max_tag = this->classtag_map[class_name.lexeme]; // the lowest.
         for(auto& class_: this->g->DFS(class_name)) {
@@ -1030,11 +1043,6 @@ void Cgen::visitCaseExpr(Case* expr) {
     emit_la(ACC, FILENAME);
     emit_li(T1, 1);
     emit_jal("_case_abort2");
-
-    std::vector<std::tuple<Token, int, Expr*>> {};
-    for (auto& match: expr->matches) {
-
-    }
 
     // Object case branch is to be handled last if present.
     bool there_is_object = false, first_iter=true;
@@ -1067,6 +1075,14 @@ void Cgen::visitCaseExpr(Case* expr) {
         }
         emit_blt(T2, classtag_map[formal->type_.lexeme], "CaseLabel" + std::to_string(casecount));
         emit_bgt(T2, max_inherited_class_tag(formal->type_), "CaseLabel" + std::to_string(casecount));
+        // bind idk to expr0 before evaluating exprk.
+        if (inside_function) {
+            emit_sw(ACC, fp_offset * WORD_SIZE, FP);
+            var_env.insert(formal->id.lexeme, fp_offset);
+        } else {
+            emit_sw(ACC, class_fp_offset * WORD_SIZE, FP);
+            var_env.insert(formal->id.lexeme, class_fp_offset);
+        }
         match_expr->accept(this); 
         emit_b("CaseLabel" + std::to_string(tagCaseEnd));
     }
@@ -1080,7 +1096,7 @@ void Cgen::visitCaseExpr(Case* expr) {
     }
     
     // Not found corresponding case.
-    emit_label("CaseLabel" + std::to_string(casecount));
+    emit_label("CaseLabel" + std::to_string(casecount++));
     emit_jal("_case_abort");
     // code after the switch case.
     emit_label("CaseLabel" + std::to_string(tagCaseEnd));
