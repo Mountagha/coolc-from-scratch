@@ -258,6 +258,7 @@ class Cgen: public StmtVisitor, public ExprVisitor {
 
         // help emitting strings that contains chars that got us in trouble.
         void print_string_literal(const std::string& s);
+        void print_string_in_bytes(const std::string& s);
 
 
 };

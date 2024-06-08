@@ -268,6 +268,43 @@ void Cgen::emit_comment(const std::string& s) {
 //
 //********************************************************
 
+void Cgen::print_string_in_bytes(const std::string& s) {
+    std::size_t column_counter = 0, column_limit = 15;
+    os << BYTE;
+    for (auto& c: s) {
+        os << static_cast<int>(c) << " ";
+        column_counter++;
+        if (column_counter > column_limit) {
+            os << std::endl << BYTE;
+            column_counter = 0;
+        }
+    }
+    os << std::endl;
+}
+
+void Cgen::print_string_literal (const std::string& s) {
+
+    bool is_new_ascii = true;
+    for (int i=0; i < s.size(); i++) {
+        if (s[i] == '\\' && s[i+1] == '\\') {
+            if (!is_new_ascii) {
+                this->os << "\"" << std::endl;
+            }
+            this->os << BYTE << static_cast<int>('\\') << std::endl; // print ascii code.
+            is_new_ascii = true;
+            i++;
+        } else {
+            if (is_new_ascii) {
+                this->os << ASCII << "\"" << s[i];
+                is_new_ascii = false;
+            } else {
+                this->os << s[i];  // Print the character as is
+            }
+        }
+    }
+    if (!is_new_ascii)
+        this->os << "\"" << std::endl;
+}
 
 void Cgen::code_constants() {
     //
@@ -282,8 +319,18 @@ void Cgen::code_constants() {
     // add empty string to string const table since it's the default value 
     // value of a newly allocated string.
     // add 0 to the int entry [in case it isn't present] for the same reason.
-    stringtable().insert("", Token{TokenType::_NULL, ""});
-    inttable().insert("0", Token{TokenType::_NULL, ""});
+    stringtable().insert("", Token{TokenType::STRING, ""});
+    inttable().insert("0", Token{TokenType::NUMBER, ""});
+    auto contains_unrecognized_char = [](const std::string s) -> bool {
+        // spim somehow do not recognized `\\` so we print it ascii code instead of literal value.
+        char previous;
+        for (auto& c: s) {
+            if (c == '\\' && previous == '\\')
+                return true;
+            previous = c;
+        }
+        return false;
+    };
 
     for (auto& elt: stringtable().get_elements()) {
         
@@ -294,7 +341,11 @@ void Cgen::code_constants() {
         os << WORD << (DEFAULT_OBJFIELDS + STRING_SLOTS + string_obj_size) << std::endl;   // size
         os << WORD << "String" << DISPTAB_SUFFIX << std::endl;
         os << WORD << INTCONST_PREFIX << inttable().get_index(std::to_string(elt.first.size())) << std::endl;
-        os << ASCIIZ << "\"" << elt.first.c_str() << "\"\n";
+        if (contains_unrecognized_char(elt.first))
+            print_string_literal(elt.first);
+        else
+            os << ASCII << "\"" << elt.first.c_str() << "\"\n";
+        //print_string_literal(elt.first);
         os << BYTE << 0 << std::endl;
         os << ALIGN;
         os << WORD << -1 << std::endl;
@@ -1102,4 +1153,4 @@ void Cgen::visitCaseExpr(Case* expr) {
     emit_label("CaseLabel" + std::to_string(tagCaseEnd));
 }
 
-}
+}   // end of namespace.
