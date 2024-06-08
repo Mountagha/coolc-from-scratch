@@ -345,7 +345,6 @@ void Cgen::code_constants() {
             print_string_literal(elt.first);
         else
             os << ASCII << "\"" << elt.first.c_str() << "\"\n";
-        //print_string_literal(elt.first);
         os << BYTE << 0 << std::endl;
         os << ALIGN;
         os << WORD << -1 << std::endl;
