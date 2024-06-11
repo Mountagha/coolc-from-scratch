@@ -47,8 +47,7 @@ class Scanner {
         const std::string& source;
         std::vector<Token> tokens;
 
-        inline bool const isAtEnd() { return current > source.length(); }
-
+        // private functions.
         void scanToken();
         void string();
         bool match(char expected);
@@ -60,6 +59,8 @@ class Scanner {
         void identifierOrKeyword();
         std::string strTolower(const std::string& s);
         bool isKeyword(const std::string& s);
+
+        inline bool const isAtEnd() { return current > source.length(); }
 
         inline bool isDigit(char c) {
             return std::isdigit(static_cast<unsigned char>(c));
