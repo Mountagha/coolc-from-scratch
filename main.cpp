@@ -36,10 +36,10 @@ int main(int argc, char* argv[]) {
         source += file_source;
     }
 
-
-    std::ofstream out{"out.s"};
+    std::string out_file = curr_filename.substr(0, curr_filename.find_last_of('.')) + ".s"; 
+    std::ofstream out{out_file};
     if (!out.is_open()) {
-        std::cerr << "Cannot open out.s for writing.";
+        std::cerr << "Cannot open `" << out_file << "` for writing.";
         exit(EXIT_FAILURE); // !TODO: better this later.
     }
     
