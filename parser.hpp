@@ -23,10 +23,10 @@ class Parser {
         ~Parser();
         bool hasError();
         std::unique_ptr<Stmt> parse();
-    
-    private:
         using PExpr = std::unique_ptr<Expr>;
         using PStmt = std::unique_ptr<Stmt>;
+    
+    private:
         // to represent id: token: expr into 1 object. (id: token) = formal.
         using letAssign = std::tuple<std::unique_ptr<Formal>, PExpr>; 
         using letAssigns = std::vector<letAssign>; // I know poor naming but hey.
@@ -40,17 +40,8 @@ class Parser {
         bool parseError;
         Program* program;
 
-        PStmt parseProgram() {
-            std::vector<std::unique_ptr<Class>> classes{};
-            while(!isAtEnd()){
-                auto class_ = parseClass();
-                // Probably a better way to do next line.
-                classes.push_back(std::unique_ptr<Class>(static_cast<Class*>(class_.release())));
-                consume(SEMICOLON, "Expect `;` at the end of a class definition.");
-            }
-            return std::make_unique<Program>(std::move(classes));
-        }
-
+        PStmt parseProgram();
+            
         PStmt parseClass() {
             consume(CLASS, "Expect the keyword `class` at the beginning of class definition.");
             Token className = consume(IDENTIFIER, "Expect a class type after `class`.");
