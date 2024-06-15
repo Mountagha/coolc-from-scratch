@@ -6,7 +6,7 @@ Parser::Parser(std::vector<Token>& tokens_): tokens{tokens_}, current{0}, parseE
 Parser::~Parser() = default;
 bool Parser::hasError() { return parseError; }
 
-std::unique_ptr<Stmt> Parser::parse() {
+PStmt Parser::parse() {
     try {
         return parseProgram();
     } catch (ParseError error) {

@@ -24,7 +24,7 @@ class Parser {
         Parser(std::vector<Token>& tokens);
         ~Parser();
         bool hasError();
-        std::unique_ptr<Stmt> parse();
+        PStmt parse();
     
     private:
         // to represent id: token: expr into 1 object. (id: token) = formal.
