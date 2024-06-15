@@ -32,6 +32,7 @@ class Parser {
         using letAssigns = std::vector<letAssign>; // I know poor naming but hey.
 
         struct ParseError : std::runtime_error {
+            // time to replace that.
             using std::runtime_error::runtime_error;
         };
         typeIdentifier typeId;
