@@ -7,21 +7,20 @@ Parser::~Parser() = default;
 bool Parser::hasError() { return parseError; }
 
 PStmt Parser::parse() {
-    try {
-        return parseProgram();
-    } catch (ParseError error) {
-        synchronize();
-        return PStmt{}; // to please to C++ compiler.
-    }
+    return parseProgram();
 }
 
 PStmt Parser::parseProgram() {
     std::vector<std::unique_ptr<Class>> classes{};
     while(!isAtEnd()){
-        auto class_ = parseClass();
-        // Probably a better way to do next line.
-        classes.push_back(std::unique_ptr<Class>(static_cast<Class*>(class_.release())));
-        consume(SEMICOLON, "Expect `;` at the end of a class definition.");
+        try {
+            auto class_ = parseClass();
+            // Probably a better way to do next line.
+            classes.push_back(std::unique_ptr<Class>(static_cast<Class*>(class_.release())));
+            consume(SEMICOLON, "Expect `;` at the end of a class definition.");
+        } catch (ParseError error) {
+            synchronize();
+        }
     }
     return std::make_unique<Program>(std::move(classes));
 }
@@ -37,9 +36,13 @@ PStmt Parser::parseClass() {
     std::vector<std::unique_ptr<Feature>> features{};
     consume(LEFT_BRACE, "Expect a left brace at the beginning of a class definition.");
     while (isCurToken(IDENTIFIER)){
-        PExpr feature = parseFeature();
-        features.push_back(std::unique_ptr<Feature>(static_cast<Feature*>(feature.release())));
-        consume(SEMICOLON, "Expect a `;` at the end of a feature definition.");
+        try {
+            PExpr feature = parseFeature();
+            features.push_back(std::unique_ptr<Feature>(static_cast<Feature*>(feature.release())));
+            consume(SEMICOLON, "Expect a `;` at the end of a feature definition.");
+        } catch (ParseError error) {
+            synchronize();
+        }
     }
     consume(RIGHT_BRACE, "Expect a right brace after class definition.");
     return std::make_unique<Class>(className, superClassName, std::move(features));
@@ -287,13 +290,15 @@ void Parser::synchronize() {
     advance(); 
     while(!isAtEnd()) {
         switch (peek().token_type){
-            case IDENTIFIER:
-                if(peek(1).token_type == COLON || peek(1).token_type == LEFT_PAREN)
-                    return; // going to the next feature.
+            //case IDENTIFIER:
+            //    if(peek(1).token_type == COLON || peek(1).token_type == LEFT_PAREN)
+            //        return; // going to the next feature. might as well be dispatch.
+            case SEMICOLON:
+                advance();
+                return;
+            case CASE:
             case LET:
             case CLASS:
-            case CASE:
-            case SEMICOLON:
                 return;
 
         }

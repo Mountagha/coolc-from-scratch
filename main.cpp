@@ -8,6 +8,7 @@
 #include "ASTPrinter.hpp"
 #include "semant.hpp"
 #include "cgen.hpp"
+#include "common.hpp"
 
 using namespace cool;
 
@@ -47,24 +48,34 @@ int main(int argc, char* argv[]) {
 
     std::vector<Token> tokens;
     tokens = s.scanTokens();
-    //for (auto& token : tokens) {
-    //    std::cout << token << "\n";
-    //}
+#ifdef DEBUG_PRINT_CODE
+    for (auto& token : tokens) {
+        std::cout << token << "\n";
+    }
+#endif
     Parser p{tokens};
     std::cout << "Parsing...\n";
     auto program = p.parse();
 
-    if(!p.hasError()) {
-        //std::cout << "Printing AST...\n";
-        //ASTPrinter{}.print(program);
-        auto semanter = Semant{};
-        std::cout << "Semanting...\n";
-        semanter.semant(program);
-        if (!semanter.hasError()) {
-            std::cout << "Printing AST after semant analysis...\n";
-            ASTPrinter{}.print(program);
-            Cgen{semanter.get_inheritancegraph(), semanter.get_classtable(), out}.cgen(program);
-        }
+    if (p.hasError()) {
+        std::cerr << "Compilation halted due to parsing errors." << std::endl;;
+        exit(EXIT_FAILURE);
     }
-        
+#ifdef DEBUG_PRINT_CODE
+    std::cout << "Printing AST...\n";
+    ASTPrinter{}.print(program);
+#endif
+    auto semanter = Semant{};
+    std::cout << "Semanting...\n";
+    semanter.semant(program);
+    if (semanter.hasError()) {
+        std::cerr << "Compilation halted due to semantic errors." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+#ifdef DEBUG_PRINT_CODE
+    std::cout << "Printing AST after semant analysis..." << std::endl;
+    ASTPrinter{}.print(program);
+#endif
+    Cgen{semanter.get_inheritancegraph(), semanter.get_classtable(), out}.cgen(program);
+    return 0;   
 }
