@@ -397,9 +397,6 @@ void Cgen::construct_classtag_map() {
             classtag++;
         }
     }
-    for (auto& kv: classtag_map) {
-        std::cout << kv.first << " " << kv.second << std::endl;
-    }
 }
 
 void Cgen::class_name_table() {
@@ -609,7 +606,6 @@ void Cgen::visitProgramStmt(Program* stmt) {
 
     localsizer.computeSize(stmt);
 
-    std::cout << "Real code actually starting here.\n\n";
     for(auto& p: g->get_graph()) {
         auto class_ = class_table_ptr->get(p.first.lexeme);
         os << class_->name.lexeme << DISPTAB_SUFFIX << LABEL;
