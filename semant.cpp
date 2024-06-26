@@ -1,4 +1,5 @@
 #include "semant.hpp"
+#include "common.hpp"
 #include <algorithm>
 
 namespace cool {
@@ -47,13 +48,13 @@ void Semant::visitFeatureExpr(Feature* expr) {
 
 void Semant::visitFormalExpr(Formal* expr) {
     if (symboltable.probe(expr->id.lexeme)) {
-        throw std::runtime_error("Supplicated name.");
+        throw cool_runtime_error("Supplicated name.");
     }
     if (expr->id == self) {
-        throw std::runtime_error("Can't use keyword 'self'. Preserved");
+        throw cool_runtime_error("Can't use keyword 'self'. Preserved");
     }
     if (expr->type_ == SELF_TYPE) {
-        throw std::runtime_error("Can't use the keyword 'SELF_TYPE'. Preserved.");
+        throw cool_runtime_error("Can't use the keyword 'SELF_TYPE'. Preserved.");
     }
     expr->expr_type = expr->type_;
     symboltable.insert(expr->id.lexeme, expr->expr_type);
@@ -81,15 +82,15 @@ void Semant::visitAssignExpr(Assign* expr) {
                 break;
             target_class = classTable.get(parent.lexeme);
             if (!target_class) 
-                throw std::runtime_error("Unable to find class `" + parent.lexeme + "`");
+                throw cool_runtime_error("Unable to find class `" + parent.lexeme + "`");
         }
     }
     // if still no id_type_ptr also meaning did not find the attribute.
     if (!id_type_ptr) {
-        throw std::runtime_error("type error in assignement construct");
+        throw cool_runtime_error("type error in assignement construct");
     }
     if (!conform(assign_type, id_type)) {
-        throw std::runtime_error("Declared type `" + id_type.lexeme + "` of " + expr->id.lexeme + " does not confom to infered type `" 
+        throw cool_runtime_error("Declared type `" + id_type.lexeme + "` of " + expr->id.lexeme + " does not confom to infered type `" 
             + assign_type.lexeme + "`.");
     }
     expr->expr_type = assign_type;
@@ -99,7 +100,7 @@ void Semant::visitIfExpr(If* expr) {
     expr->cond->accept(this);
     Token cond_type = expr->cond->expr_type;
     if (cond_type != Bool) {
-        throw std::runtime_error("predicate inside If branch must have Bool type.");
+        throw cool_runtime_error("predicate inside If branch must have Bool type.");
     }
     expr->thenBranch->accept(this);
     expr->elseBranch->accept(this);
@@ -110,7 +111,7 @@ void Semant::visitIfExpr(If* expr) {
 void Semant::visitWhileExpr(While* expr) {
     expr->cond->accept(this);
     if (expr->cond->expr_type != Bool) {
-        throw std::runtime_error("predicate inside while branch must have Bool type.");
+        throw cool_runtime_error("predicate inside while branch must have Bool type.");
     }
     expr->expr->accept(this);
     expr->expr_type = Object;
@@ -127,7 +128,7 @@ void Semant::visitBinaryExpr(Binary* expr) {
         case SLASH: {
             if (expr->lhs->expr_type != Int || expr->rhs->expr_type != Int) {
                 expr->expr_type = Object;
-                throw std::runtime_error("Binary arithmetic operands must be type Int.");
+                throw cool_runtime_error("Binary arithmetic operands must be type Int.");
             }
             expr->expr_type = Int;
             break;
@@ -136,7 +137,7 @@ void Semant::visitBinaryExpr(Binary* expr) {
         case LESS_EQUAL: {
             if (expr->lhs->expr_type != Int || expr->rhs->expr_type != Int) {
                 expr->expr_type = Object;
-                throw std::runtime_error("Binary comparison operands must be type Int.");
+                throw cool_runtime_error("Binary comparison operands must be type Int.");
             }
             expr->expr_type = Bool;
             break;
@@ -149,21 +150,21 @@ void Semant::visitBinaryExpr(Binary* expr) {
                     expr->expr_type = Bool;
                 } else {
                     expr->expr_type = Object;
-                    throw std::runtime_error("type mismatch in '=' operator.");
+                    throw cool_runtime_error("type mismatch in '=' operator.");
                 }
             } else if (lhs_type == Bool) {
                 if (rhs_type == Bool) {
                     expr->expr_type = Bool;
                 } else {
                     expr->expr_type = Object;
-                    throw std::runtime_error("type mismatch in '=' operator.");
+                    throw cool_runtime_error("type mismatch in '=' operator.");
                 }
             } else if (lhs_type == Str) {
                 if (rhs_type == Str) {
                     expr->expr_type = Bool;
                 } else {
                     expr->expr_type = Object;
-                    throw std::runtime_error("type mismatch in '=' operator.");
+                    throw cool_runtime_error("type mismatch in '=' operator.");
                 }
             }
             expr->expr_type = Bool;     // !TODO: recheck =. Not sure on the logics.
@@ -179,7 +180,7 @@ void Semant::visitUnaryExpr(Unary* expr) {
         case TILDE: {
             if (expr->expr->expr_type != Int) {
                 expr->expr_type = Object;
-                throw std::runtime_error("Type error in '~' operator.");
+                throw cool_runtime_error("Type error in '~' operator.");
             }
             expr->expr_type = Int;
             break;
@@ -187,7 +188,7 @@ void Semant::visitUnaryExpr(Unary* expr) {
         case NOT: {
             if (expr->expr->expr_type != Bool) {
                 expr->expr_type = Object;
-                throw std::runtime_error("Type error in 'NOT' operator.");
+                throw cool_runtime_error("Type error in 'NOT' operator.");
             }
             expr->expr_type = Bool;
             break;
@@ -224,11 +225,11 @@ void Semant::visitVariableExpr(Variable* expr) {
                 break;
             target_class = classTable.get(parent.lexeme);
             if (!target_class) 
-                throw std::runtime_error("Unable to find class `" + parent.lexeme + "`");
+                throw cool_runtime_error("Unable to find class `" + parent.lexeme + "`");
         }
     }
 
-    throw std::runtime_error("Variable `" + expr->name.lexeme + "` is not defined.");
+    throw cool_runtime_error("Variable `" + expr->name.lexeme + "` is not defined.");
 }
     
 void Semant::visitNewExpr(New* expr) {
@@ -258,11 +259,11 @@ void Semant::visitStaticDispatchExpr(StaticDispatch* expr) {
 
     expr->expr->accept(this);
     if (!conform(expr->expr->expr_type, expr->class_))
-        throw std::runtime_error("Type error in Static_dispatch.");
+        throw cool_runtime_error("Type error in Static_dispatch.");
 
     target_class = classTable.get(expr->class_.lexeme);
     if (!target_class)
-        throw std::runtime_error("Unable to find class `" + expr->class_.lexeme + "`");
+        throw cool_runtime_error("Unable to find class `" + expr->class_.lexeme + "`");
     while (true) {
         feat = get_feature(target_class, expr->callee_name.lexeme, FeatureType::METHOD);
         if (feat)
@@ -272,11 +273,11 @@ void Semant::visitStaticDispatchExpr(StaticDispatch* expr) {
             break;
         target_class = classTable.get(parent.lexeme);
         if (!target_class)
-            throw std::runtime_error("Unable to find class `" + parent.lexeme + "`");
+            throw cool_runtime_error("Unable to find class `" + parent.lexeme + "`");
     }
 
     if (!feat)
-        throw std::runtime_error("type error in static_dispatch.");
+        throw cool_runtime_error("type error in static_dispatch.");
 
     // We still got the type even if the feature isn't visited yet; hence the ternary.
     Token fun_type = feat->expr_type ? feat->expr_type : feat->type_;
@@ -287,7 +288,7 @@ void Semant::visitStaticDispatchExpr(StaticDispatch* expr) {
     for (size_t i = 0; i < expr->args.size(); i++) {
         expr->args[i]->accept(this);
         if (!conform(expr->args[i]->expr_type, feat->formals[i]->type_)){
-            throw std::runtime_error("Type mismatch in function Call.");
+            throw cool_runtime_error("Type mismatch in function Call.");
         }
     }
     expr->expr_type = fun_type;
@@ -304,7 +305,7 @@ void Semant::visitDispatchExpr(Dispatch* expr) {
 
     target_class = classTable.get(expr->expr->expr_type.lexeme);
     if (!target_class)
-        throw std::runtime_error("Unable to find class `" + expr->expr->expr_type.lexeme + "`");
+        throw cool_runtime_error("Unable to find class `" + expr->expr->expr_type.lexeme + "`");
     while (true) {
         feat = get_feature(target_class, expr->callee_name.lexeme, FeatureType::METHOD);
         if (feat)
@@ -314,11 +315,11 @@ void Semant::visitDispatchExpr(Dispatch* expr) {
             break;
         target_class = classTable.get(parent.lexeme);
         if (!target_class)
-            throw std::runtime_error("Unable to find `" + parent.lexeme + "`");
+            throw cool_runtime_error("Unable to find `" + parent.lexeme + "`");
 
     }
     if (!feat)
-        throw std::runtime_error("type error in dynamic dispatch.");
+        throw cool_runtime_error("type error in dynamic dispatch.");
 
     // We still got the type even if the feature isn't visited yet; hence the ternary.
     Token fun_type = feat->expr_type ? feat->expr_type : feat->type_;
@@ -329,7 +330,7 @@ void Semant::visitDispatchExpr(Dispatch* expr) {
     for (size_t i = 0; i < expr->args.size(); i++) {
         expr->args[i]->accept(this);
         if (!conform(expr->args[i]->expr_type, feat->formals[i]->type_)){
-            throw std::runtime_error("Type mismatch in function Call.");
+            throw cool_runtime_error("Type mismatch in function Call.");
         }
     }
     expr->expr_type = fun_type;
@@ -361,13 +362,13 @@ void Semant::visitLetExpr(Let* expr) {
         Expr* let_expr = std::get<1>(let).get(); // Since smart pointer.
 
         if (formal->id== self) {
-            throw std::runtime_error("type error in let.");
+            throw cool_runtime_error("type error in let.");
         }
 
         if (let_expr) {
             let_expr->accept(this);
             if (let_expr->expr_type != No_type && !conform(formal->type_, let_expr->expr_type))
-                throw std::runtime_error("Type error in let assign");
+                throw cool_runtime_error("Type error in let assign");
             symboltable.insert(formal->id.lexeme, let_expr->expr_type);
         } else {
             symboltable.insert(formal->id.lexeme, formal->type_); // !TODO: doubt on pointer here.
@@ -385,7 +386,7 @@ void Semant::visitCaseExpr(Case* expr) {
     expr->expr->accept(this);
     Token expr0_type = expr->expr->expr_type;
     if (expr0_type == No_type)
-        throw std::runtime_error("Type error in case expression.");
+        throw cool_runtime_error("Type error in case expression.");
     
     SymbolTable<std::string, Token> casetable; // to track duplicated branches.
     casetable.enterScope();
@@ -396,7 +397,7 @@ void Semant::visitCaseExpr(Case* expr) {
         Expr* match_expr = std::get<1>(match).get();
 
         if (casetable.get(formal->type_.lexeme)) {
-            throw std::runtime_error("Duplicated branch in case statement.");
+            throw cool_runtime_error("Duplicated branch in case statement.");
         }
 
         casetable.insert(formal->type_.lexeme, formal->type_);
@@ -405,10 +406,6 @@ void Semant::visitCaseExpr(Case* expr) {
 
         match_expr->accept(this);
 
-        // does not make that much sense to me. !TODO CHECK LATER
-        //if (!conform(match_expr->expr_type, id_type)) {
-        //    throw std::runtime_error("Type error in case evaluation.");
-        //}
         if (join_type == No_type)
             join_type = match_expr->expr_type;
         else 
@@ -430,17 +427,17 @@ void Semant::check_attribut(Feature* expr) {
     }
 
     if (expr->id.lexeme == "self"){
-        throw std::runtime_error("Can't use keyword 'self' as name");
+        throw cool_runtime_error("Can't use keyword 'self' as name");
     }
 
     // ensure there's no attribute override.
     target_class = classTable.get(curr_class->superClass.lexeme);
     if (!target_class)
-        throw std::runtime_error("Unable to find class `" + curr_class->superClass.lexeme + "`");
+        throw cool_runtime_error("Unable to find class `" + curr_class->superClass.lexeme + "`");
     while (true) {
         feat = get_feature(target_class, expr->id.lexeme, FeatureType::ATTRIBUT);
         if (feat) {
-            throw std::runtime_error("override occurs");
+            throw cool_runtime_error("override occurs");
             break;
         } 
         parent = target_class->superClass;
@@ -448,7 +445,7 @@ void Semant::check_attribut(Feature* expr) {
             break;
         target_class = classTable.get(parent.lexeme);
         if (!target_class) 
-            throw std::runtime_error("Unable to find class `" + parent.lexeme + "`");
+            throw cool_runtime_error("Unable to find class `" + parent.lexeme + "`");
     }
 
     if (expr->expr) {
@@ -456,7 +453,7 @@ void Semant::check_attribut(Feature* expr) {
 
         Token init_type = expr->expr->expr_type;
         if (init_type != No_type && !conform(init_type, expr->type_)) {
-            throw std::runtime_error("type error in attr_class.");
+            throw cool_runtime_error("type error in attr_class.");
         }
         expr->expr_type = expr->expr->expr_type;
     } else {
@@ -474,13 +471,13 @@ void Semant::check_method(Feature* expr) {
     symboltable.enterScope();
 
     if (!classTable.get(expr->type_.lexeme) && expr->type_ != SELF_TYPE) {
-        throw std::runtime_error("Invalid return type");
+        throw cool_runtime_error("Invalid return type");
     }
 
     feat = nullptr;
     target_class = classTable.get(curr_class->name.lexeme);
     if (!target_class) 
-        throw std::runtime_error("Unable to find class `" + curr_class->name.lexeme + "`");
+        throw cool_runtime_error("Unable to find class `" + curr_class->name.lexeme + "`");
 
     while (true) {
         feat = get_feature(target_class, expr->id.lexeme, FeatureType::METHOD);
@@ -491,24 +488,24 @@ void Semant::check_method(Feature* expr) {
             break;
         target_class = classTable.get(parent.lexeme);
         if (!target_class) {
-            throw std::runtime_error("unable to find class `" + parent.lexeme + "`");
+            throw cool_runtime_error("unable to find class `" + parent.lexeme + "`");
         }
     }
 
     if (feat) {
         if (feat->formals.size() != expr->formals.size()) {
-            throw std::runtime_error("Invalid formals.");
+            throw cool_runtime_error("Invalid formals.");
         }
 
         for (size_t i = 0; i < expr->formals.size(); i++) {
             expr->formals[i]->accept(this);
 
             if (expr->formals[i]->type_ != feat->formals[i]->type_) {
-                throw std::runtime_error("formal type mismatch");
+                throw cool_runtime_error("formal type mismatch");
             }
         }
         if (expr->type_ != feat->type_) {
-            throw std::runtime_error("Formal type mismatch");
+            throw cool_runtime_error("Formal type mismatch");
         }
 
     } else {
@@ -522,7 +519,7 @@ void Semant::check_method(Feature* expr) {
 
     // method return type must conform to body expr type.
     if (!conform(expr->expr->expr_type, expr->type_)) {
-        throw std::runtime_error("Types do not conform.");
+        throw cool_runtime_error("Types do not conform.");
     }
 
     expr->expr_type = expr->type_;
@@ -657,11 +654,11 @@ void Semant::multiple_definition_of_method_checks(Program *stmt) {
 void Semant::check_inheritance(Program* stmt) {
     // check if parents are defined.
     if (!check_parents(stmt)) 
-        throw std::runtime_error("Failed to check inheritance.");
+        throw cool_runtime_error("Failed to check inheritance.");
 
     // check if the graph does not contains cycle. 
     if (!check_DAG(stmt))
-        throw std::runtime_error("Failed to check inheritance.");
+        throw cool_runtime_error("Failed to check inheritance.");
 }
 
 void Semant::install_basic_classes() {

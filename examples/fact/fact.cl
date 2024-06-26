@@ -7,6 +7,7 @@ class Main inherits A2I {
         if (i = 0) then 1 else i * fact(i-1) fi
     };
     -- iteratively
+    (*
     fact(i: Int): Int {
         let fact: Int <- 1 in {
             while (not (i = 0)) loop 
@@ -17,6 +18,6 @@ class Main inherits A2I {
             pool;
             fact;
         }
-    };
+    }; *)
 
 };
