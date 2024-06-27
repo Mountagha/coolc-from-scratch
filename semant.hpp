@@ -57,6 +57,8 @@ class Semant : public StmtVisitor, public ExprVisitor {
         // !TODO: better error handling. later!
         std::ostream& semant_error();
 
+        void fatal_semant_error(Token &c, const std::string& msg);
+
         std::ostream& semant_error(Token& c, const std::string& msg);
         // some getters
         SymbolTable<std::string, Class* >* get_classtable() { return &classTable; }
