@@ -25,6 +25,7 @@ int main(int argc, char* argv[]) {
     curr_filename = std::string(argv[1]);   // handle later for multiple files.
     curr_filename = curr_filename.substr(curr_filename.find_last_of('/') + 1);
     std::cout << curr_filename << std::endl;
+    std::vector<Token> tokens, current_tokens;
     for (int i = 1; i < argc; i++) {
         std::ifstream f{argv[i]};
         if (!f) {
@@ -33,8 +34,13 @@ int main(int argc, char* argv[]) {
         }
         std::stringstream sstr;
         sstr << f.rdbuf();
-        std::string file_source = sstr.str();
-        source += file_source;
+        std::string current_file_source = sstr.str();
+        if (current_file_source.empty()) {
+            continue;
+        }
+        Scanner s{current_file_source};
+        current_tokens = s.scanTokens();
+        tokens.insert(tokens.end(), current_tokens.begin(), current_tokens.end());
     }
 
     std::string out_file = curr_filename.substr(0, curr_filename.find_last_of('.')) + ".s"; 
@@ -44,11 +50,13 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE); // !TODO: better this later.
     }
     
-    Scanner s{source};
+    if (tokens.empty()) {
+        std::cout << "Empty source file(s). " << std::endl;
+        exit(EXIT_SUCCESS);
+    }
 
-    std::vector<Token> tokens;
-    tokens = s.scanTokens();
 #ifdef DEBUG_PRINT_CODE
+    std::cout << "Printing tokens." << std::endl;
     for (auto& token : tokens) {
         std::cout << token << "\n";
     }
