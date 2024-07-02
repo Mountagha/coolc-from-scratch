@@ -35,11 +35,14 @@ int main(int argc, char* argv[]) {
         std::stringstream sstr;
         sstr << f.rdbuf();
         std::string current_file_source = sstr.str();
+        source += current_file_source;
+        
         if (current_file_source.empty()) {
             continue;
         }
+
         Scanner s{current_file_source};
-        current_tokens = s.scanTokens();
+        current_tokens = s.scanTokens(i == argc-1 ? true : false);
         tokens.insert(tokens.end(), current_tokens.begin(), current_tokens.end());
     }
 
@@ -49,7 +52,7 @@ int main(int argc, char* argv[]) {
         std::cerr << "Cannot open `" << out_file << "` for writing.";
         exit(EXIT_FAILURE); // !TODO: better this later.
     }
-    
+
     if (tokens.empty()) {
         std::cout << "Empty source file(s). " << std::endl;
         exit(EXIT_SUCCESS);

@@ -7,12 +7,13 @@ Scanner::Scanner(const std::string& source):
     source{source}, start{0}, current{0}, line{1} 
 {}
 
-std::vector<Token> Scanner::scanTokens() {
+std::vector<Token> Scanner::scanTokens(bool last_file) {
     while (!isAtEnd()) {
         start = current;
         scanToken();
     }
-    tokens.push_back(Token(EOFILE, "", line));
+    if (last_file)
+        tokens.push_back(Token(EOFILE, "", line));
     return tokens;
 }
 

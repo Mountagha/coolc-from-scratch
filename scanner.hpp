@@ -39,7 +39,7 @@ extern std::string curr_filename;
 class Scanner {
     public:
         Scanner(const std::string& source);
-        std::vector<Token> scanTokens();
+        std::vector<Token> scanTokens(bool last_file=false);
     private:
         unsigned int start;
         unsigned int current;
