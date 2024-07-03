@@ -10,8 +10,8 @@ project (cool-compiler)
 
 add_compile_options(-g)
 
-# include_directories("include")
-file(GLOB SOURCES "*.cpp")
+include_directories("includes")
+file(GLOB SOURCES "src/*.cpp")
 
 # Add an executable
 add_executable(coolc ${SOURCES})
