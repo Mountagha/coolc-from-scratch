@@ -1,3 +1,5 @@
+> What I cannot create I do not understant. *Richard feynman*
+
 # The COOL Programming Language
 
 ## Overview
@@ -16,6 +18,8 @@ The COOL compiler generates code in mips so in order to execute the generated co
 
 if you opt for the command line mode you will have to replace the default exception handler by the one provided in the lib [trap.handler.s](lib/trap.handler.s) directory which provides the cool runtime environment i.e the startup code, the code for methods of predefined classes (**Object**, **IO**, **String**), the garbage collector and few special procedures need by Cool programs to test objects for equality and handle runtime errors.
 
+If you go with the [QtSpim](https://spimsimulator.sourceforge.net/) you have also to replace the the default exception handler by the one provided by the project. You do it by going *Simulator* -> *Settings* -> *Mips* and then you upload the [trap.handler.s](lib/trap.handler.s) file.
+
 ## Compiling and running COOL code
 To compile the cool code we just have to provide the file(s) containing the source as arguments to the previous compiled binary.
 
@@ -28,7 +32,21 @@ By command juste provide the assembly file as argument to the spim binary.
 ![exec](./files/exec.png)
 
 or using the [QtSpim](https://spimsimulator.sourceforge.net/) by loading the file (Reinitialize and Load) and hitting the run button.
-[QtSpimExecution](./files/qtexec.png)
+
+![QtSpimExecution](./files/qtexec.png)
+
+## Improvements
+
+there are few (or many) functionalities that I can think of as improvements, that I will probably will give some time in a near future. :sunglasses:
+
++ #### Better error handling
++ #### Custom Garbage Collector (instead of the hardcoded provided one)
++ #### an x86 backend code generation
++ #### Some basic code optimization
++ #### Add an IR (instead of generating directly from the AST)
++ #### ....
+
+> The sky is the limit.
 
 
 
