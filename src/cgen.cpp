@@ -594,7 +594,9 @@ void Cgen::cgen_init_formal(Token& formal_type) {
 
 // Cgen for Exprs and Stmts
 void Cgen::visitProgramStmt(Program* stmt) {
+#ifdef DEBUG_PRINT_CODE
     std::cout << "debut code generation\n\n";
+#endif
 
     code_global_data();
 
@@ -629,8 +631,9 @@ void Cgen::visitProgramStmt(Program* stmt) {
         curr_class = class_.get();
         class_->accept(this);
     }
-
+#ifdef DEBUG_PRINT_CODE
     std::cout << "fin code generation\n\n";
+#endif
 }
 
 

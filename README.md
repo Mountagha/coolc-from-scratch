@@ -16,7 +16,22 @@ The COOL compiler generates code in mips so in order to execute the generated co
 
 if you opt for the command line mode you will have to replace the default exception handler by the one provided in the lib [trap.handler.s](lib/trap.handler.s) directory which provides the cool runtime environment i.e the startup code, the code for methods of predefined classes (**Object**, **IO**, **String**), the garbage collector and few special procedures need by Cool programs to test objects for equality and handle runtime errors.
 
-## Command line spim use case
+## Compiling and running COOL code
+To compile the cool code we just have to provide the file(s) containing the source as arguments to the previous compiled binary.
+
+![generate](./files/compile.png).
+
+To execute the file.s you can either use the command line or [QtSpim](https://spimsimulator.sourceforge.net/). 
+
+By command juste provide the assembly file as argument to the spim binary.
+
+![exec](./files/exec.png)
+
+or using the [QtSpim](https://spimsimulator.sourceforge.net/) by loading the file (Reinitialize and Load) and hitting the run button.
+[QtSpimExecution](./files/qtexec.png)
+
+
+
 
 
 

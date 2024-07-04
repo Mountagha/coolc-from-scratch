@@ -600,7 +600,6 @@ void Semant::construct_ctables(Program* stmt) {
         Token class_name, parent_name;
         class_name = class_->name;
         curr_class = class_.get();
-        std::cout << class_name;
         parent_name = class_->superClass;
         if (class_name == Main) {
             class_main_exist = true;

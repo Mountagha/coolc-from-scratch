@@ -87,6 +87,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Printing AST after semant analysis..." << std::endl;
     ASTPrinter{}.print(program);
 #endif
+    std::cout << "Generating code into `" << out_file << "`...\n";
     Cgen{semanter.get_inheritancegraph(), semanter.get_classtable(), out}.cgen(program);
     return 0;   
 }
